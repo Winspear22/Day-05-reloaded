@@ -18,12 +18,12 @@ final class Ex00Controller extends AbstractController
     public function index(): Response
     {
         return $this->render('ex00/index.html.twig', [
-            'controller_name' => 'Ex00Controller',
+            'controller_name' => 'Ex00ControllerPOPOPOPOPOPOPOPOPO',
         ]);
     }
 
     /**
-     * @Route("/ex00/create-table", name="ex00_create_table", methods={"POST"})
+     * @Route("/ex00/create_table", name="ex00_create_table", methods={"POST"})
      */
     public function createTable(CreateTableService $tableCreator): Response
     {

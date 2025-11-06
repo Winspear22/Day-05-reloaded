@@ -26,7 +26,8 @@ Root Directory: ./ex00/
 │   └── services.yaml
 ├── migrations
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex00Controller.php
@@ -42,7 +43,7 @@ Root Directory: ./ex00/
 │       └── index.html.twig
 ├── var
 │   ├── cache
-│   │   └── dev
+│   │   └── prod
 │   └── log
 └── vendor
     ├── autoload.php
@@ -139,7 +140,7 @@ Root Directory: ./ex00/
         ├── extra-bundle
         └── twig
 
-91 directories, 42 files
+91 directories, 43 files
 
 ================================================================================
 
@@ -266,6 +267,7 @@ framework:
     annotations: true
     http_method_override: false
     handle_all_throwables: true
+    error_controller: null
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.
@@ -360,12 +362,14 @@ when@dev:
 File: config/routes.yaml
 ---
 
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+ex00_index:
+    path: /ex00
+    controller: App\Controller\Ex00Controller::index
 
+ex00_create_table:
+    path: /ex00/create_table
+    controller: App\Controller\Ex00Controller::createTable
+    methods: [POST]
 
 ---
 File: config/services.yaml

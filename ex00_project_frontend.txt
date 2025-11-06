@@ -26,7 +26,8 @@ Root Directory: ./ex00/
 │   └── services.yaml
 ├── migrations
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex00Controller.php
@@ -42,7 +43,7 @@ Root Directory: ./ex00/
 │       └── index.html.twig
 ├── var
 │   ├── cache
-│   │   └── dev
+│   │   └── prod
 │   └── log
 └── vendor
     ├── autoload.php
@@ -139,7 +140,7 @@ Root Directory: ./ex00/
         ├── extra-bundle
         └── twig
 
-91 directories, 42 files
+91 directories, 43 files
 
 ================================================================================
 
@@ -158,13 +159,20 @@ File: templates/base.html.twig
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('style.css') }}">
         {% endblock %}
 
         {% block javascripts %}
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        {% block body %}
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }}">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+        {% endblock %}
     </body>
 </html>
 
@@ -178,19 +186,10 @@ File: templates/ex00/index.html.twig
 {% block title %}Hello Ex00Controller!{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/adnen/Desktop/Day-05-reloaded/ex00/src/Controller/Ex00Controller.php</code></li>
-        <li>Your template at <code>/home/adnen/Desktop/Day-05-reloaded/ex00/templates/ex00/index.html.twig</code></li>
-    </ul>
-</div>
+    <h1>Ex00 : create a table with SQL !</h1>
+    <p>Bienvenue sur l'ex00 ! On va créer la table "ex00_users" dans la base de données Day_05db !</p>
+    <form method="POST" action="/ex00/create_user_table">
+        <button type="submit">Créer la table ex00_users</button>
+    </form>
 {% endblock %}
 
