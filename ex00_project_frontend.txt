@@ -39,6 +39,8 @@ Root Directory: ./ex00/
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
+│   ├── bundles
+│   │   └── TwigBundle
 │   └── ex00
 │       └── index.html.twig
 ├── var
@@ -140,7 +142,7 @@ Root Directory: ./ex00/
         ├── extra-bundle
         └── twig
 
-91 directories, 43 files
+93 directories, 43 files
 
 ================================================================================
 
@@ -166,16 +168,54 @@ File: templates/base.html.twig
         {% endblock %}
     </head>
     <body>
-        {% block body %}
-            {% for label, messages in app.flashes %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ label }}">{{ message }}</div>
-                {% endfor %}
+    {% block body %}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">{{ message }}</div>
             {% endfor %}
-        {% endblock %}
+        {% endfor %}
+
+        {% block content %}{% endblock %}
+    {% endblock %}
     </body>
 </html>
 
+
+---
+File: templates/bundles/TwigBundle/Exception/error404.html.twig
+---
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Page non trouvée (404){% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h1>Erreur 404</h1>
+        <p>Désolé, la page que vous cherchez n'existe pas !</p>
+        <p>Ceci est un message d'erreur personnalisé.</p>
+        <a class="back-btn" href="{{ path('ex00_index') }}">Revenir à l'accueil</a>
+    </div>
+{% endblock %}
+
+
+---
+File: templates/bundles/TwigBundle/Exception/error405.html.twig
+---
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Méthode non autorisée (405){% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h1>Erreur 405</h1>
+        <p>Désolé, la méthode que vous utilisez n'est pas autorisée !</p>
+        <p>Vous tentez d'utiliser une route POST avec une méthode GET !</p>
+        <p>Ceci est un message d'erreur personnalisé.</p>
+        <a class="back-btn" href="{{ path('ex00_index') }}">Revenir à l'accueil</a>
+    </div>
+{% endblock %}
 
 ---
 File: templates/ex00/index.html.twig
@@ -185,10 +225,10 @@ File: templates/ex00/index.html.twig
 
 {% block title %}Hello Ex00Controller!{% endblock %}
 
-{% block body %}
+{% block content %}
     <h1>Ex00 : create a table with SQL !</h1>
     <p>Bienvenue sur l'ex00 ! On va créer la table "ex00_users" dans la base de données Day_05db !</p>
-    <form method="POST" action="/ex00/create_user_table">
+    <form method="POST" action="/ex00/create_table">
         <button type="submit">Créer la table ex00_users</button>
     </form>
 {% endblock %}
