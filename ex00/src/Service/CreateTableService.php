@@ -8,9 +8,14 @@ use Doctrine\DBAL\Connection;
 
 class CreateTableService 
 {
-	public function __construct() {}
+	private Connection $sql_connection;
 
-	public function createTable(Connection $connection, string $tableName): string
+	public function __construct(Connection $connection) 
+	{
+		$this->sql_connection = $connection;
+	}
+
+	public function createTable(string $tableName): string
 	{
 		$sql_command = "CREATE TABLE IF NOT EXISTS $tableName (
 			id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -23,10 +28,10 @@ class CreateTableService
 		)";
 		try
 		{
-			$result = $this->checkTableExistence($connection, $tableName);
+			$result = $this->checkTableExistence($tableName);
 			if ($result === true)
 				return "info: Table already exists.";
-			$connection->executeStatement($sql_command);
+			$this->sql_connection->executeStatement($sql_command);
 			return "success: Table created successfully.";
 		}
 		catch (Exception $e)
@@ -35,11 +40,11 @@ class CreateTableService
 		}
 	}
 
-	public function checkTableExistence(Connection $connection, string $tableName): bool 
+	public function checkTableExistence(string $tableName): bool 
 	{
 		try
 		{
-			$result = $this->$connection->fetchOne("SHOW TABLES LIKE '$tableName'");
+			$result = $this->sql_connection->fetchOne("SHOW TABLES LIKE '$tableName'");
 			if ($result === false)
 				return false;
 		}

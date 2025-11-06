@@ -25,11 +25,11 @@ final class Ex00Controller extends AbstractController
     /**
      * @Route("/ex00/create-table", name="ex00_create_table", methods={"POST"})
      */
-    public function createTable(CreateTableService $tableCreator, Connection $connection): Response
+    public function createTable(CreateTableService $tableCreator): Response
     {
         try
         {
-            $result = $tableCreator->createTable($connection, 'ex00_users');
+            $result = $tableCreator->createTable('ex00_users');
             if (str_starts_with($result, 'success'))
                 $this->addFlash('success', $result);
             else
