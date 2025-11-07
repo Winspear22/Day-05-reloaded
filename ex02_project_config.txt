@@ -26,7 +26,8 @@ Root Directory: ./ex02/
 │   └── services.yaml
 ├── migrations
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex02Controller.php
@@ -40,11 +41,14 @@ Root Directory: ./ex02/
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
+│   ├── bundles
+│   │   └── TwigBundle
 │   └── ex02
 │       └── index.html.twig
 ├── var
 │   ├── cache
 │   │   ├── dev
+│   │   ├── env
 │   │   └── prod
 │   └── log
 └── vendor
@@ -142,7 +146,7 @@ Root Directory: ./ex02/
         ├── extra-bundle
         └── twig
 
-92 directories, 44 files
+95 directories, 45 files
 
 ================================================================================
 
@@ -372,6 +376,13 @@ ex02_create_table:
     path: /ex02/create_table
     controller: App\Controller\Ex02Controller::createTable
     methods: [POST]
+
+ex02_insert_user:
+    path: /ex02/insert_user
+    controller: App\Controller\Ex02Controller::insertUser
+    methods: [POST]
+
+
 
 ---
 File: config/services.yaml

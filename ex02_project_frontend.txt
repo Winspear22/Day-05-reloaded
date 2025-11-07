@@ -26,7 +26,8 @@ Root Directory: ./ex02/
 │   └── services.yaml
 ├── migrations
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex02Controller.php
@@ -40,11 +41,14 @@ Root Directory: ./ex02/
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
+│   ├── bundles
+│   │   └── TwigBundle
 │   └── ex02
 │       └── index.html.twig
 ├── var
 │   ├── cache
 │   │   ├── dev
+│   │   ├── env
 │   │   └── prod
 │   └── log
 └── vendor
@@ -142,7 +146,7 @@ Root Directory: ./ex02/
         ├── extra-bundle
         └── twig
 
-92 directories, 44 files
+95 directories, 45 files
 
 ================================================================================
 
@@ -161,16 +165,61 @@ File: templates/base.html.twig
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('style.css') }}">
         {% endblock %}
 
         {% block javascripts %}
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+    {% block body %}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        {% block content %}{% endblock %}
+    {% endblock %}
     </body>
 </html>
 
+
+---
+File: templates/bundles/TwigBundle/Exception/error404.html.twig
+---
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Page non trouvée (404){% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h1>Erreur 404</h1>
+        <p>Désolé, la page que vous cherchez n'existe pas !</p>
+        <p>Ceci est un message d'erreur personnalisé.</p>
+        <a class="back-btn" href="{{ path('ex00_index') }}">Revenir à l'accueil</a>
+    </div>
+{% endblock %}
+
+
+---
+File: templates/bundles/TwigBundle/Exception/error405.html.twig
+---
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Méthode non autorisée (405){% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h1>Erreur 405</h1>
+        <p>Désolé, la méthode que vous utilisez n'est pas autorisée !</p>
+        <p>Vous tentez d'utiliser une route POST avec une méthode GET !</p>
+        <p>Ceci est un message d'erreur personnalisé.</p>
+        <a class="back-btn" href="{{ path('ex00_index') }}">Revenir à l'accueil</a>
+    </div>
+{% endblock %}
 
 ---
 File: templates/ex02/index.html.twig
@@ -180,20 +229,41 @@ File: templates/ex02/index.html.twig
 
 {% block title %}Hello Ex02Controller!{% endblock %}
 
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+{% block content %}
+    <h1>Ex02 : insert and read users in the database !</h1>
+    <form method="POST" action="/ex02/insert_user">
+    {{ form_start(form, { 'action': path('ex02_insert_user'), 'method': 'POST' }) }}
+        {{ form_widget(form) }}
+        <button type="submit">Insérer</button>
+    {{ form_end(form) }}
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/adnen/Desktop/Day-05-reloaded/ex02/src/Controller/Ex02Controller.php</code></li>
-        <li>Your template at <code>/home/adnen/Desktop/Day-05-reloaded/ex02/templates/ex02/index.html.twig</code></li>
-    </ul>
-</div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Pseudo</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Enable</th>
+                <th>Date de naissance</th>
+                <th>Adresse</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.enable ? 'Oui' : 'Non' }}</td>
+                    <td>{{ user.birthdate|date('Y-m-d') }}</td>
+                    <td>{{ user.address }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="7">Aucun utilisateur.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
 

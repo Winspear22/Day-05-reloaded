@@ -8,7 +8,7 @@ use Doctrine\DBAL\Connection;
 
 class CreateTableService 
 {
-	private Connection $sql_connection;
+	private readonly Connection $sql_connection;
 
 	public function __construct(Connection $connection) 
 	{

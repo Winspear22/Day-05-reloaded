@@ -26,7 +26,8 @@ Root Directory: ./ex02/
 │   └── services.yaml
 ├── migrations
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex02Controller.php
@@ -40,11 +41,14 @@ Root Directory: ./ex02/
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
+│   ├── bundles
+│   │   └── TwigBundle
 │   └── ex02
 │       └── index.html.twig
 ├── var
 │   ├── cache
 │   │   ├── dev
+│   │   ├── env
 │   │   └── prod
 │   └── log
 └── vendor
@@ -142,7 +146,7 @@ Root Directory: ./ex02/
         ├── extra-bundle
         └── twig
 
-92 directories, 44 files
+95 directories, 45 files
 
 ================================================================================
 
@@ -158,7 +162,7 @@ File: src/Controller/Ex02Controller.php
 
 namespace App\Controller;
 
-use Doctrine\DBAL\Connection;
+use Exception;
 use App\Service\ReadUserInTable;
 use App\Service\InsertUserInTable;
 use App\Service\CreateTableService;
@@ -179,7 +183,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 final class Ex02Controller extends AbstractController
 {
     public function __construct(
-        private readonly Connection $connection,
         private readonly CreateTableService $tableCreator,
         private readonly InsertUserInTable $userInserter,
         private readonly ReadUserInTable $userReader)
@@ -190,12 +193,13 @@ final class Ex02Controller extends AbstractController
     public function index(): Response
     {
         $form = $this->createUserForm();
+        $users = [];
         try
         {
             $this->tableCreator->createTable('ex02_users');
             $users = $this->userReader->readAllUsers('ex02_users');
         }
-        catch (\Exception $e)
+        catch (Exception $e)
         {
             $this->addFlash('danger', "Error, unexpected error: " . $e->getMessage());
         }
@@ -210,19 +214,29 @@ final class Ex02Controller extends AbstractController
      */
     public function insertUser(Request $request): Response
     {
-        return $this->render('ex02/index.html.twig', [
-            'controller_name' => 'Ex02Controller',
-        ]);
-    }
-
-    /**
-     * @Route("/ex02/read_user", name="ex02_read_user", methods={"GET"})
-     */
-    public function readUser(): Response
-    {
-        return $this->render('ex02/index.html.twig', [
-            'controller_name' => 'Ex02Controller',
-        ]);
+        try
+        {
+            $form = $this->createUserForm();
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $data = $form->getData();
+                $result = $this->userInserter->insertUser('ex02_users', $data);
+                [$type, $message] = explode(':', $result, 2);
+                $this->addFlash($type, $message);
+                return $this->redirectToRoute('ex02_index');
+            }
+            else
+            {
+                $this->addFlash('danger', 'Error - Invalid form submission.');
+                return $this->redirectToRoute('ex02_index');
+            }
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error while inserting user: ' . $e->getMessage());
+            return $this->redirectToRoute('ex02_index');
+        }
     }
 
     private function createUserForm()
@@ -380,7 +394,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class InsertUserInTable 
 {
-	private Connection $sql_connection;
+	private readonly Connection $sql_connection;
 
 	public function __construct(Connection $connection)
 	{
@@ -431,7 +445,7 @@ use Doctrine\DBAL\Connection;
 
 class ReadUserInTable 
 {
-	private Connection $sql_connection;
+	private readonly Connection $sql_connection;
 
 	public function __construct(Connection $connection)
 	{
@@ -454,19 +468,16 @@ class ReadUserInTable
 		}
 	}
 
-	public function readAllUsers(string $tableName): array|string
+	public function readAllUsers(string $tableName): array
 	{
 		$sql = "SELECT * FROM $tableName";
 		try
 		{
-			$users = $this->sql_connection->fetchAllAssociative($sql);
-			if (empty($users))
-				return "info:No users found in table $tableName.";
-			return $users;
+			return $this->sql_connection->fetchAllAssociative($sql) ?? [];
 		}
 		catch (Exception $e)
 		{
-			return "danger:Error, there was a problem with the database or the table $tableName : " . $e->getMessage();
+			return [];
 		}
 	}
 }
@@ -493,3 +504,38 @@ return function (array $context) {
     return new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
 };
 
+
+---
+File: public/style.css
+---
+
+.alert
+{
+    padding: 1em 1.5em;
+    margin: 1em 0;
+    border-radius: 5px;
+    font-weight: bold;
+    box-shadow: 0 1px 7px #aaa1;
+    font-size: 1em;
+}
+
+.alert-success
+{
+    background: #d4edda;
+    color: #155724;
+    border-left: 7px solid #38a169;
+}
+
+.alert-danger
+{
+    background: #f8d7da;
+    color: #721c24;
+    border-left: 7px solid #e53e3e;
+}
+
+.alert-info
+{
+    background: #ffee00;
+    color: #000000;
+    border-left: 7px solid #d8db38;
+}

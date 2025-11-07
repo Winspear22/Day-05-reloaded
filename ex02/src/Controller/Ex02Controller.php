@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use Exception;
-use Doctrine\DBAL\Connection;
 use App\Service\ReadUserInTable;
 use App\Service\InsertUserInTable;
 use App\Service\CreateTableService;
@@ -24,7 +23,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 final class Ex02Controller extends AbstractController
 {
     public function __construct(
-        private readonly Connection $connection,
         private readonly CreateTableService $tableCreator,
         private readonly InsertUserInTable $userInserter,
         private readonly ReadUserInTable $userReader)
@@ -58,25 +56,27 @@ final class Ex02Controller extends AbstractController
     {
         try
         {
+            $form = $this->createUserForm();
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $data = $form->getData();
+                $result = $this->userInserter->insertUser('ex02_users', $data);
+                [$type, $message] = explode(':', $result, 2);
+                $this->addFlash($type, $message);
+                return $this->redirectToRoute('ex02_index');
+            }
+            else
+            {
+                $this->addFlash('danger', 'Error - Invalid form submission.');
+                return $this->redirectToRoute('ex02_index');
+            }
         }
         catch (Exception $e)
         {
             $this->addFlash('danger', 'Error, unexpected error while inserting user: ' . $e->getMessage());
             return $this->redirectToRoute('ex02_index');
         }
-        return $this->render('ex02/index.html.twig', [
-            'controller_name' => 'Ex02Controller',
-        ]);
-    }
-
-    /**
-     * @Route("/ex02/read_user", name="ex02_read_user", methods={"GET"})
-     */
-    public function readUser(): Response
-    {
-        return $this->render('ex02/index.html.twig', [
-            'controller_name' => 'Ex02Controller',
-        ]);
     }
 
     private function createUserForm()
