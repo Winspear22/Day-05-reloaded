@@ -1,0 +1,9 @@
+ex02_index:
+    path: /ex02
+    controller: App\Controller\Ex02Controller::index
+    methods: [GET]
+
+ex02_create_table:
+    path: /ex02/create_table
+    controller: App\Controller\Ex02Controller::createTable
+    methods: [POST]
