@@ -79,6 +79,22 @@ final class Ex04Controller extends AbstractController
         }
     }
 
+    /**
+     * @Route("/ex04/delete_user/{id}", name="ex04_delete_user", methods={"POST"})
+     */
+    public function deleteUser(int $id): Response
+    {
+        try
+        {
+            
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error while deleting user: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex04_index');
+    }
+
     private function createUserForm()
     {
         $form = $this->createFormBuilder()
