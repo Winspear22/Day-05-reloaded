@@ -14,14 +14,14 @@ class ReadUserInTable
 		$this->sql_connection = $connection;
 	}
 
-	public function readUser(string $tableName, string $username): array|string
+	public function readUser(string $tableName, int $id): array|string
 	{
-		$sql = "SELECT * FROM $tableName WHERE username = :username";
+		$sql = "SELECT * FROM $tableName WHERE id = ?";	
 		try
 		{
-			$user = $this->sql_connection->fetchAssociative($sql, ['username' => $username]);
+			$user = $this->sql_connection->fetchAssociative($sql, [$id]);
 			if (!$user)
-				return "danger:Error - User $username not found in table $tableName.";
+				return "danger:Error - User with ID $id not found in table $tableName.";
 			return $user;
 		}
 		catch (Exception $e)

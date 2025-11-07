@@ -50,6 +50,7 @@ Root Directory: ./ex06/
 │       └── update.html.twig
 ├── var
 │   ├── cache
+│   │   ├── dev
 │   │   └── prod
 │   └── log
 └── vendor
@@ -147,7 +148,7 @@ Root Directory: ./ex06/
         ├── extra-bundle
         └── twig
 
-93 directories, 48 files
+94 directories, 48 files
 
 ================================================================================
 
@@ -270,7 +271,7 @@ File: templates/ex06/index.html.twig
                         </form>
                     </td>
                     <td>
-                        <a href="{{ path('ex06_update_user_form', {'id': user.id}) }}">Modifier</a>
+                        <a href="{{ path('ex06_update_user', {'id': user.id}) }}">Modifier</a>
                     </td>
                 </tr>
             {% else %}

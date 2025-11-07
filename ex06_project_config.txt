@@ -50,6 +50,7 @@ Root Directory: ./ex06/
 │       └── update.html.twig
 ├── var
 │   ├── cache
+│   │   ├── dev
 │   │   └── prod
 │   └── log
 └── vendor
@@ -147,7 +148,7 @@ Root Directory: ./ex06/
         ├── extra-bundle
         └── twig
 
-93 directories, 48 files
+94 directories, 48 files
 
 ================================================================================
 
@@ -387,11 +388,15 @@ ex06_delete_all_users:
     path: /ex06/delete_all_users
     controller: App\Controller\Ex06Controller::deleteAllUsers
     methods: [POST]
+    requirements:
+        id: '\d+'
 
 ex06_update_user:
     path: /ex06/update_user/{id}
     controller: App\Controller\Ex06Controller::updateUser
-    methods: [POST]
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
 
 ---
 File: config/services.yaml
