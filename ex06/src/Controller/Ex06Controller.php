@@ -118,6 +118,13 @@ final class Ex06Controller extends AbstractController
         return $this->redirectToRoute('ex06_index');
     }
 
+    /**
+     * @Route("/ex06/update_user/{id}", name="ex06_update_user_form", methods={"GET","POST"})
+     */
+    public function updateUser(Request $request, int $id)
+    {
+    }
+
     private function createUserForm()
     {
         $form = $this->createFormBuilder()

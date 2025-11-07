@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'utilisateur{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'utilisateur n°{{ user.id }}</h1>
+    {{ form_start(form, { 'method': 'POST' }) }}
+        {{ form_widget(form) }}
+        <button type="submit">Enregistrer</button>
+        <a href="{{ path('ex06_index') }}" class="btn btn-secondary" style="margin-left: 10px;">Annuler</a>
+    {{ form_end(form) }}
+{% endblock %}
