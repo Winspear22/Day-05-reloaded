@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use Exception;
 use Doctrine\DBAL\Connection;
 use App\Service\ReadUserInTable;
 use App\Service\InsertUserInTable;
 use App\Service\CreateTableService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints\Email;
@@ -28,19 +30,39 @@ final class Ex02Controller extends AbstractController
         private readonly ReadUserInTable $userReader)
         {}
     /**
-     * @Route("/ex02", name="ex02_index"), methods={"GET"})
+     * @Route("/ex02", name="ex02_index", methods={"GET"})
      */
     public function index(): Response
     {
         $form = $this->createUserForm();
+        $users = [];
         try
         {
             $this->tableCreator->createTable('ex02_users');
-
+            $users = $this->userReader->readAllUsers('ex02_users');
         }
-        catch (\Exception $e)
+        catch (Exception $e)
         {
-            // Handle exception if needed
+            $this->addFlash('danger', "Error, unexpected error: " . $e->getMessage());
+        }
+        return $this->render('ex02/index.html.twig', [
+            'form' => $form->createView(),
+            'users' => $users
+        ]);
+    }
+
+    /**
+     * @Route("/ex02/insert_user", name="ex02_insert_user", methods={"POST"})
+     */
+    public function insertUser(Request $request): Response
+    {
+        try
+        {
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error while inserting user: ' . $e->getMessage());
+            return $this->redirectToRoute('ex02_index');
         }
         return $this->render('ex02/index.html.twig', [
             'controller_name' => 'Ex02Controller',
@@ -48,17 +70,7 @@ final class Ex02Controller extends AbstractController
     }
 
     /**
-     * @Route("/ex02/insert_user", name="ex02_insert_user"), methods={"POST"})
-     */
-    public function insertUser(): Response
-    {
-        return $this->render('ex02/index.html.twig', [
-            'controller_name' => 'Ex02Controller',
-        ]);
-    }
-
-    /**
-     * @Route("/ex02/read_user", name="ex02_read_user"), methods={"GET"})
+     * @Route("/ex02/read_user", name="ex02_read_user", methods={"GET"})
      */
     public function readUser(): Response
     {

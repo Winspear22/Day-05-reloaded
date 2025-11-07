@@ -30,19 +30,16 @@ class ReadUserInTable
 		}
 	}
 
-	public function readAllUsers(string $tableName): array|string
+	public function readAllUsers(string $tableName): array
 	{
 		$sql = "SELECT * FROM $tableName";
 		try
 		{
-			$users = $this->sql_connection->fetchAllAssociative($sql);
-			if (empty($users))
-				return "info:No users found in table $tableName.";
-			return $users;
+			return $this->sql_connection->fetchAllAssociative($sql) ?? [];
 		}
 		catch (Exception $e)
 		{
-			return "danger:Error, there was a problem with the database or the table $tableName : " . $e->getMessage();
+			return [];
 		}
 	}
 }
