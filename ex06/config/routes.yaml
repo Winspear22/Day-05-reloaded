@@ -17,8 +17,12 @@ ex06_delete_all_users:
     path: /ex06/delete_all_users
     controller: App\Controller\Ex06Controller::deleteAllUsers
     methods: [POST]
+    requirements:
+        id: '\d+'
 
 ex06_update_user:
     path: /ex06/update_user/{id}
     controller: App\Controller\Ex06Controller::updateUser
-    methods: [POST]
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'

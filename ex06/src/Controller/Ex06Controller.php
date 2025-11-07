@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use Exception;
+use RuntimeException;
 use App\Service\ReadUserInTable;
 use App\Service\DeleteUserInTable;
 use App\Service\InsertUserInTable;
+use App\Service\UpdateUserInTable;
 use App\Service\CreateTableService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +29,8 @@ final class Ex06Controller extends AbstractController
         private readonly CreateTableService $tableCreator,
         private readonly InsertUserInTable $userInserter,
         private readonly DeleteUserInTable $userDeleter,
-        private readonly ReadUserInTable $userReader)
+        private readonly ReadUserInTable $userReader,
+        private readonly UpdateUserInTable $userUpdater)
         {}
     /**
      * @Route("/ex06", name="ex06_index", methods={"GET"})
@@ -119,10 +122,49 @@ final class Ex06Controller extends AbstractController
     }
 
     /**
-     * @Route("/ex06/update_user/{id}", name="ex06_update_user_form", methods={"GET","POST"})
+     * @Route("/ex06/update_user/{id}", name="ex06_update_user_form", methods={"GET", "POST"})
      */
-    public function updateUser(Request $request, int $id)
+    public function updateUser(int $id, Request $request): Response
     {
+        try
+        {
+            $user = $this->userReader->readUser('ex06_users', $id);
+            if (is_string($user))
+            {
+                $this->addFlash('danger', $user);
+                return $this->redirectToRoute('ex06_index');
+            }
+            if (isset($user['enable']))
+                $user['enable'] = (bool)$user['enable'];
+            
+            if (isset($user['birthdate']) && !($user['birthdate'] instanceof \DateTimeInterface))
+                $user['birthdate'] = new \DateTime($user['birthdate']);
+            $form = $this->createUserForm();
+            $form->setData($user);
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $data = $form->getData();
+                $result = $this->userUpdater->updateUser('ex06_users', $id, $data);
+                [$type, $message] = explode(':', $result, 2);
+                $this->addFlash($type, $message);
+                return $this->redirectToRoute('ex06_index');
+            }
+            return $this->render('ex06/update.html.twig', [
+                'form' => $form->createView(),
+                'user' => $user,
+            ]);
+        }
+        catch (RuntimeException $e)
+        {
+            $this->addFlash('danger', "Error, the form creation had a problem : " . $e->getMessage());
+            return $this->redirectToRoute('ex06_index');
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Unexpected error while updating user: ' . $e->getMessage());
+            return $this->redirectToRoute('ex06_index');
+        }
     }
 
     private function createUserForm()

@@ -17,3 +17,5 @@ ex04_delete_all_users:
     path: /ex04/delete_all_users
     controller: App\Controller\Ex04Controller::deleteAllUsers
     methods: [POST]
+    requirements:
+        id: '\d+'
