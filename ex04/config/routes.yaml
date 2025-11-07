@@ -1,0 +1,10 @@
+ex04_index:
+    path: /ex04
+    controller: App\Controller\Ex04Controller::index
+    methods: [GET]
+
+ex04_insert_user:
+    path: /ex04/insert_user
+    controller: App\Controller\Ex04Controller::insertUser
+    methods: [POST]
+

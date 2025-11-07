@@ -3,11 +3,6 @@ ex02_index:
     controller: App\Controller\Ex02Controller::index
     methods: [GET]
 
-ex02_create_table:
-    path: /ex02/create_table
-    controller: App\Controller\Ex02Controller::createTable
-    methods: [POST]
-
 ex02_insert_user:
     path: /ex02/insert_user
     controller: App\Controller\Ex02Controller::insertUser

@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello Ex04Controller!{% endblock %}
+
+{% block content %}
+    <h1>Ex04 : insert and read users in the database !</h1>
+    {{ form_start(form, { 'action': path('ex04_insert_user'), 'method': 'POST' }) }}
+        {{ form_widget(form) }}
+        <button type="submit">Insérer</button>
+    {{ form_end(form) }}
+    <h2>Liste des utilisateurs :</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Pseudo</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Enable</th>
+                <th>Date de naissance</th>
+                <th>Adresse</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.enable ? 'Oui' : 'Non' }}</td>
+                    <td>{{ user.birthdate|date('Y-m-d') }}</td>
+                    <td>{{ user.address }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="7">Aucun utilisateur.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
