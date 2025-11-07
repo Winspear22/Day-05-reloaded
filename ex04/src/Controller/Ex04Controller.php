@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Exception;
 use App\Service\ReadUserInTable;
+use App\Service\DeleteUserInTable;
 use App\Service\InsertUserInTable;
 use App\Service\CreateTableService;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +26,7 @@ final class Ex04Controller extends AbstractController
     public function __construct(
         private readonly CreateTableService $tableCreator,
         private readonly InsertUserInTable $userInserter,
+        private readonly DeleteUserInTable $userDeleter,
         private readonly ReadUserInTable $userReader)
         {}
     /**
@@ -86,11 +88,32 @@ final class Ex04Controller extends AbstractController
     {
         try
         {
-            
+            $result = $this->userDeleter->deleteUser('ex04_users', $id);
+            [$type, $message] = explode(':', $result, 2);
+            $this->addFlash($type, $message);
+            return $this->redirectToRoute('ex04_index');
         }
         catch (Exception $e)
         {
             $this->addFlash('danger', 'Error, unexpected error while deleting user: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex04_index');
+    }
+
+    /**
+     * @Route("/ex04/delete_all_users", name="ex04_delete_all_users", methods={"POST"})
+     */
+    public function deleteAllUsers(): Response
+    {
+        try
+        {
+            $result = $this->userDeleter->deleteAllUsers('ex04_users');
+            [$type, $message] = explode(':', $result, 2);
+            $this->addFlash($type, $message);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error while deleting all users: ' . $e->getMessage());
         }
         return $this->redirectToRoute('ex04_index');
     }

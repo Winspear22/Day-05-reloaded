@@ -8,3 +8,12 @@ ex04_insert_user:
     controller: App\Controller\Ex04Controller::insertUser
     methods: [POST]
 
+ex04_delete_user:
+    path: /ex04/delete_user/{id}
+    controller: App\Controller\Ex04Controller::deleteUser
+    methods: [POST]
+
+ex04_delete_all_users:
+    path: /ex04/delete_all_users
+    controller: App\Controller\Ex04Controller::deleteAllUsers
+    methods: [POST]
