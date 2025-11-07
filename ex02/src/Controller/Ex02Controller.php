@@ -2,12 +2,22 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\DBAL\Connection;
+use App\Service\ReadUserInTable;
+use App\Service\InsertUserInTable;
+use App\Service\CreateTableService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class Ex02Controller extends AbstractController
 {
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly CreateTableService $tableCreator,
+        private readonly InsertUserInTable $userInserter,
+        private readonly ReadUserInTable $userReader)
+        {}
     /**
      * @Route("/ex02", name="ex02_index"), methods={"GET"})
      */
