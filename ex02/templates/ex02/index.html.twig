@@ -3,7 +3,7 @@
 {% block title %}Hello Ex02Controller!{% endblock %}
 
 {% block content %}
-    <h1>Ex02 : insert and read users in the database !</h1>
+    <h1>Ex02 : insert and read users in the database (SQL) !</h1>
     {{ form_start(form, { 'action': path('ex02_insert_user'), 'method': 'POST' }) }}
         {{ form_widget(form) }}
         <button type="submit">Insérer</button>

@@ -10,7 +10,6 @@ use App\Service\AlterAddressesTableService;
 use App\Service\CreateAddressesTableService;
 use App\Service\AlterBankAccountsTableService;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use App\Service\CreateBankAccountsTableService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 

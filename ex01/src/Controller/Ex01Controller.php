@@ -5,7 +5,6 @@ namespace App\Controller;
 use Exception;
 use App\Service\CreateTableService;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class Ex01Controller extends AbstractController
@@ -39,7 +38,7 @@ final class Ex01Controller extends AbstractController
         catch (Exception $e)
         {
             $this->addFlash('danger', 'Error creating table: ' . $e->getMessage());
-            return $this->redirectToRoute('ex01_index');
+            return $this->redirectToRoute('ex01_index');        
         }
     }
 }
