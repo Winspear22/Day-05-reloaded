@@ -3,26 +3,17 @@ ex08_index:
     controller: App\Controller\Ex08Controller::index
     methods: [GET]
 
-ex08_insert_user:
-    path: /ex08/insert_user
-    controller: App\Controller\Ex08Controller::insertUser
+ex08_create_persons_table:
+    path: /ex08/create_persons_table
+    controller: App\Controller\Ex08Controller::createPersonsTable
     methods: [POST]
 
-ex08_delete_user:
-    path: /ex08/delete_user/{id}
-    controller: App\Controller\Ex08Controller::deleteUser
+ex08_create_bank_accounts_table:
+    path: /ex08/create_bank_accounts_table
+    controller: App\Controller\Ex08Controller::createBankAccountsTable
     methods: [POST]
 
-ex08_delete_all_users:
-    path: /ex08/delete_all_users
-    controller: App\Controller\Ex08Controller::deleteAllUsers
+ex08_create_relation_bank_account:
+    path: /ex08/create_relation_bank_account
+    controller: App\Controller\Ex08Controller::createBankAccountRelation
     methods: [POST]
-    requirements:
-        id: '\d+'
-
-ex08_update_user:
-    path: /ex08/update_user/{id}
-    controller: App\Controller\Ex08Controller::updateUser
-    methods: [GET, POST]
-    requirements:
-        id: '\d+'
