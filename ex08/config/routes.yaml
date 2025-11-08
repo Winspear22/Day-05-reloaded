@@ -1,0 +1,28 @@
+ex08_index:
+    path: /ex08
+    controller: App\Controller\Ex08Controller::index
+    methods: [GET]
+
+ex08_insert_user:
+    path: /ex08/insert_user
+    controller: App\Controller\Ex08Controller::insertUser
+    methods: [POST]
+
+ex08_delete_user:
+    path: /ex08/delete_user/{id}
+    controller: App\Controller\Ex08Controller::deleteUser
+    methods: [POST]
+
+ex08_delete_all_users:
+    path: /ex08/delete_all_users
+    controller: App\Controller\Ex08Controller::deleteAllUsers
+    methods: [POST]
+    requirements:
+        id: '\d+'
+
+ex08_update_user:
+    path: /ex08/update_user/{id}
+    controller: App\Controller\Ex08Controller::updateUser
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
