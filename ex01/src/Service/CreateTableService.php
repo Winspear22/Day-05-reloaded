@@ -16,20 +16,23 @@ class CreateTableService
 	{
 		try
 		{
-			$result = $this->checkTableExistence($tableName);
-			if ($result === true)
+			if ($this->checkTableExistence($tableName)) {
 				return 'info: Table already exists.';
+			}
+
 			$process = new Process([
 				'php',
 				'bin/console',
-				'doctrine:migrations:migrate'
+				'doctrine:migrations:migrate',
+				'--no-interaction'
 			]);
+			$process->setWorkingDirectory(__DIR__ . '/../../');
 			$process->run();
 			if ($process->isSuccessful())
 				return 'success: Table created successfully!';
 			else
-				return 'error: popo' . $process->getErrorOutput();
-		}
+				return 'error: ' . $process->getErrorOutput();
+		} 
 		catch (Exception $e)
 		{
 			return 'error: ' . $e->getMessage();

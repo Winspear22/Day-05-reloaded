@@ -1,0 +1,15 @@
+php bin/console doctrine:migrations:migrate 0
+NE SURTOUT PAS DROP TABLE MANUELLEMENT SINON : 
+
+# ÉTAPE 1 : Supprimer l'enregistrement dans doctrine_migration_versions
+mysql> DELETE FROM Day05db_ex01.doctrine_migration_versions WHERE version = 'DoctrineMigrations\\Version20251108123323';
+
+# Ou plus simple (tout supprimer) :
+mysql> DELETE FROM Day05db_ex01.doctrine_migration_versions;
+
+# ÉTAPE 2 : Vérifier que c'est vide
+mysql> SELECT * FROM Day05db_ex01.doctrine_migration_versions;
+# Doit afficher : Empty set (0 rows)
+
+# ÉTAPE 3 : Maintenant tu peux re-migrer
+php bin/console doctrine:migrations:migrate
