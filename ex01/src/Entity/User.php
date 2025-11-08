@@ -16,29 +16,29 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(length: 64, unique: true)]
-    private ?string $username = null;
+    private string $username;
 
     #[ORM\Column(length: 64)]
-    private ?string $name = null;
+    private string $name;
 
     #[ORM\Column(length: 128, unique: true)]
-    private ?string $email = null;
+    private string $email;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $enable = false;
 
     #[ORM\Column]
-    private ?bool $bool = null;
-
-    #[ORM\Column]
-    private ?\DateTime $birthdate = null;
+    private \DateTime $birthdate;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $address = null;
+    private string $address;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUsername(): ?string
+    public function getUsername(): string
     {
         return $this->username;
     }
@@ -46,11 +46,10 @@ class User
     public function setUsername(string $username): static
     {
         $this->username = $username;
-
         return $this;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -58,11 +57,10 @@ class User
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -70,23 +68,21 @@ class User
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
-    public function isBool(): ?bool
+    public function isEnable(): bool
     {
-        return $this->bool;
+        return $this->enable;
     }
 
-    public function setBool(bool $bool): static
+    public function setEnable(bool $enable): static
     {
-        $this->bool = $bool;
-
+        $this->enable = $enable;
         return $this;
     }
 
-    public function getBirthdate(): ?\DateTime
+    public function getBirthdate(): \DateTime
     {
         return $this->birthdate;
     }
@@ -94,11 +90,10 @@ class User
     public function setBirthdate(\DateTime $birthdate): static
     {
         $this->birthdate = $birthdate;
-
         return $this;
     }
 
-    public function getAddress(): ?string
+    public function getAddress(): string
     {
         return $this->address;
     }
@@ -106,7 +101,6 @@ class User
     public function setAddress(string $address): static
     {
         $this->address = $address;
-
         return $this;
     }
 }
