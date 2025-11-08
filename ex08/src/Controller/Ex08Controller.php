@@ -41,7 +41,7 @@ final class Ex08Controller extends AbstractController
     {
         try
         {
-            $result = $this->createPersonsTable->createPersonsTable('persons');
+            $result = $this->createPersonsTable->createPersonsTable('ex08_persons');
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }
@@ -59,7 +59,7 @@ final class Ex08Controller extends AbstractController
     {
         try
         {
-            $result = $this->createAddressesTable->createAddressesTable('addresses');
+            $result = $this->createAddressesTable->createAddressesTable('ex08_addresses');
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }
@@ -77,7 +77,7 @@ final class Ex08Controller extends AbstractController
     {
         try
         {
-            $result = $this->alterAddressesTable->alterAddressesTable("persons", "addresses");
+            $result = $this->alterAddressesTable->alterAddressesTable("ex08_persons", "ex08_addresses");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }
@@ -95,7 +95,7 @@ final class Ex08Controller extends AbstractController
     {
         try
         {
-            $result = $this->createBankAccountsTable->createBankAccountsTable('bank_accounts');
+            $result = $this->createBankAccountsTable->createBankAccountsTable('ex08_bank_accounts');
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }
@@ -113,7 +113,7 @@ final class Ex08Controller extends AbstractController
     {
         try
         {
-            $result = $this->alterBankAccountsTables->alterBankAccountsTable("persons", "bank_accounts");
+            $result = $this->alterBankAccountsTables->alterBankAccountsTable("ex08_persons", "ex08_bank_accounts");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }
@@ -131,7 +131,7 @@ final class Ex08Controller extends AbstractController
     {
         try
         {
-            $result = $this->alterPersonsTable->addMaritalStatusToPersons("persons");
+            $result = $this->alterPersonsTable->addMaritalStatusToPersons("ex08_persons");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }
@@ -149,7 +149,7 @@ final class Ex08Controller extends AbstractController
     {
         try
         {
-            $result = $this->alterPersonsTable->removeMaritalStatusFromPersons("persons");
+            $result = $this->alterPersonsTable->removeMaritalStatusFromPersons("ex08_persons");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }

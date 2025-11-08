@@ -1,277 +1,45 @@
-{# templates/ex08/index.html.twig #}
-
 {% extends "base.html.twig" %}
 
 {% block title %}Exercise 08 - Database Relations{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
     <h1>Exercise 08 - Create Database Relations</h1>
-    
-    <!-- Afficher les flash messages -->
-    {% for type, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ type }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endfor %}
 
-    <!-- Section 1: Créer les tables de base -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h2>1. Create Base Tables</h2>
-        </div>
-        <div class="card-body">
-            <p>Start by creating the base tables in this order.</p>
-            
-            <div class="row">
-                <div class="col-md-4">
-                    <form method="POST" action="{{ path('ex08_create_persons_table') }}">
-                        <button type="submit" class="btn btn-success w-100 mb-3">
-                            ✅ Create Persons Table
-                        </button>
-                    </form>
-                </div>
-                <div class="col-md-4">
-                    <form method="POST" action="{{ path('ex08_create_bank_accounts_table') }}">
-                        <button type="submit" class="btn btn-success w-100 mb-3">
-                            ✅ Create Bank Accounts Table
-                        </button>
-                    </form>
-                </div>
-                <div class="col-md-4">
-                    <form method="POST" action="{{ path('ex08_create_addresses_table') }}">
-                        <button type="submit" class="btn btn-success w-100 mb-3">
-                            ✅ Create Addresses Table
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <h2>1. Create Tables</h2>
+    <form method="POST" action="{{ path('ex08_create_persons_table') }}">
+        <button type="submit">Create Persons Table</button>
+    </form>
+    <form method="POST" action="{{ path('ex08_create_bank_accounts_table') }}">
+        <button type="submit">Create Bank Accounts Table</button>
+    </form>
+    <form method="POST" action="{{ path('ex08_create_addresses_table') }}">
+        <button type="submit">Create Addresses Table</button>
+    </form>
 
-    <!-- Section 2: Altérer les tables -->
-    <div class="card mb-4">
-        <div class="card-header bg-warning text-dark">
-            <h2>2. Alter Persons Table</h2>
-        </div>
-        <div class="card-body">
-            <p>Add or remove the marital_status ENUM column.</p>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <form method="POST" action="{{ path('ex08_add_marital_status') }}">
-                        <button type="submit" class="btn btn-warning w-100 mb-3">
-                            🔧 Add Marital Status ENUM
-                        </button>
-                    </form>
-                </div>
-                <div class="col-md-6">
-                    <form method="POST" action="{{ path('ex08_remove_marital_status') }}">
-                        <button type="submit" class="btn btn-danger w-100 mb-3">
-                            🗑️ Remove Marital Status
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <h2>2. Alter Persons Table</h2>
+    <form method="POST" action="{{ path('ex08_add_marital_status') }}">
+        <button type="submit">Add Marital Status</button>
+    </form>
+    <form method="POST" action="{{ path('ex08_remove_marital_status') }}">
+        <button type="submit">Remove Marital Status</button>
+    </form>
 
-    <!-- Section 3: Créer les relations -->
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <h2>3. Create Relations (Foreign Keys)</h2>
-        </div>
-        <div class="card-body">
-            <p><strong>One-to-One:</strong> A person has exactly one bank account</p>
-            <form method="POST" action="{{ path('ex08_create_relation_bank_account') }}" class="mb-3">
-                <button type="submit" class="btn btn-info w-100">
-                    🔗 Create Bank Accounts ↔ Persons Relation (1:1)
-                </button>
-            </form>
+    <h2>3. Create Relations</h2>
+    <form method="POST" action="{{ path('ex08_create_relation_bank_account') }}">
+        <button type="submit">Create Bank Accounts ↔ Persons (1:1)</button>
+    </form>
+    <form method="POST" action="{{ path('ex08_create_relation_addresses') }}">
+        <button type="submit">Create Addresses ↔ Persons (1:N)</button>
+    </form>
 
-            <p><strong>One-to-Many:</strong> A person can have multiple addresses</p>
-            <form method="POST" action="{{ path('ex08_create_relation_addresses') }}">
-                <button type="submit" class="btn btn-info w-100">
-                    🔗 Create Addresses ↔ Persons Relation (1:N)
-                </button>
-            </form>
-        </div>
-    </div>
+    <h2>Order of Operations</h2>
+    <ol>
+        <li>Create Persons table</li>
+        <li>Create Bank Accounts table</li>
+        <li>Create Addresses table</li>
+        <li>Add Marital Status (optional)</li>
+        <li>Create Bank Accounts ↔ Persons relation (1:1 with UNIQUE)</li>
+        <li>Create Addresses ↔ Persons relation (1:N with NOT NULL)</li>
+    </ol>
 
-    <!-- Section 4: Instructions -->
-    <div class="card mb-4">
-        <div class="card-header bg-secondary text-white">
-            <h2>📋 Order of Operations</h2>
-        </div>
-        <div class="card-body">
-            <ol>
-                <li><strong>Create Persons table</strong> first</li>
-                <li><strong>Create Bank Accounts table</strong></li>
-                <li><strong>Create Addresses table</strong></li>
-                <li><strong>Add Marital Status</strong> ENUM column to Persons (optional)</li>
-                <li><strong>Create Bank Accounts ↔ Persons relation</strong> (One-to-One with UNIQUE)</li>
-                <li><strong>Create Addresses ↔ Persons relation</strong> (One-to-Many with NOT NULL)</li>
-            </ol>
-            
-            <hr>
-            
-            <h3>Table Structures:</h3>
-            <ul>
-                <li>✅ <strong>Persons table:</strong> id, username, name, email, enable, birthdate, (marital_status)</li>
-                <li>✅ <strong>Bank Accounts table:</strong> id, iban, bank_name</li>
-                <li>✅ <strong>Addresses table:</strong> id, address</li>
-                <li>🔗 <strong>FK One-to-One:</strong> bank_accounts.person_id UNIQUE → persons.id</li>
-                <li>🔗 <strong>FK One-to-Many:</strong> addresses.person_id NOT NULL → persons.id</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Section 5: Relations Diagram -->
-    <div class="card">
-        <div class="card-header bg-dark text-white">
-            <h2>🗄️ Database Schema</h2>
-        </div>
-        <div class="card-body">
-            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;">
-<strong>persons</strong>
-├── id (PK)
-├── username (UNIQUE)
-├── name
-├── email (UNIQUE)
-├── enable
-├── birthdate
-└── marital_status (ENUM - optional)
-    ↑
-    ├─── 1:1 (UNIQUE) ──→ <strong>bank_accounts</strong>
-    │                      ├── id (PK)
-    │                      ├── iban
-    │                      ├── bank_name
-    │                      └── person_id (FK, UNIQUE)
-    │
-    └─── 1:N (NOT NULL) ──→ <strong>addresses</strong>
-                            ├── id (PK)
-                            ├── address
-                            └── person_id (FK, NOT NULL)
-            </pre>
-        </div>
-    </div>
-
-</div>
-
-<style>
-    .container {
-        max-width: 1000px;
-    }
-
-    .card-header {
-        font-weight: bold;
-    }
-
-    .btn {
-        margin: 5px 0;
-        padding: 12px 20px;
-        font-size: 16px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-    .alert {
-        margin-top: 15px;
-        padding: 15px;
-        border-radius: 5px;
-        font-weight: bold;
-        box-shadow: 0 1px 7px rgba(0,0,0,0.1);
-    }
-
-    .alert-success {
-        background: #d4edda;
-        color: #155724;
-        border-left: 5px solid #38a169;
-    }
-
-    .alert-danger {
-        background: #f8d7da;
-        color: #721c24;
-        border-left: 5px solid #e53e3e;
-    }
-
-    .alert-info {
-        background: #d1ecf1;
-        color: #0c5460;
-        border-left: 5px solid #17a2b8;
-    }
-
-    .alert-warning {
-        background: #fff3cd;
-        color: #856404;
-        border-left: 5px solid #ffc107;
-    }
-
-    .card {
-        border: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
-        border-radius: 8px;
-    }
-
-    .card-header {
-        border-bottom: 2px solid rgba(0,0,0,0.1);
-        padding: 15px;
-        border-radius: 8px 8px 0 0;
-    }
-
-    .card-body {
-        padding: 20px;
-    }
-
-    .row {
-        display: flex;
-        gap: 10px;
-    }
-
-    .col-md-4,
-    .col-md-6 {
-        flex: 1;
-        min-width: 0;
-    }
-
-    h2 {
-        margin: 0;
-        font-size: 20px;
-    }
-
-    h3 {
-        margin-top: 15px;
-        margin-bottom: 10px;
-    }
-
-    ol, ul {
-        margin-bottom: 10px;
-        padding-left: 20px;
-    }
-
-    li {
-        margin-bottom: 8px;
-    }
-
-    p {
-        margin-bottom: 15px;
-        color: #666;
-    }
-
-    pre {
-        font-family: 'Courier New', monospace;
-        font-size: 13px;
-        line-height: 1.6;
-        color: #333;
-    }
-</style>
 {% endblock %}
