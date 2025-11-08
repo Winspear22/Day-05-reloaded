@@ -12,7 +12,7 @@ class CreatePersonsTableService
 		private readonly Connection $sql_connection,
 		private readonly UtilsTableService $utilsTableService) {}
 
-	public function createPersonsTable(string $tableName)
+	public function createPersonsTable(string $tableName): string
 	{
 		$sql_command = "CREATE TABLE IF NOT EXISTS $tableName (
 			id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,

@@ -24,5 +24,21 @@ class UtilsTableService
 		}
 		return true;
 	}
+
+	public function doesColumnExist(string $tableName, string $columnName): bool
+	{
+		try
+		{
+			$columns = $this->sql_connection->fetchAllAssociative("SHOW COLUMNS FROM $tableName LIKE :column", ['column' => $columnName]);
+			return count($columns) > 0;
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+	}
+
+	public function checkIfRelationBetweenTablesIsPossible()
+	{}
 }
 ?>

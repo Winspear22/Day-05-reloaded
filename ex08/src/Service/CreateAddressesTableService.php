@@ -12,7 +12,7 @@ class CreateAddressesTableService
 		private readonly Connection $sql_connection,
 		private readonly UtilsTableService $utilsTableService) {}
 
-	public function createAddressesTable(Connection $connection, string $tableName): string
+	public function createAddressesTable(string $tableName): string
     {
         $sql_command = "CREATE TABLE IF NOT EXISTS $tableName (
             id INT AUTO_INCREMENT PRIMARY KEY,
