@@ -41,10 +41,6 @@ Root Directory: ./ex08/
 │       ├── CreateAddressesTableService.php
 │       ├── CreateBankAccountsTableService.php
 │       ├── CreatePersonsTableService.php
-│       ├── CreateTableService.php
-│       ├── DeleteUserInTable.php
-│       ├── InsertUserInTable.php
-│       ├── ReadUserInTable.php
 │       └── UtilsTableService.php
 ├── symfony.lock
 ├── templates
@@ -153,7 +149,7 @@ Root Directory: ./ex08/
         ├── extra-bundle
         └── twig
 
-94 directories, 53 files
+94 directories, 49 files
 
 ================================================================================
 

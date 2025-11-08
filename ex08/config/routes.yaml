@@ -17,3 +17,13 @@ ex08_create_relation_bank_account:
     path: /ex08/create_relation_bank_account
     controller: App\Controller\Ex08Controller::createBankAccountRelation
     methods: [POST]
+
+ex08_create_addresses_table:
+    path: /ex08/create_addresses_table
+    controller: App\Controller\Ex08Controller::createAddressesTable
+    methods: [POST]
+
+ex08_create_relation_addresses:
+    path: /ex08/create_relation_addresses
+    controller: App\Controller\Ex08Controller::createAddressesRelation
+    methods: [POST]

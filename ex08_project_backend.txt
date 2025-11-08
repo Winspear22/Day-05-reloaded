@@ -41,10 +41,6 @@ Root Directory: ./ex08/
 │       ├── CreateAddressesTableService.php
 │       ├── CreateBankAccountsTableService.php
 │       ├── CreatePersonsTableService.php
-│       ├── CreateTableService.php
-│       ├── DeleteUserInTable.php
-│       ├── InsertUserInTable.php
-│       ├── ReadUserInTable.php
 │       └── UtilsTableService.php
 ├── symfony.lock
 ├── templates
@@ -153,7 +149,7 @@ Root Directory: ./ex08/
         ├── extra-bundle
         └── twig
 
-94 directories, 53 files
+94 directories, 49 files
 
 ================================================================================
 
@@ -218,7 +214,7 @@ final class Ex08Controller extends AbstractController
     }
 
     /**
-     * @Route("/ex08/create_bank_accounts_table", name="ex08_create_bank_accounts_table", methods={"POST"})
+     * @Route("/ex08/create_addresses_table", name="ex08_create_addresses_table", methods={"POST"})
      */
     public function createAddressesTable(): Response
     {
@@ -236,7 +232,7 @@ final class Ex08Controller extends AbstractController
     }
 
     /**
-     * @Route("/ex08/create_relation_bank_account", name="ex08_create_relation_bank_account", methods={"POST"})
+     * @Route("/ex08/create_relation_addresses", name="ex08_create_relation_addresses", methods={"POST"})
      */
     public function createAddressesRelation(): Response
     {
@@ -278,7 +274,7 @@ final class Ex08Controller extends AbstractController
     {
         try
         {
-            $result = $this->alterBankAccountsTables,tablesAlter->alterBankAccountsTable("persons", "bank_accounts");
+            $result = $this->alterBankAccountsTables->alterBankAccountsTable("persons", "bank_accounts");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }
@@ -343,7 +339,7 @@ class AlterAddressesTableService
                 return $errorMessage;
             }
             $this->sql_connection->executeStatement($sql_command);
-            return "success: Relation one-to-many between $daughterTableName and $motherTableName created successfully.";
+            return "success:Relation one-to-many between $daughterTableName and $motherTableName created successfully.";
         }
 		catch (Exception $e)
 		{
@@ -354,10 +350,10 @@ class AlterAddressesTableService
                 );
                 
                 if (!empty($constraints))
-                    return "info: The relation between $daughterTableName and $motherTableName already exists.";
+                    return "info:The relation between $daughterTableName and $motherTableName already exists.";
             }
 			catch (Exception $f) {}
-            return "danger: An error occurred while altering the $daughterTableName table: " . $e->getMessage();
+            return "danger:An error occurred while altering the $daughterTableName table: " . $e->getMessage();
         }
     }
 }
@@ -436,53 +432,6 @@ class AlterPersonsTableService
 	public function __construct(
 		private readonly Connection $sql_connection,
 		private readonly UtilsTableService $utilsTableService) {}
-
-	public function addColumn(string $tableName, string $columnName, string $columnType): string
-	{
-		$sql = "ALTER TABLE $tableName ADD COLUMN $columnName $columnType";
-		try
-		{
-			if (!$this->checkTableExistence($tableName))
-				return "info:The table $tableName does not exist.";
-			$this->sql_connection->executeStatement($sql);
-			return "success:Success! The column $columnName was added to the table $tableName!";
-		}
-		catch (Exception $e)
-		{
-			return "danger:Error, there was a problem in the column $columnName addition : " . $e->getMessage();
-		}
-	}
-
-	public function removeColumn(string $tableName, string $columnName): string
-	{
-		$sql = "ALTER TABLE $tableName DROP COLUMN $columnName";
-		try
-		{
-			if (!$this->checkTableExistence($tableName))
-				return "info:The table $tableName does not exist.";
-			$this->sql_connection->executeStatement($sql);
-			return "success:Success! The column $columnName was removed from the table $tableName!";
-		}
-		catch (Exception $e)
-		{
-			return "danger:Error, there was a problem in the column $columnName removal : " . $e->getMessage();
-		}
-	}
-
-	public function checkTableExistence(string $tableName): bool
-	{
-		try
-		{
-			$result = $this->sql_connection->fetchOne("SHOW TABLES LIKE '$tableName'");
-			if ($result === false)
-				return false;
-		}
-		catch (Exception $e)
-		{
-			return false;
-		}
-		return true;
-	}
 }
 
 
@@ -613,257 +562,6 @@ class CreatePersonsTableService
 ?>
 
 ---
-File: src/Service/CreateTableService.php
----
-
-<?php 
-
-namespace App\Service;
-
-use Exception;
-use RuntimeException;
-use Doctrine\DBAL\Connection;
-
-class CreateTableService 
-{
-	private readonly Connection $sql_connection;
-
-	public function __construct(Connection $connection) 
-	{
-		$this->sql_connection = $connection;
-	}
-
-	public function createTable(string $tableName): string
-	{
-		$sql_command = "CREATE TABLE IF NOT EXISTS $tableName (
-			id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-			username VARCHAR(64) NOT NULL UNIQUE,
-			name VARCHAR(64) NOT NULL,
-			email VARCHAR(128) NOT NULL UNIQUE,
-			enable BOOL DEFAULT FALSE NOT NULL,
-			birthdate DATETIME NOT NULL,
-			address LONGTEXT NOT NULL
-		)";
-		try
-		{
-			$result = $this->checkTableExistence($tableName);
-			if ($result === true)
-				return "info: Table already exists.";
-			$this->sql_connection->executeStatement($sql_command);
-			return "success: Table created successfully.";
-		}
-		catch (Exception $e)
-		{
-			throw new RuntimeException("Failed to create table: " . $e->getMessage());
-		}
-	}
-
-	public function checkTableExistence(string $tableName): bool 
-	{
-		try
-		{
-			$result = $this->sql_connection->fetchOne("SHOW TABLES LIKE '$tableName'");
-			if ($result === false)
-				return false;
-		}
-		catch (Exception $e)
-		{
-			return false;
-		}
-		return true;
-	}
-}
-?>
-
----
-File: src/Service/DeleteUserInTable.php
----
-
-<?php 
-
-namespace App\Service;
-
-use Exception;
-use Doctrine\DBAL\Connection;
-
-class DeleteUserInTable
-{
-	private readonly Connection $sql_connection;
-
-	public function __construct(Connection $connection)
-	{
-		$this->sql_connection = $connection;
-	}
-
-	public function deleteUser(string $tableName, int $id) 
-	{
-		$sql = "DELETE FROM $tableName WHERE id = ?";
-		try
-		{
-			if (!$this->checkIfUserExistsById($tableName, $id))
-                return "danger:Error - User with ID $id does not exist in the table $tableName.";
-			$this->sql_connection->executeStatement($sql, [$id]);
-			return "success:Success! User with ID $id has been deleted from the table $tableName.";
-		}
-		catch (Exception $e)
-		{
-			return "danger:Error, there was a problem checking the existence of user with ID $id in the table $tableName : " . $e->getMessage();
-		}
-	}
-
-	public function deleteAllUsers(string $tableName) 
-	{
-		$sql = "DELETE FROM $tableName";
-		try
-		{
-			$count = $this->getUserCount($tableName);
-            if ($count <= 0)
-                return "danger:Error - There are no users to delete in the table $tableName.";
-			$this->sql_connection->executeStatement($sql);
-			return "success:Success! All users have been deleted from the table $tableName.";
-		}
-		catch (Exception $e)
-		{
-			return "danger:Error, Error while deleting all users in the $tableName : " . $e->getMessage();
-		}
-	}
-
-    public function checkIfUserExistsById(string $tableName, int $id): bool
-    {
-		$sql = "SELECT id FROM $tableName WHERE id = ?";
-        try
-        {
-            $result = $this->sql_connection->fetchOne($sql, [$id]);
-            return $result !== false;
-        }
-        catch (Exception $e)
-        {
-            return false;
-        }
-    }
-
-	public function getUserCount(string $tableName): int
-    {
-		$sql = "SELECT COUNT(*) as count FROM $tableName";
-        try
-        {
-            $result = $this->sql_connection->fetchOne($sql);
-            return (int)$result;
-        }
-        catch (Exception $e)
-        {
-            return 0;
-        }
-    }
-}
-?>
-
----
-File: src/Service/InsertUserInTable.php
----
-
-<?php 
-
-namespace App\Service;
-
-use Exception;
-use DateTimeInterface;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-
-class InsertUserInTable 
-{
-	private readonly Connection $sql_connection;
-
-	public function __construct(Connection $connection)
-	{
-		$this->sql_connection = $connection;
-	}
-
-	public function insertUser(string $tableName, array $data) 
-	{
-		$sql = "INSERT INTO $tableName (username, name, email, enable, birthdate, address)
-		VALUES (:username, :name, :email, :enable, :birthdate, :address)";
-		try
-		{
-			$this->sql_connection->executeStatement($sql, [
-				'username' => $data['username'],
-				'name' => $data['name'],
-				'email' => $data['email'],
-				'enable'    => $data['enable'] ? 1 : 0,
-				'birthdate' => $data['birthdate'] instanceof DateTimeInterface
-					? $data['birthdate']->format('Y-m-d H:i:s')
-					: $data['birthdate'],
-				'address' => $data['address']
-			]);
-			return "success:Success! User {$data['username']} has been inserted into the table $tableName.";
-		}
-        catch (UniqueConstraintViolationException $e)
-        {
-            return "danger:Error - There is a duplicate entry ! Username or email already exists.";
-        }
-        catch (Exception $e)
-        {
-            return "danger:Error, there was a problem with the database or the table $tableName : " . $e->getMessage();
-        }
-	}
-}
-
-?>
-
----
-File: src/Service/ReadUserInTable.php
----
-
-<?php
-
-namespace App\Service;
-
-use Exception;
-use Doctrine\DBAL\Connection;
-
-class ReadUserInTable 
-{
-	private readonly Connection $sql_connection;
-
-	public function __construct(Connection $connection)
-	{
-		$this->sql_connection = $connection;
-	}
-
-	public function readUser(string $tableName, string $username): array|string
-	{
-		$sql = "SELECT * FROM $tableName WHERE username = :username";
-		try
-		{
-			$user = $this->sql_connection->fetchAssociative($sql, ['username' => $username]);
-			if (!$user)
-				return "danger:Error - User $username not found in table $tableName.";
-			return $user;
-		}
-		catch (Exception $e)
-		{
-			return "danger:Error, there was a problem with the database or the table $tableName : " . $e->getMessage();
-		}
-	}
-
-	public function readAllUsers(string $tableName): array
-	{
-		$sql = "SELECT * FROM $tableName";
-		try
-		{
-			return $this->sql_connection->fetchAllAssociative($sql) ?? [];
-		}
-		catch (Exception $e)
-		{
-			return [];
-		}
-	}
-}
-
-?>
-
----
 File: src/Service/UtilsTableService.php
 ---
 
@@ -883,7 +581,7 @@ class UtilsTableService
 	{
 		try
 		{
-			$result = $this->sql_connection->fetchOne("SHOW TABLES LIKE '$tableName'");
+			$result = $this->sql_connection->fetchOne("SHOW TABLES LIKE ?", [$tableName]);
 			if ($result === false)
 				return false;
 		}

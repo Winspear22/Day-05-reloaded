@@ -17,26 +17,33 @@
         {% endfor %}
     {% endfor %}
 
-    <!-- Section 1: Créer les tables -->
+    <!-- Section 1: Créer les tables de base -->
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
-            <h2>1. Create Tables</h2>
+            <h2>1. Create Base Tables</h2>
         </div>
         <div class="card-body">
-            <p>Start by creating the base tables. These must be created in order.</p>
+            <p>Start by creating the base tables in this order.</p>
             
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <form method="POST" action="{{ path('ex08_create_persons_table') }}">
                         <button type="submit" class="btn btn-success w-100 mb-3">
                             ✅ Create Persons Table
                         </button>
                     </form>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <form method="POST" action="{{ path('ex08_create_bank_accounts_table') }}">
                         <button type="submit" class="btn btn-success w-100 mb-3">
                             ✅ Create Bank Accounts Table
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-4">
+                    <form method="POST" action="{{ path('ex08_create_addresses_table') }}">
+                        <button type="submit" class="btn btn-success w-100 mb-3">
+                            ✅ Create Addresses Table
                         </button>
                     </form>
                 </div>
@@ -51,16 +58,23 @@
         </div>
         <div class="card-body">
             <p><strong>One-to-One:</strong> A person has exactly one bank account</p>
-            <form method="POST" action="{{ path('ex08_create_relation_bank_account') }}">
-                <button type="submit" class="btn btn-info w-100 mb-3">
+            <form method="POST" action="{{ path('ex08_create_relation_bank_account') }}" class="mb-3">
+                <button type="submit" class="btn btn-info w-100">
                     🔗 Create Bank Accounts ↔ Persons Relation (1:1)
+                </button>
+            </form>
+
+            <p><strong>One-to-Many:</strong> A person can have multiple addresses</p>
+            <form method="POST" action="{{ path('ex08_create_relation_addresses') }}">
+                <button type="submit" class="btn btn-info w-100">
+                    🔗 Create Addresses ↔ Persons Relation (1:N)
                 </button>
             </form>
         </div>
     </div>
 
     <!-- Section 3: Instructions -->
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header bg-secondary text-white">
             <h2>📋 Order of Operations</h2>
         </div>
@@ -68,40 +82,58 @@
             <ol>
                 <li><strong>Create Persons table</strong> first</li>
                 <li><strong>Create Bank Accounts table</strong></li>
-                <li><strong>Create Bank Accounts ↔ Persons relation</strong> (One-to-One)</li>
+                <li><strong>Create Addresses table</strong></li>
+                <li><strong>Create Bank Accounts ↔ Persons relation</strong> (One-to-One with UNIQUE)</li>
+                <li><strong>Create Addresses ↔ Persons relation</strong> (One-to-Many with NOT NULL)</li>
             </ol>
             
             <hr>
             
-            <h3>What's happening:</h3>
+            <h3>Table Structures:</h3>
             <ul>
-                <li>✅ <strong>Persons table:</strong> firstname, lastname, birthdate (no address)</li>
-                <li>✅ <strong>Bank Accounts table:</strong> iban, bank_name</li>
-                <li>🔗 <strong>Relation:</strong> Each person has ONE bank account (UNIQUE constraint)</li>
+                <li>✅ <strong>Persons table:</strong> id, username, name, email, enable, birthdate</li>
+                <li>✅ <strong>Bank Accounts table:</strong> id, iban, bank_name</li>
+                <li>✅ <strong>Addresses table:</strong> id, address</li>
+                <li>🔗 <strong>FK One-to-One:</strong> bank_accounts.person_id UNIQUE → persons.id</li>
+                <li>🔗 <strong>FK One-to-Many:</strong> addresses.person_id NOT NULL → persons.id</li>
             </ul>
         </div>
     </div>
 
-    <!-- Debug Info -->
-    <div class="card mt-4" style="opacity: 0.7;">
+    <!-- Section 4: Relations Diagram -->
+    <div class="card">
         <div class="card-header bg-dark text-white">
-            <h5>Debug Info</h5>
+            <h2>🗄️ Database Schema</h2>
         </div>
-        <div class="card-body" style="font-size: 12px; font-family: monospace;">
-            <p>Routes configured:</p>
-            <ul>
-                <li>GET /ex08 → ex08_index</li>
-                <li>POST /ex08/create_persons_table → ex08_create_persons_table</li>
-                <li>POST /ex08/create_bank_accounts_table → ex08_create_bank_accounts_table</li>
-                <li>POST /ex08/create_relation_bank_account → ex08_create_relation_bank_account</li>
-            </ul>
+        <div class="card-body">
+            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;">
+<strong>persons</strong>
+├── id (PK)
+├── username (UNIQUE)
+├── name
+├── email (UNIQUE)
+├── enable
+└── birthdate
+    ↑
+    ├─── 1:1 (UNIQUE) ──→ <strong>bank_accounts</strong>
+    │                      ├── id (PK)
+    │                      ├── iban
+    │                      ├── bank_name
+    │                      └── person_id (FK, UNIQUE)
+    │
+    └─── 1:N (NOT NULL) ──→ <strong>addresses</strong>
+                            ├── id (PK)
+                            ├── address
+                            └── person_id (FK, NOT NULL)
+            </pre>
         </div>
     </div>
+
 </div>
 
 <style>
     .container {
-        max-width: 900px;
+        max-width: 1000px;
     }
 
     .card-header {
@@ -176,8 +208,10 @@
         gap: 10px;
     }
 
+    .col-md-4,
     .col-md-6 {
         flex: 1;
+        min-width: 0;
     }
 
     h2 {
@@ -192,10 +226,23 @@
 
     ol, ul {
         margin-bottom: 10px;
+        padding-left: 20px;
     }
 
     li {
         margin-bottom: 8px;
+    }
+
+    p {
+        margin-bottom: 15px;
+        color: #666;
+    }
+
+    pre {
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #333;
     }
 </style>
 {% endblock %}

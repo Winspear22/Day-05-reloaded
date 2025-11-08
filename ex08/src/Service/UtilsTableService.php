@@ -14,7 +14,7 @@ class UtilsTableService
 	{
 		try
 		{
-			$result = $this->sql_connection->fetchOne("SHOW TABLES LIKE '$tableName'");
+			$result = $this->sql_connection->fetchOne("SHOW TABLES LIKE ?", [$tableName]);
 			if ($result === false)
 				return false;
 		}

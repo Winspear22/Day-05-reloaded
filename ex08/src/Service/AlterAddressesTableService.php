@@ -29,7 +29,7 @@ class AlterAddressesTableService
                 return $errorMessage;
             }
             $this->sql_connection->executeStatement($sql_command);
-            return "success: Relation one-to-many between $daughterTableName and $motherTableName created successfully.";
+            return "success:Relation one-to-many between $daughterTableName and $motherTableName created successfully.";
         }
 		catch (Exception $e)
 		{
@@ -40,10 +40,10 @@ class AlterAddressesTableService
                 );
                 
                 if (!empty($constraints))
-                    return "info: The relation between $daughterTableName and $motherTableName already exists.";
+                    return "info:The relation between $daughterTableName and $motherTableName already exists.";
             }
 			catch (Exception $f) {}
-            return "danger: An error occurred while altering the $daughterTableName table: " . $e->getMessage();
+            return "danger:An error occurred while altering the $daughterTableName table: " . $e->getMessage();
         }
     }
 }
