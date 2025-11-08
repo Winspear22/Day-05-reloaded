@@ -2,12 +2,13 @@
 
 namespace App\Controller;
 
-use App\Service\AlterAddressesTableService;
 use Exception;
 use Doctrine\DBAL\Connection;
+use App\Service\AlterPersonsTableService;
 use App\Service\CreatePersonsTableService;
-use App\Service\AlterBankAccountsTableService;
+use App\Service\AlterAddressesTableService;
 use App\Service\CreateAddressesTableService;
+use App\Service\AlterBankAccountsTableService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Service\CreateBankAccountsTableService;
@@ -21,8 +22,9 @@ final class Ex08Controller extends AbstractController
         private readonly CreateBankAccountsTableService $createBankAccountsTable,
         private readonly CreateAddressesTableService $createAddressesTable,
         private readonly AlterBankAccountsTableService $alterBankAccountsTables,
-        private readonly AlterAddressesTableService $alterAddressesTable
-    ) {}
+        private readonly AlterAddressesTableService $alterAddressesTable,
+        private readonly AlterPersonsTableService $alterPersonsTable
+        ) {}
 
     /**
      * @Route("/ex08", name="ex08_index")
@@ -112,6 +114,42 @@ final class Ex08Controller extends AbstractController
         try
         {
             $result = $this->alterBankAccountsTables->alterBankAccountsTable("persons", "bank_accounts");
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex08_index');
+    }
+
+    /** 
+     * @Route("/ex08/add_marital_status", name="ex08_add_marital_status", methods={"POST"})
+     */
+    public function addMaritalStatus(): Response
+    {
+        try
+        {
+            $result = $this->alterPersonsTable->addMaritalStatusToPersons("persons");
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex08_index');
+    }
+
+    /** 
+     * @Route("/ex08/remove_marital_status", name="ex08_remove_marital_status", methods={"POST"})
+     */
+    public function removeMaritalStatus(): Response
+    {
+        try
+        {
+            $result = $this->alterPersonsTable->removeMaritalStatusFromPersons("persons");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }

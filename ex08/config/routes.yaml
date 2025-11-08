@@ -27,3 +27,13 @@ ex08_create_relation_addresses:
     path: /ex08/create_relation_addresses
     controller: App\Controller\Ex08Controller::createAddressesRelation
     methods: [POST]
+
+ex08_add_marital_status:
+    path: /ex08/add_marital_status
+    controller: App\Controller\Ex08Controller::addMaritalStatus
+    methods: [POST]
+
+ex08_remove_marital_status:
+    path: /ex08/remove_marital_status
+    controller: App\Controller\Ex08Controller::removeMaritalStatus
+    methods: [POST]

@@ -52,11 +52,11 @@ class UtilsTableService
 	public function getRelationErrorMessage(string $motherTableName, string $daughterTableName): string
     {
         if (!$this->checkTableExistence($daughterTableName))
-            return "danger: Error, the table $daughterTableName does not exist.";
+            return "danger:Error, the table $daughterTableName does not exist.";
         if (!$this->checkTableExistence($motherTableName))
-            return "danger: Error, the table $motherTableName does not exist.";
+            return "danger:Error, the table $motherTableName does not exist.";
         if ($this->doesColumnExist($daughterTableName, 'person_id'))
-            return "danger: Error! Relation between $daughterTableName and $motherTableName already exists.";
+            return "danger:Error! Relation between $daughterTableName and $motherTableName already exists.";
         return "";
     }
 }

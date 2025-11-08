@@ -51,10 +51,37 @@
         </div>
     </div>
 
-    <!-- Section 2: Créer les relations -->
+    <!-- Section 2: Altérer les tables -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h2>2. Alter Persons Table</h2>
+        </div>
+        <div class="card-body">
+            <p>Add or remove the marital_status ENUM column.</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <form method="POST" action="{{ path('ex08_add_marital_status') }}">
+                        <button type="submit" class="btn btn-warning w-100 mb-3">
+                            🔧 Add Marital Status ENUM
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <form method="POST" action="{{ path('ex08_remove_marital_status') }}">
+                        <button type="submit" class="btn btn-danger w-100 mb-3">
+                            🗑️ Remove Marital Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Créer les relations -->
     <div class="card mb-4">
         <div class="card-header bg-info text-white">
-            <h2>2. Create Relations (Foreign Keys)</h2>
+            <h2>3. Create Relations (Foreign Keys)</h2>
         </div>
         <div class="card-body">
             <p><strong>One-to-One:</strong> A person has exactly one bank account</p>
@@ -73,7 +100,7 @@
         </div>
     </div>
 
-    <!-- Section 3: Instructions -->
+    <!-- Section 4: Instructions -->
     <div class="card mb-4">
         <div class="card-header bg-secondary text-white">
             <h2>📋 Order of Operations</h2>
@@ -83,6 +110,7 @@
                 <li><strong>Create Persons table</strong> first</li>
                 <li><strong>Create Bank Accounts table</strong></li>
                 <li><strong>Create Addresses table</strong></li>
+                <li><strong>Add Marital Status</strong> ENUM column to Persons (optional)</li>
                 <li><strong>Create Bank Accounts ↔ Persons relation</strong> (One-to-One with UNIQUE)</li>
                 <li><strong>Create Addresses ↔ Persons relation</strong> (One-to-Many with NOT NULL)</li>
             </ol>
@@ -91,7 +119,7 @@
             
             <h3>Table Structures:</h3>
             <ul>
-                <li>✅ <strong>Persons table:</strong> id, username, name, email, enable, birthdate</li>
+                <li>✅ <strong>Persons table:</strong> id, username, name, email, enable, birthdate, (marital_status)</li>
                 <li>✅ <strong>Bank Accounts table:</strong> id, iban, bank_name</li>
                 <li>✅ <strong>Addresses table:</strong> id, address</li>
                 <li>🔗 <strong>FK One-to-One:</strong> bank_accounts.person_id UNIQUE → persons.id</li>
@@ -100,7 +128,7 @@
         </div>
     </div>
 
-    <!-- Section 4: Relations Diagram -->
+    <!-- Section 5: Relations Diagram -->
     <div class="card">
         <div class="card-header bg-dark text-white">
             <h2>🗄️ Database Schema</h2>
@@ -113,7 +141,8 @@
 ├── name
 ├── email (UNIQUE)
 ├── enable
-└── birthdate
+├── birthdate
+└── marital_status (ENUM - optional)
     ↑
     ├─── 1:1 (UNIQUE) ──→ <strong>bank_accounts</strong>
     │                      ├── id (PK)
