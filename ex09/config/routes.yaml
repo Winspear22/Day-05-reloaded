@@ -1,5 +1,19 @@
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+ex09_index:
+    path: /ex09
+    controller: App\Controller\Ex09Controller::index
+    methods: [GET]
+
+ex09_create_table_without_marital_status:
+    path: /ex09/create_table_without_marital_status
+    controller: App\Controller\Ex09Controller::createTableWithoutMaritalStatus
+    methods: [POST]
+
+ex09_create_table_with_marital_status:
+    path: /ex09/create_table_with_marital_status
+    controller: App\Controller\Ex09Controller::createTableWithMaritalStatus
+    methods: [POST]
+
+ex09_drop_tables:
+    path: /ex09/drop_tables
+    controller: App\Controller\Ex09Controller::dropTables
+    methods: [POST]

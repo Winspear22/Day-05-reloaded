@@ -1,20 +1,88 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello Ex09Controller!{% endblock %}
+{% block title %}Ex09 - ORM Relations & Migrations{% endblock %}
 
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+{% block content %}
+    <h1>Exercise 09 - ORM Relations & Migrations</h1>
+    
+    <p>This exercise demonstrates Doctrine ORM relationships (OneToOne, OneToMany) and migration management.</p>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h2>Migration States</h2>
+    
+    <div class="migration-info">
+        <h3>Available Options</h3>
+        <p>Choose the database schema you want to use:</p>
+    </div>
 
-    This friendly message is coming from:
+    <h3>1. Create Tables WITHOUT marital_status</h3>
+    <p>Creates the initial schema with Person, BankAccount, and Address tables (no marital_status column).</p>
+    <form method="POST" action="{{ path('ex09_create_table_without_marital_status') }}">
+        <button type="submit" class="btn btn-info">
+            ✓ Migrate to Version 1 (WITHOUT marital_status)
+        </button>
+    </form>
+
+    <h3>2. Create Tables WITH marital_status</h3>
+    <p>Adds the marital_status column to the Person table.</p>
+    <form method="POST" action="{{ path('ex09_create_table_with_marital_status') }}">
+        <button type="submit" class="btn btn-success">
+            ✓ Migrate to Version 2 (WITH marital_status)
+        </button>
+    </form>
+
+    <h3>3. Drop All Tables</h3>
+    <p>Removes all tables and returns the database to its initial state (no migrations executed).</p>
+    <form method="POST" action="{{ path('ex09_drop_tables') }}" 
+          onsubmit="return confirm('⚠️  Are you sure? This will DELETE all tables!');">
+        <button type="submit" class="btn btn-danger">
+            ✗ Drop All Tables
+        </button>
+    </form>
+
+    <hr>
+
+    <h2>Database Schema Information</h2>
+    
+    <h3>Tables Structure</h3>
+    <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Version</th>
+                <th>ex09_persons</th>
+                <th>ex09_bank_accounts</th>
+                <th>ex09_addresses</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>V1 (WITHOUT marital_status)</strong></td>
+                <td>id, username, name, email, enable, birthdate</td>
+                <td>id, iban, bank_name, person_id (UNIQUE)</td>
+                <td>id, address, person_id (INDEX)</td>
+            </tr>
+            <tr>
+                <td><strong>V2 (WITH marital_status)</strong></td>
+                <td>id, username, name, email, enable, birthdate, <strong>marital_status</strong></td>
+                <td>id, iban, bank_name, person_id (UNIQUE)</td>
+                <td>id, address, person_id (INDEX)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Relationships</h3>
     <ul>
-        <li>Your controller at <code>/home/adnen/Desktop/Day-05-reloaded/ex09/src/Controller/Ex09Controller.php</code></li>
-        <li>Your template at <code>/home/adnen/Desktop/Day-05-reloaded/ex09/templates/ex09/index.html.twig</code></li>
+        <li><strong>Person ↔ BankAccount:</strong> OneToOne (1 person = 1 bank account MAX)</li>
+        <li><strong>Person ↔ Address:</strong> OneToMany (1 person = N addresses)</li>
     </ul>
-</div>
+
+    <hr>
+
+    <h2>How to Use</h2>
+    <ol>
+        <li>Click <strong>"Migrate to Version 1"</strong> to create tables without marital_status</li>
+        <li>Click <strong>"Migrate to Version 2"</strong> to add marital_status column</li>
+        <li>Use <strong>"Migrate to Version 1"</strong> again to rollback and remove marital_status</li>
+        <li>Click <strong>"Drop All Tables"</strong> to reset the database completely</li>
+    </ol>
+
 {% endblock %}
