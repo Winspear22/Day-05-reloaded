@@ -5,8 +5,10 @@ namespace App\Controller;
 use Exception;
 use App\Entity\User;
 use App\Service\ReadUserInTable;
+use App\Repository\UserRepository;
 use App\Service\DeleteUserInTable;
 use App\Service\InsertUserInTable;
+use App\Service\UpdateUserInTable;
 use App\Service\CreateTableService;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,7 +32,9 @@ final class Ex07Controller extends AbstractController
         private readonly CreateTableService $tableCreator,
         private readonly InsertUserInTable $userInserter,
         private readonly ReadUserInTable $userReader,
-        private readonly DeleteUserInTable $userDeleter
+        private readonly DeleteUserInTable $userDeleter,
+        private readonly UpdateUserInTable $userUpdater,
+        private readonly UserRepository $repo
     ) {}
 
     /**
@@ -100,6 +104,35 @@ final class Ex07Controller extends AbstractController
             $result = $this->userDeleter->deleteUserById($id);
             [$type, $message] = explode(':', $result, 2);
             $this->addFlash($type, $message);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex07_index');
+    }
+
+    /**
+     * @Route("/ex07/update_user/{id}", name="ex07_update_user", methods={"GET", "POST"})
+     */
+    public function updateUser(Request $request, int $id): Response
+    {
+        try
+        {
+            $user = $this->repo->find($id);
+            if (!$user)
+            {
+                $this->addFlash('danger', 'Error: User not found.');
+                return $this->redirectToRoute('ex07_index');
+            }
+            $form = $this->createUserForm($user);
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $result = $this->userUpdater->updateUser();
+                [$type, $message] = explode(':', $result, 2);
+                $this->addFlash($type, $message);
+            }
         }
         catch (Exception $e)
         {

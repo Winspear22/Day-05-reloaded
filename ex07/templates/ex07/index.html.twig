@@ -3,7 +3,7 @@
 {% block title %}Hello Ex07Controller!{% endblock %}
 
 {% block content %}
-    <h1>Ex07 : insert, read and delete users in the database !</h1>
+    <h1>Ex07 : insert, read, delete and update users in the database !</h1>
     {{ form_start(form, { 'action': path('ex07_insert_user'), 'method': 'POST' }) }}
         {{ form_widget(form) }}
         <button type="submit">Insérer</button>
@@ -22,7 +22,8 @@
                 <th>Enable</th>
                 <th>Date de naissance</th>
                 <th>Adresse</th>
-                <th>Actions</th>
+                <th>Supprimer</th>
+                <th>Modifier</th>
             </tr>
         </thead>
         <tbody>
@@ -39,6 +40,9 @@
                         <form method="post" action="{{ path('ex07_delete_user', {'id': user.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
                             <button type="submit">Supprimer</button>
                         </form>
+                    </td>
+                    <td>
+                        <a href="{{ path('ex07_update_user', {'id': user.id}) }}">Modifier</a>
                     </td>
                 </tr>
             {% else %}
