@@ -1,0 +1,21 @@
+ex07_index:
+    path: /ex07
+    controller: App\Controller\Ex07Controller::index
+    methods: [GET]
+
+ex07_insert_user:
+    path: /ex07/insert_user
+    controller: App\Controller\Ex07Controller::insertUser
+    methods: [POST]
+
+ex07_delete_user:
+    path: /ex07/delete_user/{id}
+    controller: App\Controller\Ex07Controller::deleteUser
+    methods: [POST]
+    requirements:
+        id: '\d+'
+
+ex07_delete_all_users:
+    path: /ex07/delete_all_users
+    controller: App\Controller\Ex07Controller::deleteAllUsers
+    methods: [POST]
