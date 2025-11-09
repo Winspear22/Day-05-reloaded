@@ -8,11 +8,15 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class Ex10Controller extends AbstractController
 {
-    #[Route('/ex10', name: 'app_ex10')]
+    /**
+     * @Route("/ex10", name="app_ex10", methods={"GET"})
+     */
     public function index(): Response
     {
         return $this->render('ex10/index.html.twig', [
             'controller_name' => 'Ex10Controller',
         ]);
     }
+
+    
 }
