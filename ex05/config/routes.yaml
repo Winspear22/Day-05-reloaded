@@ -1,5 +1,21 @@
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+ex05_index:
+    path: /ex05
+    controller: App\Controller\Ex05Controller::index
+    methods: [GET]
+
+ex05_insert_user:
+    path: /ex05/insert_user
+    controller: App\Controller\Ex05Controller::insertUser
+    methods: [POST]
+
+ex05_delete_user:
+    path: /ex05/delete_user/{id}
+    controller: App\Controller\Ex05Controller::deleteUser
+    methods: [POST]
+    requirements:
+        id: '\d+'
+
+ex05_delete_all_users:
+    path: /ex05/delete_all_users
+    controller: App\Controller\Ex05Controller::deleteAllUsers
+    methods: [POST]
