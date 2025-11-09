@@ -132,13 +132,17 @@ final class Ex07Controller extends AbstractController
                 $result = $this->userUpdater->updateUser();
                 [$type, $message] = explode(':', $result, 2);
                 $this->addFlash($type, $message);
+                return $this->redirectToRoute('ex07_index');
             }
         }
         catch (Exception $e)
         {
             $this->addFlash('danger', 'Error: ' . $e->getMessage());
         }
-        return $this->redirectToRoute('ex07_index');
+        return $this->render('ex07/update.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user,
+        ]);
     }
 
     /**

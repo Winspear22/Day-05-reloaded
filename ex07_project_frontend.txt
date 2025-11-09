@@ -25,8 +25,10 @@ Root Directory: ./ex07/
 │   ├── routes.yaml
 │   └── services.yaml
 ├── migrations
+│   └── Version20251109091307.php
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex07Controller.php
@@ -39,14 +41,16 @@ Root Directory: ./ex07/
 │       ├── CreateTableService.php
 │       ├── DeleteUserInTable.php
 │       ├── InsertUserInTable.php
-│       └── ReadUserInTable.php
+│       ├── ReadUserInTable.php
+│       └── UpdateUserInTable.php
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
 │   ├── bundles
 │   │   └── TwigBundle
 │   └── ex07
-│       └── index.html.twig
+│       ├── index.html.twig
+│       └── update.html.twig
 ├── var
 │   ├── cache
 │   │   ├── dev
@@ -144,7 +148,7 @@ Root Directory: ./ex07/
         ├── extra-bundle
         └── twig
 
-91 directories, 47 files
+91 directories, 51 files
 
 ================================================================================
 
@@ -228,7 +232,7 @@ File: templates/ex07/index.html.twig
 {% block title %}Hello Ex07Controller!{% endblock %}
 
 {% block content %}
-    <h1>Ex07 : insert, read and delete users in the database !</h1>
+    <h1>Ex07 : insert, read, delete and update users in the database !</h1>
     {{ form_start(form, { 'action': path('ex07_insert_user'), 'method': 'POST' }) }}
         {{ form_widget(form) }}
         <button type="submit">Insérer</button>
@@ -247,7 +251,8 @@ File: templates/ex07/index.html.twig
                 <th>Enable</th>
                 <th>Date de naissance</th>
                 <th>Adresse</th>
-                <th>Actions</th>
+                <th>Supprimer</th>
+                <th>Modifier</th>
             </tr>
         </thead>
         <tbody>
@@ -265,6 +270,9 @@ File: templates/ex07/index.html.twig
                             <button type="submit">Supprimer</button>
                         </form>
                     </td>
+                    <td>
+                        <a href="{{ path('ex07_update_user', {'id': user.id}) }}">Modifier</a>
+                    </td>
                 </tr>
             {% else %}
                 <tr><td colspan="8">Aucun utilisateur.</td></tr>
@@ -273,3 +281,20 @@ File: templates/ex07/index.html.twig
     </table>
 {% endblock %}
 
+
+---
+File: templates/ex07/update.html.twig
+---
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'utilisateur{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'utilisateur n°{{ user.id }}</h1>
+    {{ form_start(form, { 'method': 'POST' }) }}
+        {{ form_widget(form) }}
+        <button type="submit">Enregistrer</button>
+        <a href="{{ path('ex07_index') }}" class="btn btn-secondary" style="margin-left: 10px;">Annuler</a>
+    {{ form_end(form) }}
+{% endblock %}

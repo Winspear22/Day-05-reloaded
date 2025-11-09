@@ -25,8 +25,10 @@ Root Directory: ./ex07/
 │   ├── routes.yaml
 │   └── services.yaml
 ├── migrations
+│   └── Version20251109091307.php
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex07Controller.php
@@ -39,14 +41,16 @@ Root Directory: ./ex07/
 │       ├── CreateTableService.php
 │       ├── DeleteUserInTable.php
 │       ├── InsertUserInTable.php
-│       └── ReadUserInTable.php
+│       ├── ReadUserInTable.php
+│       └── UpdateUserInTable.php
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
 │   ├── bundles
 │   │   └── TwigBundle
 │   └── ex07
-│       └── index.html.twig
+│       ├── index.html.twig
+│       └── update.html.twig
 ├── var
 │   ├── cache
 │   │   ├── dev
@@ -144,7 +148,7 @@ Root Directory: ./ex07/
         ├── extra-bundle
         └── twig
 
-91 directories, 47 files
+91 directories, 51 files
 
 ================================================================================
 
@@ -268,7 +272,7 @@ File: config/packages/framework.yaml
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
-    annotations: false
+    annotations: true
     http_method_override: false
     handle_all_throwables: true
 
@@ -365,12 +369,34 @@ when@dev:
 File: config/routes.yaml
 ---
 
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+ex07_index:
+    path: /ex07
+    controller: App\Controller\Ex07Controller::index
+    methods: [GET]
 
+ex07_insert_user:
+    path: /ex07/insert_user
+    controller: App\Controller\Ex07Controller::insertUser
+    methods: [POST]
+
+ex07_delete_user:
+    path: /ex07/delete_user/{id}
+    controller: App\Controller\Ex07Controller::deleteUser
+    methods: [POST]
+    requirements:
+        id: '\d+'
+
+ex07_delete_all_users:
+    path: /ex07/delete_all_users
+    controller: App\Controller\Ex07Controller::deleteAllUsers
+    methods: [POST]
+
+ex07_update_user:
+    path: /ex07/update_user/{id}
+    controller: App\Controller\Ex07Controller::updateUser
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
 
 ---
 File: config/services.yaml
@@ -412,4 +438,41 @@ services:
 File: migrations/.gitignore
 ---
 
+
+
+---
+File: migrations/Version20251109091307.php
+---
+
+<?php
+
+declare(strict_types=1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
+final class Version20251109091307 extends AbstractMigration
+{
+    public function getDescription(): string
+    {
+        return '';
+    }
+
+    public function up(Schema $schema): void
+    {
+        // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE TABLE ex07_users (id INT AUTO_INCREMENT NOT NULL, username VARCHAR(64) NOT NULL, name VARCHAR(64) NOT NULL, email VARCHAR(128) NOT NULL, enable TINYINT(1) DEFAULT 0 NOT NULL, birthdate DATETIME NOT NULL, address LONGTEXT NOT NULL, UNIQUE INDEX UNIQ_584FE6F8F85E0677 (username), UNIQUE INDEX UNIQ_584FE6F8E7927C74 (email), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+    }
+
+    public function down(Schema $schema): void
+    {
+        // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('DROP TABLE ex07_users');
+    }
+}
 

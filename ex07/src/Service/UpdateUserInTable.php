@@ -24,11 +24,11 @@ class UpdateUserInTable
 		}
 		catch (UniqueConstraintViolationException $e)
 		{
-			return "error: Email or username already exists!";
+			return "danger: Email or username already exists!: " . $e->getMessage();
 		}
 		catch (Exception $e) 
 		{
-			return "error: " . $e->getMessage();
+			return "danger: " . $e->getMessage();
 		}
 	}
 }
