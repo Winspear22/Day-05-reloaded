@@ -17,9 +17,9 @@ class CreateTableService
     // Version 1 : SANS marital_status
     public function migrateToVersionWithoutMaritalStatus(): string
     {
-        // CHECK si marital_status EXISTS
+        // Si déjà à V2, faire rollback de V2
         if ($this->maritalStatusExists())
-            return 'info: Already at Version 2 (WITH marital_status). Use drop to go back.';
+            return $this->rollbackFromVersion('DoctrineMigrations\\Version20251109121119');
         
         if ($this->utilsTableService->checkTableExistence('ex09_persons'))
             return 'info: Already at Version 1 (WITHOUT marital_status).';
@@ -44,7 +44,7 @@ class CreateTableService
                 'php',
                 'bin/console',
                 'doctrine:migrations:migrate',
-                $version,  // ← Avec le namespace complet !
+                $version,
                 '--no-interaction'
             ]);
             
@@ -54,7 +54,36 @@ class CreateTableService
             if ($process->isSuccessful())
                 return 'success: Migration successful!';
             else
-                return 'error: ' . $process->getErrorOutput() . ' | ' . $process->getOutput();
+                return 'error: ' . $process->getErrorOutput();
+        }
+        catch (Exception $e)
+        {
+            return 'error: ' . $e->getMessage();
+        }
+    }
+
+    // ← NEW FUNCTION
+    private function rollbackFromVersion(string $version): string
+    {
+        try
+        {
+            // Execute le down() de cette version
+            $process = new Process([
+                'php',
+                'bin/console',
+                'doctrine:migrations:execute',
+                $version,
+                '--down',  // ← Important !
+                '--no-interaction'
+            ]);
+            
+            $process->setWorkingDirectory(__DIR__ . '/../../');
+            $process->run();
+            
+            if ($process->isSuccessful())
+                return 'success: Rolled back to Version 1!';
+            else
+                return 'error: ' . $process->getErrorOutput();
         }
         catch (Exception $e)
         {
@@ -79,6 +108,5 @@ class CreateTableService
             return false;
         }
     }
-
 }
 ?>
