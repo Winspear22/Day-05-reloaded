@@ -31,6 +31,9 @@ class Person
     #[ORM\Column]
     private ?\DateTime $birthdate = null;
 
+    #[ORM\Column(type: "string",columnDefinition: "ENUM('single', 'married', 'widower') DEFAULT 'single'")]
+    private string $marital_status = 'single';
+
     /**
      * @var Collection<int, Address>
      */
@@ -107,6 +110,18 @@ class Person
     {
         $this->birthdate = $birthdate;
 
+        return $this;
+    }
+
+    // Getters/setters
+    public function getMaritalStatus(): string
+    {
+        return $this->marital_status;
+    }
+
+    public function setMaritalStatus(string $marital_status): static
+    {
+        $this->marital_status = $marital_status;
         return $this;
     }
 
