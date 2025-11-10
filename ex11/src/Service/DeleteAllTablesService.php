@@ -3,22 +3,22 @@
 namespace App\Service;
 
 use Exception;
-use App\Service\UtilsService;
 use Doctrine\DBAL\Connection;
+use App\Service\UtilsTableService;
 
 class DeleteAllTablesService
 {
 	public function __construct(
 		private readonly Connection $sql_connection,
-		private readonly UtilsService $utils_service,
+		private readonly UtilsTableService $utils_service,
 	) {}
 
-	public function deleteTable(string $tableName): string
+	public function deleteTableContent(string $tableName): string
 	{
 		$sql_command = "DELETE FROM $tableName";
 		try
 		{
-			if (!$this->utils_service->checkTableExistenceSQL($tableName))
+			if (!$this->utils_service->checkTableExistence($tableName))
 				return "danger:The table $tableName does not exist (SQL).";
 			$this->sql_connection->executeStatement($sql_command);
 			return "success:Success! All data deleted from $tableName.";

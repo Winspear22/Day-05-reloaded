@@ -30,7 +30,7 @@ final class Ex11Controller extends AbstractController
      */
     public function index(): Response
     {  
-        return $this->render('ex10/index.html.twig');
+        return $this->render('ex11/index.html.twig');
     }
 
     /**
@@ -64,13 +64,13 @@ final class Ex11Controller extends AbstractController
     {
         try
         {
-            $result = $this->deleteTable->deleteTable("ex11_bank_accounts");
+            $result = $this->deleteTable->deleteTableContent("ex11_bank_accounts");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
-            $result = $this->deleteTable->deleteTable("ex11_addresses");
+            $result = $this->deleteTable->deleteTableContent("ex11_addresses");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
-            $result = $this->deleteTable->deleteTable("ex11_persons");
+            $result = $this->deleteTable->deleteTableContent("ex11_persons");
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
         }
