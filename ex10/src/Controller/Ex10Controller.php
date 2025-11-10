@@ -243,6 +243,8 @@ class Ex10Controller extends AbstractController
      */
     public function importFile(ImportFileService $importFileService): Response
     {
+        $tableNameSql = "ex10_data_sql";
+        $tableNameOrm = "ex10_data_orm";
         try
         {
             $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
@@ -259,14 +261,9 @@ class Ex10Controller extends AbstractController
                 return $this->redirectToRoute('ex10_index');
             }
 
-            $result = $importFileService->importFile($filePath, 'ex10_data_sql');
-            
-            // ✅ CORRECTION : Le service retourne déjà un tableau
-            if ($result['success'])
-                $this->addFlash('success', $result['message']);
-            else
-                $this->addFlash('danger', $result['message']);
-                
+            $result = $importFileService->importFile($filePath, $tableNameSql, $tableNameOrm);
+            [$type, $msg] = explode(':', $result['message'], 2);
+            $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
         catch (Exception $e)
@@ -277,5 +274,4 @@ class Ex10Controller extends AbstractController
             return $this->redirectToRoute('ex10_index');
         }
     }
-
 }

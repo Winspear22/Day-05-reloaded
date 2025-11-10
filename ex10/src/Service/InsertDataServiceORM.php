@@ -20,14 +20,14 @@ class InsertDataServiceORM
 		try
 		{
 			if (!$this->utilsService->checkTableExistenceORM($tableName))
-				return "danger: Table $tableName does not exist.";
+				return "danger:Table $tableName does not exist.";
 			$this->em->persist($data);
 			$this->em->flush();
 			return "success:Success! Data inserted into $tableName.";
 		}
 		catch (Exception $e)
 		{
-			return "danger: Error inserting data with ID " . $data->getId() . ". " . $e->getMessage();
+			return "danger:Error inserting data with ID " . $data->getId() . ". " . $e->getMessage();
 		}
 	}
 }

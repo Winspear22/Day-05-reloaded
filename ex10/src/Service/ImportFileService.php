@@ -20,7 +20,7 @@ class ImportFileService
 	) {}
 	
 
-    public function importFile(string $filePath, string $tableName): array
+    public function importFile(string $filePath, string $tableNameSql, string $tableNameOrm): array
     {
         try
         {
@@ -36,18 +36,23 @@ class ImportFileService
                 return ['success' => false, 'message' => 'Error ! The file is empty.'];
             
             $date = new DateTime();
-            $this->createTableServiceSQL->createTableSQL($tableName);
-            $this->createTableServiceORM->createTableORM($tableName);
-            
+            $this->createTableServiceSQL->createTableSQL($tableNameSql);
+            $this->createTableServiceORM->createTableORM($tableNameOrm);
             foreach ($content as $line)
-                $this->insertDataServiceSQL->insertDataSQL($tableName, $line, $date);
-            
+            {
+                $result = $this->insertDataServiceSQL->insertDataSQL($tableNameSql, $line, $date);
+                if (strpos($result, 'danger') === 0)
+                    return ['success' => false, 'message' => $result];
+            }
+
             foreach ($content as $line)
             {
                 $dataEntity = new Data();
                 $dataEntity->setData($line);
                 $dataEntity->setDate($date);
-                $this->InsertDataServiceORM->insertDataORM($tableName, $dataEntity);
+                $result = $this->InsertDataServiceORM->insertDataORM($tableNameOrm, $dataEntity);
+                if (strpos($result, 'danger') === 0)
+                    return ['success' => false, 'message' => $result];
             }
             
             return ['success' => true, 'message' => 'Success! The SQL and ORM import was successful!'];
