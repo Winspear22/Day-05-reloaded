@@ -14,41 +14,24 @@ class DeleteAllDataService
         private readonly DeleteDataServiceORM $deleteOrm
 
 	) {}
-	public function deleteAllData(string $tableNameSql, string $tableNameOrm): array
-	{
-		try
-		{
-			$resultOrm = $this->deleteOrm->deleteAllDataORM($tableNameOrm);
-			$resultSql = $this->deleteSql->deleteAllDataSQL($tableNameSql);
-			if (strpos($resultOrm, 'danger') === 0 || strpos($resultOrm, 'info') === 0)
-			{
-				return [
-					'success' => false,
-					'message' => $resultOrm  // ✅ Format type:message
-				];
-			}
-			
-			if (strpos($resultSql, 'danger') === 0 || strpos($resultSql, 'info') === 0)
-			{
-				return [
-					'success' => false,
-					'message' => $resultSql  // ✅ Format type:message
-				];
-			}
-			
-
-			
-			return [
-				'success' => true,
-				'message' => 'success:All data deleted successfully from both SQL and ORM!'  // ✅ Ajoute "success:" ici
-			];
-		}
-		catch (Exception $e)
-		{
-			return [
-				'success' => false,
-				'message' => 'danger:Error deleting all data: ' . $e->getMessage()  // ✅ Format type:message
-			];
-		}
-	}
+    public function deleteAllData(string $tableNameSql, string $tableNameOrm): string
+    {
+        try
+        {
+            $resultOrm = $this->deleteOrm->deleteAllDataORM($tableNameOrm);
+            $resultSql = $this->deleteSql->deleteAllDataSQL($tableNameSql);
+            
+            if (strpos($resultOrm, 'danger') === 0 || strpos($resultOrm, 'info') === 0)
+                return $resultOrm;
+            
+            if (strpos($resultSql, 'danger') === 0 || strpos($resultSql, 'info') === 0)
+                return $resultSql;
+            
+            return 'success:All data deleted successfully from both SQL and ORM!';
+        }
+        catch (Exception $e)
+        {
+            return 'danger:Error deleting all data: ' . $e->getMessage();
+        }
+    }
 }
