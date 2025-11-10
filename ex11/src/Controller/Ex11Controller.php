@@ -3,14 +3,15 @@
 namespace App\Controller;
 
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\DBAL\Connection;
+use App\Service\LoadDemoDataService;
+use App\Service\DeleteAllTablesService;
 use App\Service\CreatePersonsTableService;
 use App\Service\CreateAddressesTableService;
+use Symfony\Component\HttpFoundation\Response;
 use App\Service\CreateBankAccountsTableService;
-use App\Service\DeleteAllTablesService;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class Ex11Controller extends AbstractController
 {
@@ -20,7 +21,8 @@ final class Ex11Controller extends AbstractController
         private readonly CreatePersonsTableService $createPersonsTable,
         private readonly CreateBankAccountsTableService $createBankAccountsTable,
         private readonly CreateAddressesTableService $createAddressesTable,
-        private readonly DeleteAllTablesService $deleteTable
+        private readonly DeleteAllTablesService $deleteTable,
+        private readonly LoadDemoDataService $loadDemoData
     ) {}
 
     /**
@@ -52,7 +54,7 @@ final class Ex11Controller extends AbstractController
         {
             $this->addFlash('danger', 'Error: ' . $e->getMessage());
         }
-        return $this->redirectToRoute('ex08_index');
+        return $this->redirectToRoute('ex11_index');
     }
 
     /**
@@ -76,6 +78,26 @@ final class Ex11Controller extends AbstractController
         {
             $this->addFlash('danger', 'Error: ' . $e->getMessage());
         }
-        return $this->redirectToRoute('ex08_index');
+        return $this->redirectToRoute('ex11_index');
     }
+
+    /**
+     * @Route("/ex11/load_demo_data", name="ex11_load_demo_data", methods={"POST"})
+     */
+    public function loadDemoData(): Response
+    {
+        try
+        {
+            $result = $this->loadDemoData->loadData();
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
+            return $this->redirectToRoute('ex11_index');
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex11_index');
+
+    }   
 }
