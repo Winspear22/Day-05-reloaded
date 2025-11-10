@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Exception;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -23,7 +24,7 @@ class DeleteUserInTable
 			$this->em->flush();
 			return "success: User deleted successfully!";
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return "error: " . $e->getMessage();
 		}
@@ -41,7 +42,7 @@ class DeleteUserInTable
 			$this->em->flush();
 			return "success: All users deleted successfully!";
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return "error: " . $e->getMessage();
 		}
