@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Service;
+
+use Exception;
+use Doctrine\DBAL\Connection;
+use App\Service\UtilsTableService;
+
+class CreateAddressesTableService
+{
+	public function __construct(
+		private readonly Connection $sql_connection,
+		private readonly UtilsTableService $utilsTableService) {}
+
+	public function createAddressesTable(string $tableName): string
+    {
+		$sql_command = "CREATE TABLE IF NOT EXISTS $tableName (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+			person_id INT NOT NULL,
+			address LONGTEXT NOT NULL,
+			FOREIGN KEY (person_id) REFERENCES ex11_persons(id) ON DELETE CASCADE
+		)";	
+		try
+		{
+			if ($this->utilsTableService->checkTableExistence($tableName))
+				return "info:The table $tableName already exists and cannot be created again.";
+			$this->sql_connection->executeStatement($sql_command);
+            return "success:Success! The table $tableName was created!";
+		}
+		catch (Exception $e)
+		{
+			return "danger:Error, there was a problem in the table $tableName creation : " . $e->getMessage();
+		}
+    }
+}
+
+?>
