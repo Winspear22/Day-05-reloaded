@@ -16,11 +16,12 @@ class InsertDataServiceORM
 
 	) {}
 
-	public function insertDataORM(Data $data): string
+	public function insertDataORM(string $tableName, Data $data): string
 	{
 		try
 		{
-			if ($this->utilsService->checkTableExistenceORM('data'))
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
+				return "danger: Table $tableName does not exist.";
 			$this->em->persist($data);
 			$this->em->flush();
 			return "success: Data with ID " . $data->getId() . " inserted successfully!";

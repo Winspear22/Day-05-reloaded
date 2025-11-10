@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Exception;
+use App\Service\UtilsService;
 use App\Repository\DataRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -10,14 +11,17 @@ class DeleteDataServiceORM
 {
 	public function __construct(
 		private readonly DataRepository $data_repository,
-		private readonly EntityManagerInterface $em
+		private readonly EntityManagerInterface $em,
+		private readonly UtilsService $utilsService
 
 	) {}
 
-	public function deleteDataByIdORM(int $id): string
+	public function deleteDataByIdORM(string $tableName, int $id): string
 	{
 		try
 		{
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
+				return "info: Table $tableName does not exist.";
 			$data = $this->data_repository->find($id);
 			if (!$data)
 				return "info: Data with ID $id not found.";
@@ -31,10 +35,12 @@ class DeleteDataServiceORM
 		}
 	}
 
-	public function deleteAllDataORM(): string
+	public function deleteAllDataORM(string $tableName): string
 	{
 		try
 		{
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
+				return "info: Table $tableName does not exist.";
 			$datas = $this->data_repository->findAll();
 			if (empty($datas))
 				return "info: No data to delete.";
