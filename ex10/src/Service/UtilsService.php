@@ -8,7 +8,7 @@ use Doctrine\DBAL\Connection;
 class UtilsService
 {
 	public function __construct(
-		private readonly Connection $connection
+		private readonly Connection $connection,
 	) {}
 
 	public function checkTableExistenceSQL(string $tableName): bool

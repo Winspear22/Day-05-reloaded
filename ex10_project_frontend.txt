@@ -238,18 +238,19 @@ File: templates/ex10/index.html.twig
 
 {% block content %}
     <h1>Ex10 – Lecture de fichier et insertion SQL & ORM</h1>
+
     <div class="form-wrapper">
         <h2>Insérer une donnée SQL</h2>
-        <form action="{{ path('ex10_insert_data_sql') }}" method="post">
-            <input type="text" name="comment" maxlength="255" placeholder="Your comment" required>
+        {{ form_start(formSQL, {'action': path('ex10_insert_data_sql'), 'method': 'POST'}) }}
+            {{ form_widget(formSQL) }}
             <button type="submit">Insérer en SQL</button>
-        </form>
+        {{ form_end(formSQL) }}
 
         <h2>Insérer une donnée ORM</h2>
-        <form action="{{ path('ex10_insert_data_orm') }}" method="post">
-            <input type="text" name="comment" maxlength="255" placeholder="Your comment" required>
+        {{ form_start(formORM, {'action': path('ex10_insert_data_orm'), 'method': 'POST'}) }}
+            {{ form_widget(formORM) }}
             <button type="submit">Insérer en ORM</button>
-        </form>
+        {{ form_end(formORM) }}
     </div>
 
     <h2>Importer depuis text.txt</h2>
@@ -263,7 +264,7 @@ File: templates/ex10/index.html.twig
 
     <h2>Données existantes (SQL) - ex10_data_sql</h2>
     {% if datasSQL is not empty %}
-        <table border="1">
+        <table border="1" style="width: 100%; margin-top: 20px;">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -295,7 +296,7 @@ File: templates/ex10/index.html.twig
 
     <h2>Données existantes (ORM) - ex10_data_orm</h2>
     {% if datasORM is not empty %}
-        <table border="1">
+        <table border="1" style="width: 100%; margin-top: 20px;">
             <thead>
                 <tr>
                     <th>ID</th>
