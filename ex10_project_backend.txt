@@ -40,6 +40,7 @@ Root Directory: ./ex10/
 │   └── Service
 │       ├── CreateTableServiceORM.php
 │       ├── CreateTableServiceSQL.php
+│       ├── DeleteAllDataService.php
 │       ├── DeleteDataServiceORM.php
 │       ├── DeleteDataServiceSQL.php
 │       ├── ImportFileService.php
@@ -153,7 +154,7 @@ Root Directory: ./ex10/
         ├── extra-bundle
         └── twig
 
-91 directories, 56 files
+91 directories, 57 files
 
 ================================================================================
 
@@ -174,7 +175,7 @@ use Exception;
 use App\Entity\Data;
 use App\Service\CreateTableServiceORM;
 use App\Service\CreateTableServiceSQL;
-use DateTimeInterface;
+use App\Service\DeleteAllDataService;
 use App\Service\ImportFileService;
 use App\Service\ReadDataServiceORM;
 use App\Service\ReadDataServiceSQL;
@@ -182,7 +183,6 @@ use App\Service\DeleteDataServiceORM;
 use App\Service\DeleteDataServiceSQL;
 use App\Service\InsertDataServiceORM;
 use App\Service\InsertDataServiceSQL;
-use App\Service\UtilsService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -202,7 +202,7 @@ class Ex10Controller extends AbstractController
         private readonly DeleteDataServiceORM $deleteOrm,
         private readonly CreateTableServiceSQL $createSql,
         private readonly CreateTableServiceORM $createOrm,
-        private readonly UtilsService $utils
+        private readonly DeleteAllDataService $utils
 
     ) {}
 
@@ -282,8 +282,9 @@ class Ex10Controller extends AbstractController
                 $dataEntity = new Data();
                 $dataEntity->setData($comment);
                 $dataEntity->setDate(new DateTime());
-                $this->insertOrm->insertDataORM("ex10_data_orm", $dataEntity);
-                $this->addFlash('success', 'Success! Data added successfully!');
+                $result = $this->insertOrm->insertDataORM("ex10_data_orm", $dataEntity);
+                [$type, $msg] = explode(':', $result, 2);
+                $this->addFlash($type, $msg);
                 return $this->redirectToRoute('ex10_index');
             }
             else
@@ -327,11 +328,9 @@ class Ex10Controller extends AbstractController
         $tableName = "ex10_data_sql";
         try
         {
-            $success = $this->deleteSql->deleteAllDataSQL($tableName);
-            if ($success)
-                $this->addFlash('success', "Success! All the Data was successfully deleted !");
-            else
-                $this->addFlash('danger', "Error, we could not find the data requested !");
+            $result = $this->deleteSql->deleteAllDataSQL($tableName);
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
         catch (Exception $e)
@@ -348,11 +347,9 @@ class Ex10Controller extends AbstractController
     {
         try
         {
-            $success = $this->deleteOrm->deleteDataByIdORM("ex10_data_orm", $id);
-            if ($success)
-                $this->addFlash('success', "Success! Data was successfully deleted !");
-            else
-                $this->addFlash('danger', "Error, we could not find the data requested !");
+            $result = $this->deleteOrm->deleteDataByIdORM("ex10_data_orm", $id);
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
         catch (Exception $e)
@@ -361,7 +358,7 @@ class Ex10Controller extends AbstractController
             return $this->redirectToRoute('ex10_index');
         }
     }
-
+        
     /**
      * @Route("/ex10/delete_all_data_orm", name="ex10_delete_all_data_orm", methods={"POST"})
      */
@@ -370,11 +367,9 @@ class Ex10Controller extends AbstractController
         $tableName = "ex10_data_orm";
         try
         {
-            $success = $this->deleteOrm->deleteAllDataORM($tableName);
-            if ($success)
-                $this->addFlash('success', "Success! All the Data was successfully deleted !");
-            else
-                $this->addFlash('danger', "Error, we could not find the data requested !");
+            $result = $this->deleteOrm->deleteAllDataORM($tableName);
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
         catch (Exception $e)
@@ -419,42 +414,36 @@ class Ex10Controller extends AbstractController
      * @Route("/ex10/import", name="ex10_import_file", methods={"POST"})
      */
     public function importFile(ImportFileService $importFileService): Response
-{
-    try
     {
-        $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
-
-        if (!is_file($filePath))
+        try
         {
-            $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
+            $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
+
+            if (!is_file($filePath))
+            {
+                $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
+                return $this->redirectToRoute('ex10_index');
+            }
+
+            if (!is_readable($filePath))
+            {
+                $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
+                return $this->redirectToRoute('ex10_index');
+            }
+
+            $result = $importFileService->importFile($filePath, 'ex10_data_sql');
+            [$type, $msg] = explode(':', $result['message'], 2);
+            $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
-
-        if (!is_readable($filePath))
+        catch (Exception $e)
         {
-            $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
+            $this->addFlash('danger', 'An unexpected error occurred during import.');
+            if ($this->getParameter('kernel.debug'))
+                $this->addFlash('danger', 'Debug: ' . $e->getMessage());
             return $this->redirectToRoute('ex10_index');
         }
-
-        // Appeler le service et récupérer le résultat
-        $result = $importFileService->importFile($filePath, 'ex10_data_sql');
-
-        // Ajouter le message au flash selon le résultat
-        $flashType = $result['success'] ? 'success' : 'danger';
-        $this->addFlash($flashType, $result['message']);
-
-        return $this->redirectToRoute('ex10_index');
     }
-    catch (Exception $e)
-    {
-        $this->addFlash('danger', 'An unexpected error occurred during import.');
-        if ($this->getParameter('kernel.debug'))
-        {
-            $this->addFlash('danger', 'Debug: ' . $e->getMessage());
-        }
-        return $this->redirectToRoute('ex10_index');
-    }
-}
 }
 
 
@@ -666,6 +655,62 @@ class CreateTableServiceSQL
 ?>
 
 ---
+File: src/Service/DeleteAllDataService.php
+---
+
+<?php
+
+namespace App\Service;
+
+use Exception;
+use Doctrine\DBAL\Connection;
+use App\Service\DeleteDataServiceORM;
+use App\Service\DeleteDataServiceSQL;
+
+class DeleteAllDataService
+{
+	public function __construct(
+		private readonly DeleteDataServiceSQL $deleteSql,
+        private readonly DeleteDataServiceORM $deleteOrm
+
+	) {}
+	public function deleteAllData(string $tableNameSql, string $tableNameOrm): array
+	{
+		try
+		{
+			$resultSql = $this->deleteSql->deleteAllDataSQL($tableNameSql);
+			$resultOrm = $this->deleteOrm->deleteAllDataORM($tableNameOrm);
+			
+			[$typeSql, $msgSql] = explode(':', $resultSql, 2);
+			[$typeOrm, $msgOrm] = explode(':', $resultOrm, 2);
+			
+			if ($typeSql === 'danger' || $typeOrm === 'danger')
+			{
+				return [
+					'success' => false,
+					'type' => 'danger',
+					'message' => "Error deleting data | SQL: $msgSql | ORM: $msgOrm"
+				];
+			}
+			
+			return [
+				'success' => true,
+				'message' => 'All data deleted successfully from both SQL and ORM!',
+				'sql' => $resultSql,
+				'orm' => $resultOrm
+			];
+		}
+		catch (Exception $e)
+		{
+			return [
+				'success' => false,
+				'message' => 'Error deleting all data: ' . $e->getMessage()
+			];
+		}
+	}
+}
+
+---
 File: src/Service/DeleteDataServiceORM.php
 ---
 
@@ -809,41 +854,6 @@ class ImportFileService
 		private readonly CreateTableServiceORM $createTableServiceORM,
 	) {}
 	
-	/*public function importFile(string $filePath, string $tableName): void
-    {
-        try
-		{
-            if (!file_exists($filePath))
-			{
-                $this->flashBag->add('danger', 'Error ! Could not find file: ' . basename($filePath));
-                return;
-            }
-            $content = array_map(
-                fn ($line) => htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-                file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)
-            );
-            $date = new DateTime();
-            // Créer la table SQL si besoin
-            $this->createTableServiceSQL->createTableSQL($tableName);
-			$this->createTableServiceORM->createTableORM($tableName);
-            // Insertion dans SQL
-            foreach ($content as $line)
-                $this->insertDataServiceSQL->insertDataSQL($tableName, $line, $date);
-            // Insertion dans ORM
-            foreach ($content as $line)
-			{
-                $dataEntity = new Data();
-                $dataEntity->setData($line);
-                $dataEntity->setDate($date);
-                $this->InsertDataServiceORM->insertDataORM($tableName, $dataEntity);
-            }
-            $this->flashBag->add('success', 'Success! The SQL and ORM import was successful!');
-        }
-		catch (Exception $e)
-		{
-            $this->flashBag->add('danger', 'Error during the file import: ' . $e->getMessage());
-        }
-    }*/
 
     public function importFile(string $filePath, string $tableName): array
     {
@@ -939,13 +949,15 @@ class InsertDataServiceSQL
 {
 	public function __construct(
 		private readonly Connection $sql_connection,
-		private readonly UtilsService $utils_service) {}
+		private readonly UtilsService $utilsService) {}
 
 	public function insertDataSQL(string $tableName, string $data, DateTimeInterface $date): string
 	{
 		$sql_command = "INSERT INTO $tableName (data, date) VALUES (:data, :date);";
 		try
 		{
+			if (!$this->utilsService->checkTableExistenceSQL($tableName))
+				return "danger: Table $tableName does not exist.";
 			$this->sql_connection->executeStatement($sql_command, [
 				'data' => $data,
 				'date' => $date->format('Y-m-d H:i:s')
@@ -1073,16 +1085,11 @@ namespace App\Service;
 
 use Exception;
 use Doctrine\DBAL\Connection;
-use App\Service\DeleteDataServiceORM;
-use App\Service\DeleteDataServiceSQL;
 
 class UtilsService
 {
 	public function __construct(
 		private readonly Connection $connection,
-		private readonly DeleteDataServiceSQL $deleteSql,
-        private readonly DeleteDataServiceORM $deleteOrm
-
 	) {}
 
 	public function checkTableExistenceSQL(string $tableName): bool
@@ -1111,29 +1118,6 @@ class UtilsService
 			return false;
 		}
 	}
-
-	public function deleteAllData(string $tableNameSql, string $tableNameOrm): array
-    {
-        try
-        {
-            $resultSql = $this->deleteSql->deleteAllDataSQL($tableNameSql);
-            $resultOrm = $this->deleteOrm->deleteAllDataORM($tableNameOrm);
-            
-            return [
-                'success' => true,
-                'message' => 'All data deleted successfully from both SQL and ORM!',
-                'sql' => $resultSql,
-                'orm' => $resultOrm
-            ];
-        }
-        catch (Exception $e)
-        {
-            return [
-                'success' => false,
-                'message' => 'Error deleting all data: ' . $e->getMessage()
-            ];
-        }
-    }
 }
 ?>
 

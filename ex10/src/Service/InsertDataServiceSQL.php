@@ -10,13 +10,15 @@ class InsertDataServiceSQL
 {
 	public function __construct(
 		private readonly Connection $sql_connection,
-		private readonly UtilsService $utils_service) {}
+		private readonly UtilsService $utilsService) {}
 
 	public function insertDataSQL(string $tableName, string $data, DateTimeInterface $date): string
 	{
 		$sql_command = "INSERT INTO $tableName (data, date) VALUES (:data, :date);";
 		try
 		{
+			if (!$this->utilsService->checkTableExistenceSQL($tableName))
+				return "danger: Table $tableName does not exist.";
 			$this->sql_connection->executeStatement($sql_command, [
 				'data' => $data,
 				'date' => $date->format('Y-m-d H:i:s')

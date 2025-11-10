@@ -40,6 +40,7 @@ Root Directory: ./ex10/
 │   └── Service
 │       ├── CreateTableServiceORM.php
 │       ├── CreateTableServiceSQL.php
+│       ├── DeleteAllDataService.php
 │       ├── DeleteDataServiceORM.php
 │       ├── DeleteDataServiceSQL.php
 │       ├── ImportFileService.php
@@ -153,7 +154,7 @@ Root Directory: ./ex10/
         ├── extra-bundle
         └── twig
 
-91 directories, 56 files
+91 directories, 57 files
 
 ================================================================================
 
@@ -253,17 +254,31 @@ File: templates/ex10/index.html.twig
         {{ form_end(formORM) }}
     </div>
 
-    <h2>Importer depuis text.txt</h2>
-    <form action="{{ path('ex10_import_file') }}" method="post">
-        <button type="submit" onclick="return confirm('Importer les données du fichier text.txt ?')">
-            Importer dans SQL & ORM
-        </button>
-    </form>
+    <h2>Actions globales</h2>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <form action="{{ path('ex10_import_file') }}" method="post">
+            <button type="submit" onclick="return confirm('Importer les données du fichier text.txt ?')">
+                📥 Importer depuis text.txt
+            </button>
+        </form>
+        <form action="{{ path('ex10_delete_all') }}" method="post">
+            <button type="submit" onclick="return confirm('Supprimer TOUS les enregistrements SQL ET ORM ?')">
+                🗑️ Supprimer tout (SQL + ORM)
+            </button>
+        </form>
+    </div>
 
     <hr>
 
     <h2>Données existantes (SQL) - ex10_data_sql</h2>
     {% if datasSQL is not empty %}
+        <div style="margin-bottom: 10px;">
+            <form action="{{ path('ex10_delete_all_data_sql') }}" method="post" style="display:inline;">
+                <button type="submit" onclick="return confirm('Supprimer TOUS les enregistrements SQL ?')">
+                    🗑️ Supprimer tous les SQL
+                </button>
+            </form>
+        </div>
         <table border="1" style="width: 100%; margin-top: 20px;">
             <thead>
                 <tr>
@@ -282,7 +297,7 @@ File: templates/ex10/index.html.twig
                         <td>
                             <form action="{{ path('ex10_delete_data_sql', {id: data.id}) }}" method="post" style="display:inline;">
                                 <button type="submit" onclick="return confirm('Supprimer cet enregistrement SQL ?')">
-                                    Supprimer
+                                    ❌
                                 </button>
                             </form>
                         </td>
@@ -296,6 +311,13 @@ File: templates/ex10/index.html.twig
 
     <h2>Données existantes (ORM) - ex10_data_orm</h2>
     {% if datasORM is not empty %}
+        <div style="margin-bottom: 10px;">
+            <form action="{{ path('ex10_delete_all_data_orm') }}" method="post" style="display:inline;">
+                <button type="submit" onclick="return confirm('Supprimer TOUS les enregistrements ORM ?')">
+                    🗑️ Supprimer tous les ORM
+                </button>
+            </form>
+        </div>
         <table border="1" style="width: 100%; margin-top: 20px;">
             <thead>
                 <tr>
@@ -314,7 +336,7 @@ File: templates/ex10/index.html.twig
                         <td>
                             <form action="{{ path('ex10_delete_data_orm', {id: data.id}) }}" method="post" style="display:inline;">
                                 <button type="submit" onclick="return confirm('Supprimer cet enregistrement ORM ?')">
-                                    Supprimer
+                                    ❌
                                 </button>
                             </form>
                         </td>

@@ -19,41 +19,6 @@ class ImportFileService
 		private readonly CreateTableServiceORM $createTableServiceORM,
 	) {}
 	
-	/*public function importFile(string $filePath, string $tableName): void
-    {
-        try
-		{
-            if (!file_exists($filePath))
-			{
-                $this->flashBag->add('danger', 'Error ! Could not find file: ' . basename($filePath));
-                return;
-            }
-            $content = array_map(
-                fn ($line) => htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-                file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)
-            );
-            $date = new DateTime();
-            // Créer la table SQL si besoin
-            $this->createTableServiceSQL->createTableSQL($tableName);
-			$this->createTableServiceORM->createTableORM($tableName);
-            // Insertion dans SQL
-            foreach ($content as $line)
-                $this->insertDataServiceSQL->insertDataSQL($tableName, $line, $date);
-            // Insertion dans ORM
-            foreach ($content as $line)
-			{
-                $dataEntity = new Data();
-                $dataEntity->setData($line);
-                $dataEntity->setDate($date);
-                $this->InsertDataServiceORM->insertDataORM($tableName, $dataEntity);
-            }
-            $this->flashBag->add('success', 'Success! The SQL and ORM import was successful!');
-        }
-		catch (Exception $e)
-		{
-            $this->flashBag->add('danger', 'Error during the file import: ' . $e->getMessage());
-        }
-    }*/
 
     public function importFile(string $filePath, string $tableName): array
     {

@@ -114,8 +114,9 @@ class Ex10Controller extends AbstractController
                 $dataEntity = new Data();
                 $dataEntity->setData($comment);
                 $dataEntity->setDate(new DateTime());
-                $this->insertOrm->insertDataORM("ex10_data_orm", $dataEntity);
-                $this->addFlash('success', 'Success! Data added successfully!');
+                $result = $this->insertOrm->insertDataORM("ex10_data_orm", $dataEntity);
+                [$type, $msg] = explode(':', $result, 2);
+                $this->addFlash($type, $msg);
                 return $this->redirectToRoute('ex10_index');
             }
             else
@@ -159,11 +160,9 @@ class Ex10Controller extends AbstractController
         $tableName = "ex10_data_sql";
         try
         {
-            $success = $this->deleteSql->deleteAllDataSQL($tableName);
-            if ($success)
-                $this->addFlash('success', "Success! All the Data was successfully deleted !");
-            else
-                $this->addFlash('danger', "Error, we could not find the data requested !");
+            $result = $this->deleteSql->deleteAllDataSQL($tableName);
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
         catch (Exception $e)
@@ -180,11 +179,9 @@ class Ex10Controller extends AbstractController
     {
         try
         {
-            $success = $this->deleteOrm->deleteDataByIdORM("ex10_data_orm", $id);
-            if ($success)
-                $this->addFlash('success', "Success! Data was successfully deleted !");
-            else
-                $this->addFlash('danger', "Error, we could not find the data requested !");
+            $result = $this->deleteOrm->deleteDataByIdORM("ex10_data_orm", $id);
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
         catch (Exception $e)
@@ -193,7 +190,7 @@ class Ex10Controller extends AbstractController
             return $this->redirectToRoute('ex10_index');
         }
     }
-
+        
     /**
      * @Route("/ex10/delete_all_data_orm", name="ex10_delete_all_data_orm", methods={"POST"})
      */
@@ -202,11 +199,9 @@ class Ex10Controller extends AbstractController
         $tableName = "ex10_data_orm";
         try
         {
-            $success = $this->deleteOrm->deleteAllDataORM($tableName);
-            if ($success)
-                $this->addFlash('success', "Success! All the Data was successfully deleted !");
-            else
-                $this->addFlash('danger', "Error, we could not find the data requested !");
+            $result = $this->deleteOrm->deleteAllDataORM($tableName);
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
         catch (Exception $e)
@@ -251,40 +246,40 @@ class Ex10Controller extends AbstractController
      * @Route("/ex10/import", name="ex10_import_file", methods={"POST"})
      */
     public function importFile(ImportFileService $importFileService): Response
-{
-    try
     {
-        $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
-
-        if (!is_file($filePath))
+        try
         {
-            $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
+            $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
+
+            if (!is_file($filePath))
+            {
+                $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
+                return $this->redirectToRoute('ex10_index');
+            }
+
+            if (!is_readable($filePath))
+            {
+                $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
+                return $this->redirectToRoute('ex10_index');
+            }
+
+            $result = $importFileService->importFile($filePath, 'ex10_data_sql');
+            
+            // ✅ CORRECTION : Le service retourne déjà un tableau
+            if ($result['success'])
+                $this->addFlash('success', $result['message']);
+            else
+                $this->addFlash('danger', $result['message']);
+                
             return $this->redirectToRoute('ex10_index');
         }
-
-        if (!is_readable($filePath))
+        catch (Exception $e)
         {
-            $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
+            $this->addFlash('danger', 'An unexpected error occurred during import.');
+            if ($this->getParameter('kernel.debug'))
+                $this->addFlash('danger', 'Debug: ' . $e->getMessage());
             return $this->redirectToRoute('ex10_index');
         }
-
-        // Appeler le service et récupérer le résultat
-        $result = $importFileService->importFile($filePath, 'ex10_data_sql');
-
-        // Ajouter le message au flash selon le résultat
-        $flashType = $result['success'] ? 'success' : 'danger';
-        $this->addFlash($flashType, $result['message']);
-
-        return $this->redirectToRoute('ex10_index');
     }
-    catch (Exception $e)
-    {
-        $this->addFlash('danger', 'An unexpected error occurred during import.');
-        if ($this->getParameter('kernel.debug'))
-        {
-            $this->addFlash('danger', 'Debug: ' . $e->getMessage());
-        }
-        return $this->redirectToRoute('ex10_index');
-    }
-}
+
 }

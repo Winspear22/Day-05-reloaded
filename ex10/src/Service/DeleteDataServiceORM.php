@@ -21,7 +21,7 @@ class DeleteDataServiceORM
 		try
 		{
 			if (!$this->utilsService->checkTableExistenceORM($tableName))
-				return "info: Table $tableName does not exist.";
+				return "info: Table $tableName does not exist (ORM).";
 			$data = $this->data_repository->find($id);
 			if (!$data)
 				return "info: Data with ID $id not found.";
@@ -39,8 +39,8 @@ class DeleteDataServiceORM
 	{
 		try
 		{
-			if (!$this->utilsService->checkTableExistenceORM($tableName))
-				return "info: Table $tableName does not exist.";
+			if ($this->utilsService->checkTableExistenceORM($tableName))
+				return "info: The table $tableName does not exist (ORM).";
 			$datas = $this->data_repository->findAll();
 			if (empty($datas))
 				return "info: No data to delete.";
