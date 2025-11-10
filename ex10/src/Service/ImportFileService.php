@@ -20,12 +20,12 @@ class ImportFileService
 	) {}
 	
 
-    public function importFile(string $filePath, string $tableNameSql, string $tableNameOrm): array
+    public function importFile(string $filePath, string $tableNameSql, string $tableNameOrm): string
     {
         try
         {
             if (!file_exists($filePath))
-                return ['success' => false, 'message' => 'Error ! Could not find file: ' . basename($filePath)];
+                return 'danger:Error ! Could not find file: ' . basename($filePath);
             
             $content = array_map(
                 fn ($line) => htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
@@ -33,16 +33,17 @@ class ImportFileService
             );
             
             if (empty($content))
-                return ['success' => false, 'message' => 'Error ! The file is empty.'];
+                return 'danger:Error ! The file is empty.';
             
             $date = new DateTime();
             $this->createTableServiceSQL->createTableSQL($tableNameSql);
             $this->createTableServiceORM->createTableORM($tableNameOrm);
+            
             foreach ($content as $line)
             {
                 $result = $this->insertDataServiceSQL->insertDataSQL($tableNameSql, $line, $date);
                 if (strpos($result, 'danger') === 0)
-                    return ['success' => false, 'message' => $result];
+                    return $result;
             }
 
             foreach ($content as $line)
@@ -52,15 +53,16 @@ class ImportFileService
                 $dataEntity->setDate($date);
                 $result = $this->InsertDataServiceORM->insertDataORM($tableNameOrm, $dataEntity);
                 if (strpos($result, 'danger') === 0)
-                    return ['success' => false, 'message' => $result];
+                    return $result;
             }
             
-            return ['success' => true, 'message' => 'Success! The SQL and ORM import was successful!'];
+            return 'success:Success! The SQL and ORM import was successful!';
         }
         catch (Exception $e)
         {
-            return ['success' => false, 'message' => 'Error during the file import: ' . $e->getMessage()];
+            return 'danger:Error during the file import: ' . $e->getMessage();
         }
     }
+
 }
 ?>

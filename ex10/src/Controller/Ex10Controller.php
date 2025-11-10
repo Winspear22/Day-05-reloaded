@@ -262,7 +262,7 @@ class Ex10Controller extends AbstractController
             }
 
             $result = $importFileService->importFile($filePath, $tableNameSql, $tableNameOrm);
-            [$type, $msg] = explode(':', $result['message'], 2);
+            [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex10_index');
         }
