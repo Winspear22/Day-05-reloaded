@@ -21,7 +21,6 @@ class DeleteAllDataService
 			$resultSql = $this->deleteSql->deleteAllDataSQL($tableNameSql);
 			$resultOrm = $this->deleteOrm->deleteAllDataORM($tableNameOrm);
 			
-			// ✅ VÉRIFIER SI LES SERVICES ONT RETOURNÉ UNE ERREUR
 			if (strpos($resultSql, 'danger') === 0)
 			{
 				return [

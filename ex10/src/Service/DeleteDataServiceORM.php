@@ -27,7 +27,7 @@ class DeleteDataServiceORM
 				return "info: Data with ID $id not found.";
 			$this->em->remove($data);
 			$this->em->flush();
-			return "success: Data with ID $id deleted successfully!";
+			return "success:Success! Data $id deleted from $tableName.";
 		}
 		catch (Exception $e)
 		{
@@ -39,7 +39,7 @@ class DeleteDataServiceORM
 	{
 		try
 		{
-			if ($this->utilsService->checkTableExistenceORM($tableName))
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
 				return "info: The table $tableName does not exist (ORM).";
 			$datas = $this->data_repository->findAll();
 			if (empty($datas))

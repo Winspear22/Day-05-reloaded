@@ -219,12 +219,8 @@ class Ex10Controller extends AbstractController
         $tableNameSql = "ex10_data_sql";
         $tableNameOrm = "ex10_data_orm";
         $result = $this->utils->deleteAllData($tableNameSql, $tableNameOrm);
-        
-        if ($result['success'])
-            $this->addFlash('success', $result['message']);
-        else
-            $this->addFlash('danger', $result['message']);
-        
+        [$type, $msg] = explode(':', $result['message'], 2);
+        $this->addFlash($type, $msg);
         return $this->redirectToRoute('ex10_index');
     }
 

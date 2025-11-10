@@ -23,7 +23,7 @@ class InsertDataServiceORM
 				return "danger: Table $tableName does not exist.";
 			$this->em->persist($data);
 			$this->em->flush();
-			return "success: Data with ID " . $data->getId() . " inserted successfully!";
+			return "success:Success! Data inserted into $tableName.";
 		}
 		catch (Exception $e)
 		{
