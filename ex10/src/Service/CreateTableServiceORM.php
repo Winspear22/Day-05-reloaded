@@ -12,7 +12,7 @@ class CreateTableServiceORM
 		private readonly UtilsService $utilsService
 	) {}
 
-	public function createTable(string $tableName): string
+	public function createTableORM(string $tableName): string
 	{
 		try
 		{

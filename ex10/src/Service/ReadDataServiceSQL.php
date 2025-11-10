@@ -17,6 +17,7 @@ class ReadDataServiceSQL
         $sql_command = "SELECT * FROM $tableName ORDER BY id ASC";
 		try
 		{
+			
 			return $this->sql_connection->fetchAllAssociative($sql_command);
 		}
 		catch (Exception $e)

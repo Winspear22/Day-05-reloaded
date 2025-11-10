@@ -1,0 +1,1004 @@
+================================================================================
+PROJECT STRUCTURE OVERVIEW - ex10
+================================================================================
+
+Root Directory: ./ex10/
+
+./ex10
+├── bin
+│   └── console
+├── composer.json
+├── composer.lock
+├── config
+│   ├── bundles.php
+│   ├── packages
+│   │   ├── cache.yaml
+│   │   ├── doctrine_migrations.yaml
+│   │   ├── doctrine.yaml
+│   │   ├── framework.yaml
+│   │   ├── routing.yaml
+│   │   ├── twig.yaml
+│   │   └── validator.yaml
+│   ├── preload.php
+│   ├── routes
+│   │   └── framework.yaml
+│   ├── routes.yaml
+│   └── services.yaml
+├── migrations
+│   └── Version20251110134744.php
+├── public
+│   ├── index.php
+│   └── style.css
+├── src
+│   ├── Controller
+│   │   └── Ex10Controller.php
+│   ├── Entity
+│   │   └── Data.php
+│   ├── Kernel.php
+│   ├── Repository
+│   │   └── DataRepository.php
+│   └── Service
+│       ├── CreateTableServiceORM.php
+│       ├── CreateTableServiceSQL.php
+│       ├── DeleteDataServiceORM.php
+│       ├── DeleteDataServiceSQL.php
+│       ├── ImportFileService.php
+│       ├── InsertDataServiceORM.php
+│       ├── InsertDataServiceSQL.php
+│       ├── ReadDataServiceORM.php
+│       ├── ReadDataServiceSQL.php
+│       └── UtilsService.php
+├── symfony.lock
+├── templates
+│   ├── base.html.twig
+│   ├── bundles
+│   │   └── TwigBundle
+│   └── ex10
+│       └── index.html.twig
+├── var
+│   ├── cache
+│   │   ├── env
+│   │   └── prod
+│   └── log
+└── vendor
+    ├── autoload.php
+    ├── autoload_runtime.php
+    ├── bin
+    │   ├── doctrine-migrations
+    │   ├── patch-type-declarations
+    │   ├── php-parse
+    │   ├── sql-formatter
+    │   ├── var-dump-server
+    │   └── yaml-lint
+    ├── composer
+    │   ├── autoload_classmap.php
+    │   ├── autoload_files.php
+    │   ├── autoload_namespaces.php
+    │   ├── autoload_psr4.php
+    │   ├── autoload_real.php
+    │   ├── autoload_static.php
+    │   ├── ClassLoader.php
+    │   ├── installed.json
+    │   ├── installed.php
+    │   ├── InstalledVersions.php
+    │   ├── LICENSE
+    │   └── platform_check.php
+    ├── doctrine
+    │   ├── annotations
+    │   ├── collections
+    │   ├── dbal
+    │   ├── deprecations
+    │   ├── doctrine-bundle
+    │   ├── doctrine-migrations-bundle
+    │   ├── event-manager
+    │   ├── inflector
+    │   ├── instantiator
+    │   ├── lexer
+    │   ├── migrations
+    │   ├── orm
+    │   ├── persistence
+    │   └── sql-formatter
+    ├── nikic
+    │   └── php-parser
+    ├── psr
+    │   ├── cache
+    │   ├── container
+    │   ├── event-dispatcher
+    │   └── log
+    ├── symfony
+    │   ├── asset
+    │   ├── cache
+    │   ├── cache-contracts
+    │   ├── config
+    │   ├── console
+    │   ├── dependency-injection
+    │   ├── deprecation-contracts
+    │   ├── doctrine-bridge
+    │   ├── dotenv
+    │   ├── error-handler
+    │   ├── event-dispatcher
+    │   ├── event-dispatcher-contracts
+    │   ├── filesystem
+    │   ├── finder
+    │   ├── flex
+    │   ├── form
+    │   ├── framework-bundle
+    │   ├── http-foundation
+    │   ├── http-kernel
+    │   ├── maker-bundle
+    │   ├── options-resolver
+    │   ├── polyfill-intl-grapheme
+    │   ├── polyfill-intl-icu
+    │   ├── polyfill-intl-normalizer
+    │   ├── polyfill-mbstring
+    │   ├── polyfill-php83
+    │   ├── polyfill-php84
+    │   ├── process
+    │   ├── property-access
+    │   ├── property-info
+    │   ├── routing
+    │   ├── runtime
+    │   ├── service-contracts
+    │   ├── stopwatch
+    │   ├── string
+    │   ├── translation-contracts
+    │   ├── twig-bridge
+    │   ├── twig-bundle
+    │   ├── validator
+    │   ├── var-dumper
+    │   ├── var-exporter
+    │   └── yaml
+    └── twig
+        ├── extra-bundle
+        └── twig
+
+91 directories, 55 files
+
+================================================================================
+
+📂 SOURCE CODE (src/) - Location: ex10/src/
+================================================================================
+
+
+---
+File: src/Controller/Ex10Controller.php
+---
+
+<?php
+
+namespace App\Controller;
+
+use DateTime;
+use Exception;
+use App\Entity\Data;
+use DateTimeInterface;
+use App\Service\ReadDataServiceORM;
+use App\Service\ReadDataServiceSQL;
+use App\Service\DeleteDataServiceORM;
+use App\Service\DeleteDataServiceSQL;
+use App\Service\InsertDataServiceORM;
+use App\Service\InsertDataServiceSQL;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+class Ex10Controller extends AbstractController
+{
+    public function __construct(
+        private readonly ReadDataServiceSQL $readSql,
+        private readonly ReadDataServiceORM $readOrm,
+        private readonly InsertDataServiceSQL $insertSql,
+        private readonly InsertDataServiceORM $insertOrm,
+        private readonly DeleteDataServiceSQL $deleteSql,
+        private readonly DeleteDataServiceORM $deleteOrm,
+    ) {}
+
+    /**
+     * @Route("/ex10", name="app_ex10", methods={"GET"})
+     */
+    public function index(): Response
+    {
+        return $this->render('ex10/index.html.twig', [
+            'controller_name' => 'Ex10Controller',
+        ]);
+    }
+
+    /**
+     * @Route("/ex10/insert_data_sql", name="ex10_insert_data_sql", methods={"POST"})
+     */
+    public function insertDataSQL(Request $request): Response
+    {
+        try
+        {
+            $form = $this->createDataForm();
+            $form->handleRequest($request);
+            $date = new DateTime();
+
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $data = $form->get('comment')->getData();
+                $result = $this->insertSql->insertDataSQL("ex10_data_sql", $data, $date);//$dataInsertService->insertData($connection, 'ex10_data_sql', $data, $date);
+                [$type, $msg] = explode(':', $result, 2);
+                $this->addFlash($type, $msg);
+                return $this->redirectToRoute('ex10_index');
+            }
+            else
+            {
+                $this->addFlash('danger', 'Error, invalid form!');
+                return $this->redirectToRoute('ex10_index');
+            }
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error while inserting data: ' . $e->getMessage());
+            return $this->redirectToRoute('ex10_index');
+        }
+    }
+
+    /**
+     * @Route("/ex10/insert_data_orm", name="ex10_insert_data_orm", methods={"POST"})
+     */
+    public function insertDataORM(Request $request): Response
+    {
+        try
+        {
+            $form = $this->createDataForm();
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $comment = $form->get('comment')->getData();
+                $dataEntity = new Data();
+                $dataEntity->setData($comment);
+                $dataEntity->setDate(new DateTime());
+                $this->insertOrm->insertDataORM("ex10_data_orm", $dataEntity);
+                $this->addFlash('success', 'Success! Data added successfully!');
+                return $this->redirectToRoute('ex10_index');
+            }
+            else
+            {
+                $this->addFlash('danger', 'Error, invalid form!');
+                return $this->redirectToRoute('ex10_index');
+            }
+        }
+        catch(Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error while inserting data: ' . $e->getMessage());
+            return $this->redirectToRoute('ex10_index');
+        }
+    }
+
+    /**
+     * @Route("/ex10/delete_data_sql/{id}", name="ex10_delete_data_sql", methods={"POST"})
+     */
+    public function deleteDataSQL(int $id): Response
+    {
+        try
+        {
+            $result = $this->deleteSql->deleteDataByIdSQL("ex10_data_sql", $id);
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
+            return $this->redirectToRoute('ex10_index');
+
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', "Unexpected error while deleting data: " . $e->getMessage());
+            return $this->redirectToRoute('ex10_index');
+        }
+    }
+
+    /**
+     * @Route("/ex10/delete_data_orm/{id}", name="ex10_delete_data_orm", methods={"POST"})
+     */
+    public function delete(int $id): Response
+    {
+        try
+        {
+            $success = $this->deleteOrm->deleteDataByIdORM("ex10_data_orm", $id);
+                $this->addFlash('success', "Success! Data was successfully deleted !");
+            else
+                $this->addFlash('danger', "Error, we could not find the data requested !");
+            return $this->redirectToRoute('ex10_index');
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error: ' . $e->getMessage());
+            return $this->redirectToRoute('ex10_index');
+        }
+    }
+
+    private function createDataForm()
+    {
+        return $this->createFormBuilder()
+            ->add('comment', TextType::class, [
+                'label' => 'Comment',
+                'constraints' => [
+                    new NotBlank(['message' => 'Comment is required.']),
+                    new Length(['max' => 255, 'maxMessage' => 'Maximum 255 characters allowed.']),
+                ],
+                'attr' => ['maxlength' => 255, 'placeholder' => 'Your comment']
+            ])
+            ->getForm();
+    }
+
+    
+}
+
+
+---
+File: src/Entity/Data.php
+---
+
+<?php
+
+namespace App\Entity;
+
+use App\Repository\DataRepository;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: DataRepository::class)]
+#[ORM\Table(name: "ex10_data_orm")]
+class Data
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $data = null;
+
+    #[ORM\Column]
+    private ?\DateTime $date = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getData(): ?string
+    {
+        return $this->data;
+    }
+
+    public function setData(string $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTime
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTime $date): static
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+}
+
+
+---
+File: src/Kernel.php
+---
+
+<?php
+
+namespace App;
+
+use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+
+class Kernel extends BaseKernel
+{
+    use MicroKernelTrait;
+}
+
+
+---
+File: src/Repository/DataRepository.php
+---
+
+<?php
+
+namespace App\Repository;
+
+use App\Entity\Data;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<Data>
+ */
+class DataRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Data::class);
+    }
+
+    //    /**
+    //     * @return Data[] Returns an array of Data objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('d')
+    //            ->andWhere('d.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('d.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?Data
+    //    {
+    //        return $this->createQueryBuilder('d')
+    //            ->andWhere('d.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
+}
+
+
+---
+File: src/Service/CreateTableServiceORM.php
+---
+
+<?php 
+
+namespace App\Service;
+
+use Exception;
+use Doctrine\DBAL\Connection;
+use Symfony\Component\Process\Process;
+
+class CreateTableServiceORM
+{
+	public function __construct(
+		private readonly UtilsService $utilsService
+	) {}
+
+	public function createTableORM(string $tableName): string
+	{
+		try
+		{
+			if ($this->utilsService->checkTableExistenceORM($tableName))
+				return 'info: Table already exists.';
+			$process = new Process([
+				'php',
+				'bin/console',
+				'doctrine:migrations:migrate',
+				'--no-interaction'
+			]);
+			$process->setWorkingDirectory(__DIR__ . '/../../');
+			$process->run();
+			if ($process->isSuccessful())
+				return 'success: Table created successfully!';
+			else
+				return 'error: ' . $process->getErrorOutput();
+		} 
+		catch (Exception $e)
+		{
+			return 'error: ' . $e->getMessage();
+		}
+	}
+}
+?>
+
+---
+File: src/Service/CreateTableServiceSQL.php
+---
+
+<?php 
+
+namespace App\Service;
+
+use App\Service\UtilsService;
+use Doctrine\DBAL\Connection;
+
+class CreateTableServiceSQL
+{
+	public function __construct(
+		private readonly Connection $sql_connection,
+		private readonly UtilsService $utils_service) {}
+
+	public function createTableSQL(string $tableName): string
+	{
+		$sql = "CREATE TABLE IF NOT EXISTS $tableName (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+			data VARCHAR(255) NOT NULL,
+			date DATETIME NOT NULL
+		);";
+		try
+		{
+			if ($this->utils_service->checkTableExistenceSQL($tableName))
+				return "info:The table $tableName already exists and cannot be created again.";
+			$this->sql_connection->executeStatement($sql);
+			return "success:Success! The table $tableName was created!";
+		}
+		catch (\Exception $e)
+		{
+			return "danger:Error! The table $tableName could not be created. " . $e->getMessage();
+		}
+	}
+}
+?>
+
+---
+File: src/Service/DeleteDataServiceORM.php
+---
+
+<?php
+
+namespace App\Service;
+
+use Exception;
+use App\Service\UtilsService;
+use App\Repository\DataRepository;
+use Doctrine\ORM\EntityManagerInterface;
+
+class DeleteDataServiceORM
+{
+	public function __construct(
+		private readonly DataRepository $data_repository,
+		private readonly EntityManagerInterface $em,
+		private readonly UtilsService $utilsService
+
+	) {}
+
+	public function deleteDataByIdORM(string $tableName, int $id): string
+	{
+		try
+		{
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
+				return "info: Table $tableName does not exist.";
+			$data = $this->data_repository->find($id);
+			if (!$data)
+				return "info: Data with ID $id not found.";
+			$this->em->remove($data);
+			$this->em->flush();
+			return "success: Data with ID $id deleted successfully!";
+		}
+		catch (Exception $e)
+		{
+			return "danger: Error deleting data with ID $id. " . $e->getMessage();
+		}
+	}
+
+	public function deleteAllDataORM(string $tableName): string
+	{
+		try
+		{
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
+				return "info: Table $tableName does not exist.";
+			$datas = $this->data_repository->findAll();
+			if (empty($datas))
+				return "info: No data to delete.";
+			foreach ($datas as $data)
+				$this->em->remove($data);
+			$this->em->flush();
+			return "success: All data deleted successfully!";
+		}
+		catch (Exception $e)
+		{
+			return "danger: Error deleting all data. " . $e->getMessage();
+		}
+	}
+}
+
+---
+File: src/Service/DeleteDataServiceSQL.php
+---
+
+<?php
+
+namespace App\Service;
+
+use Exception;
+use App\Service\UtilsService;
+use Doctrine\DBAL\Connection;
+use App\Service\ReadDataServiceSQL;
+
+class DeleteDataServiceSQL
+{
+	public function __construct(
+		private readonly Connection $sql_connection,
+		private readonly UtilsService $utils_service,
+		private readonly ReadDataServiceSQL $read_service
+	) {}
+
+	public function deleteDataByIdSQL(string $tableName, int $id): string
+	{
+		$sql_command = "DELETE FROM $tableName WHERE id = :id";
+		try
+		{
+			if (!$this->utils_service->checkTableExistenceSQL($tableName))
+				return "info: The table $tableName does not exist.";
+			if ($this->read_service->readDataByIdSQL($tableName, $id) === null)
+				return "danger:Error, data $id does not exist.";
+			$this->sql_connection->executeStatement($sql_command, ['id' => $id]);
+			return "success:Success! Data $id deleted from $tableName.";
+		}
+		catch (Exception $e)
+		{
+            return "danger:Error while deleting data $id: " . $e->getMessage();
+		}
+	}
+
+	public function deleteAllDataSQL(string $tableName): string
+	{
+		$sql_command = "DELETE FROM $tableName";
+		try
+		{
+			if (!$this->utils_service->checkTableExistenceSQL($tableName))
+				return "info: The table $tableName does not exist.";
+			$this->sql_connection->executeStatement($sql_command);
+			return "success:Success! All data deleted from $tableName.";
+		}
+		catch (Exception $e)
+		{
+			return "danger:Error while deleting all data: " . $e->getMessage();
+		}
+	}
+}
+?>
+
+---
+File: src/Service/ImportFileService.php
+---
+
+<?php
+
+namespace App\Service;
+
+use DateTime;
+use Exception;
+use App\Entity\Data;
+use App\Service\UtilsService;
+use Doctrine\DBAL\Connection;
+use App\Service\ReadDataServiceSQL;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+
+class ImportFileService
+{
+	public function __construct(
+		private readonly Connection $sql_connection,
+		private readonly UtilsService $utils_service,
+		private readonly InsertDataServiceORM $InsertDataServiceORM,
+		private readonly InsertDataServiceSQL $insertDataServiceSQL,
+		private readonly CreateTableServiceSQL $createTableServiceSQL,
+		private readonly CreateTableServiceORM $createTableServiceORM,
+		private readonly FlashBagInterface $flashBag
+	) {}
+	
+	public function importFile(string $filePath, string $tableName): void
+    {
+        try
+		{
+            if (!file_exists($filePath))
+			{
+                $this->flashBag->add('danger', 'Error ! Could not find file: ' . basename($filePath));
+                return;
+            }
+            $content = array_map(
+                fn ($line) => htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)
+            );
+            $date = new DateTime();
+            // Créer la table SQL si besoin
+            $this->createTableServiceSQL->createTableSQL($tableName);
+			$this->createTableServiceORM->createTableORM($tableName);
+            // Insertion dans SQL
+            foreach ($content as $line)
+                $this->insertDataServiceSQL->insertDataSQL($tableName, $line, $date);
+            // Insertion dans ORM
+            foreach ($content as $line)
+			{
+                $dataEntity = new Data();
+                $dataEntity->setData($line);
+                $dataEntity->setDate($date);
+                $this->InsertDataServiceORM->insertDataORM($tableName, $dataEntity);
+            }
+            $this->flashBag->add('success', 'Success! The SQL and ORM import was successful!');
+        }
+		catch (Exception $e)
+		{
+            $this->flashBag->add('danger', 'Error during the file import: ' . $e->getMessage());
+        }
+    }
+
+}
+?>
+
+---
+File: src/Service/InsertDataServiceORM.php
+---
+
+<?php
+
+namespace App\Service;
+
+use Exception;
+use App\Entity\Data;
+use App\Repository\DataRepository;
+use Doctrine\ORM\EntityManagerInterface;
+
+class InsertDataServiceORM
+{
+	public function __construct(
+		private readonly DataRepository $data_repository,
+		private readonly EntityManagerInterface $em,
+		private readonly UtilsService $utilsService
+
+	) {}
+	public function insertDataORM(string $tableName, Data $data): string
+	{
+		try
+		{
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
+				return "danger: Table $tableName does not exist.";
+			$this->em->persist($data);
+			$this->em->flush();
+			return "success: Data with ID " . $data->getId() . " inserted successfully!";
+		}
+		catch (Exception $e)
+		{
+			return "danger: Error inserting data with ID " . $data->getId() . ". " . $e->getMessage();
+		}
+	}
+}
+
+---
+File: src/Service/InsertDataServiceSQL.php
+---
+
+<?php 
+
+namespace App\Service;
+
+use Exception;
+use DateTimeInterface;
+use Doctrine\DBAL\Connection;
+
+class InsertDataServiceSQL
+{
+	public function __construct(
+		private readonly Connection $sql_connection,
+		private readonly UtilsService $utils_service) {}
+
+	public function insertDataSQL(string $tableName, string $data, DateTimeInterface $date): string
+	{
+		$sql_command = "INSERT INTO $tableName (data, date) VALUES (:data, :date);";
+		try
+		{
+			$this->sql_connection->executeStatement($sql_command, [
+				'data' => $data,
+				'date' => $date->format('Y-m-d H:i:s')
+			]);
+			return "success:Success! Data inserted into $tableName.";
+		}
+		catch (Exception $e)
+		{
+			return "danger:Error! Data could not be inserted into $tableName. " . $e->getMessage();
+		}
+	}
+}
+?>
+
+---
+File: src/Service/ReadDataServiceORM.php
+---
+
+<?php
+
+namespace App\Service;
+
+use Exception;
+use App\Service\UtilsService;
+use App\Repository\DataRepository;
+use Doctrine\ORM\EntityManagerInterface;
+
+class ReadDataServiceORM
+{
+	public function __construct(
+		private readonly DataRepository $data_repository,
+		private readonly EntityManagerInterface $em,
+		private readonly UtilsService $utilsService
+
+	) {}
+	
+	public function readAllDataORM(string $tableName): ?array
+    {
+        try
+        {
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
+				return [];
+            return $this->data_repository->findAll();
+        }
+        catch (Exception $e)
+        {
+            return [];
+        }
+    }
+
+	public function readDataORM(string $tableName, int $id)
+	{
+		try
+		{
+			if (!$this->utilsService->checkTableExistenceORM($tableName))
+				return [];
+			return $this->data_repository->find($id);
+		}
+		catch (Exception $e)
+		{
+			return [];
+		}
+	}
+
+
+}
+
+---
+File: src/Service/ReadDataServiceSQL.php
+---
+
+<?php 
+
+namespace App\Service;
+
+use Exception;
+use DateTimeInterface;
+use Doctrine\DBAL\Connection;
+
+class ReadDataServiceSQL
+{
+	public function __construct(
+		private readonly Connection $sql_connection,
+		private readonly UtilsService $utils_service) {}
+
+	public function readAllDataSQL(string $tableName): ?array
+	{
+        $sql_command = "SELECT * FROM $tableName ORDER BY id ASC";
+		try
+		{
+			
+			return $this->sql_connection->fetchAllAssociative($sql_command);
+		}
+		catch (Exception $e)
+		{
+			return null;
+		}
+	}
+
+	public function readDataByIdSQL(string $tableName, int $id): ?array
+	{
+		$sql_command = "SELECT * FROM $tableName WHERE id = :id";
+		try
+		{
+			$data = $this->sql_connection->fetchAssociative($sql_command, ['id' => $id]);
+			if ($data === false)
+				return null;
+			return $data;
+		}
+		catch (Exception $e)
+		{
+			return null;
+		}
+	}
+}
+?>
+
+---
+File: src/Service/UtilsService.php
+---
+
+<?php
+
+namespace App\Service;
+
+use Exception;
+use Doctrine\DBAL\Connection;
+
+class UtilsService
+{
+	public function __construct(
+		private readonly Connection $connection
+	) {}
+
+	public function checkTableExistenceSQL(string $tableName): bool
+	{
+		$sql_command = "SHOW TABLES LIKE '$tableName'";
+		try
+		{
+			$result = $this->connection->fetchOne($sql_command);
+			return ($result !== false);
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+	}
+
+	public function checkTableExistenceORM(string $tableName): bool
+	{
+		try
+		{
+			$schemaManager = $this->connection->createSchemaManager();
+			return $schemaManager->tablesExist([$tableName]);
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+	}
+}
+?>
+
+================================================================================
+
+📂 PUBLIC FILES (public/) - Location: ex10/public/
+================================================================================
+
+
+---
+File: public/index.php
+---
+
+<?php
+
+use App\Kernel;
+
+require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
+
+return function (array $context) {
+    return new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
+};
+
+
+---
+File: public/style.css
+---
+
+.alert
+{
+    padding: 1em 1.5em;
+    margin: 1em 0;
+    border-radius: 5px;
+    font-weight: bold;
+    box-shadow: 0 1px 7px #aaa1;
+    font-size: 1em;
+}
+
+.alert-success
+{
+    background: #d4edda;
+    color: #155724;
+    border-left: 7px solid #38a169;
+}
+
+.alert-danger
+{
+    background: #f8d7da;
+    color: #721c24;
+    border-left: 7px solid #e53e3e;
+}
+
+.alert-info
+{
+    background: #ffee00;
+    color: #000000;
+    border-left: 7px solid #d8db38;
+}

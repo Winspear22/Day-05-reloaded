@@ -20,6 +20,8 @@ class DeleteDataServiceSQL
 		$sql_command = "DELETE FROM $tableName WHERE id = :id";
 		try
 		{
+			if (!$this->utils_service->checkTableExistenceSQL($tableName))
+				return "info: The table $tableName does not exist.";
 			if ($this->read_service->readDataByIdSQL($tableName, $id) === null)
 				return "danger:Error, data $id does not exist.";
 			$this->sql_connection->executeStatement($sql_command, ['id' => $id]);
@@ -36,6 +38,8 @@ class DeleteDataServiceSQL
 		$sql_command = "DELETE FROM $tableName";
 		try
 		{
+			if (!$this->utils_service->checkTableExistenceSQL($tableName))
+				return "info: The table $tableName does not exist.";
 			$this->sql_connection->executeStatement($sql_command);
 			return "success:Success! All data deleted from $tableName.";
 		}
@@ -45,6 +49,4 @@ class DeleteDataServiceSQL
 		}
 	}
 }
-
-
 ?>

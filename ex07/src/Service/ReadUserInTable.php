@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Exception;
 use App\Repository\UserRepository;
 
 class ReadUserInTable
@@ -12,6 +13,13 @@ class ReadUserInTable
 
     public function getAllUsers(): array
     {
-        return $this->userRepository->findAll();
+        try
+        {
+            return $this->userRepository->findAll();
+        }
+        catch (Exception $e)
+        {
+            return [];
+        }
     }
 }

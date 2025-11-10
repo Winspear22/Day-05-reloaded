@@ -2,21 +2,231 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use DateTime;
+use Exception;
+use App\Entity\Data;
+use App\Service\CreateTableServiceORM;
+use App\Service\CreateTableServiceSQL;
+use DateTimeInterface;
+use App\Service\ImportFileService;
+use App\Service\ReadDataServiceORM;
+use App\Service\ReadDataServiceSQL;
+use App\Service\DeleteDataServiceORM;
+use App\Service\DeleteDataServiceSQL;
+use App\Service\InsertDataServiceORM;
+use App\Service\InsertDataServiceSQL;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-final class Ex10Controller extends AbstractController
+class Ex10Controller extends AbstractController
 {
+    public function __construct(
+        private readonly ReadDataServiceSQL $readSql,
+        private readonly ReadDataServiceORM $readOrm,
+        private readonly InsertDataServiceSQL $insertSql,
+        private readonly InsertDataServiceORM $insertOrm,
+        private readonly DeleteDataServiceSQL $deleteSql,
+        private readonly DeleteDataServiceORM $deleteOrm,
+        private readonly CreateTableServiceSQL $createSql,
+        private readonly CreateTableServiceORM $createOrm
+    ) {}
+
     /**
      * @Route("/ex10", name="app_ex10", methods={"GET"})
      */
     public function index(): Response
     {
+        $formSQL = $this->createDataForm();
+        $formORM = $this->createDataForm();
+        $tableNameSql = "ex10_data_sql";
+        $tableNameOrm = "ex10_data_orm";
+        try
+        {
+            $this->createSql->createTableSQL($tableNameSql).
+            $this->createOrm->createTableORM($tableNameOrm);
+            $dataSql = $this->readSql->readAllDataSQL($tableNameSql);
+            $dataOrm = $this->readOrm->readAllDataORM($tableNameOrm);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', "Error, unexpected error: " . $e->getMessage());
+            $dataSql = [];
+            $dataOrm = [];
+        }
         return $this->render('ex10/index.html.twig', [
-            'controller_name' => 'Ex10Controller',
+            'formSQL' => $formSQL->createView(),
+            'formORM' => $formORM->createView(),
+            'datasSQL' => $dataSql,
+            'datasORM' => $dataOrm
         ]);
     }
 
-    
+    /**
+     * @Route("/ex10/insert_data_sql", name="ex10_insert_data_sql", methods={"POST"})
+     */
+    public function insertDataSQL(Request $request): Response
+    {
+        try
+        {
+            $form = $this->createDataForm();
+            $form->handleRequest($request);
+            $date = new DateTime();
+
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $data = $form->get('comment')->getData();
+                $result = $this->insertSql->insertDataSQL("ex10_data_sql", $data, $date);//$dataInsertService->insertData($connection, 'ex10_data_sql', $data, $date);
+                [$type, $msg] = explode(':', $result, 2);
+                $this->addFlash($type, $msg);
+                return $this->redirectToRoute('ex10_index');
+            }
+            else
+            {
+                $this->addFlash('danger', 'Error, invalid form!');
+                return $this->redirectToRoute('ex10_index');
+            }
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error while inserting data: ' . $e->getMessage());
+            return $this->redirectToRoute('ex10_index');
+        }
+    }
+
+    /**
+     * @Route("/ex10/insert_data_orm", name="ex10_insert_data_orm", methods={"POST"})
+     */
+    public function insertDataORM(Request $request): Response
+    {
+        try
+        {
+            $form = $this->createDataForm();
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $comment = $form->get('comment')->getData();
+                $dataEntity = new Data();
+                $dataEntity->setData($comment);
+                $dataEntity->setDate(new DateTime());
+                $this->insertOrm->insertDataORM("ex10_data_orm", $dataEntity);
+                $this->addFlash('success', 'Success! Data added successfully!');
+                return $this->redirectToRoute('ex10_index');
+            }
+            else
+            {
+                $this->addFlash('danger', 'Error, invalid form!');
+                return $this->redirectToRoute('ex10_index');
+            }
+        }
+        catch(Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error while inserting data: ' . $e->getMessage());
+            return $this->redirectToRoute('ex10_index');
+        }
+    }
+
+    /**
+     * @Route("/ex10/delete_data_sql/{id}", name="ex10_delete_data_sql", methods={"POST"})
+     */
+    public function deleteDataSQL(int $id): Response
+    {
+        try
+        {
+            $result = $this->deleteSql->deleteDataByIdSQL("ex10_data_sql", $id);
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
+            return $this->redirectToRoute('ex10_index');
+
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', "Unexpected error while deleting data: " . $e->getMessage());
+            return $this->redirectToRoute('ex10_index');
+        }
+    }
+
+    /**
+     * @Route("/ex10/delete_data_orm/{id}", name="ex10_delete_data_orm", methods={"POST"})
+     */
+    public function deleteDataORM(int $id): Response
+    {
+        try
+        {
+            $success = $this->deleteOrm->deleteDataByIdORM("ex10_data_orm", $id);
+            if ($success)
+                $this->addFlash('success', "Success! Data was successfully deleted !");
+            else
+                $this->addFlash('danger', "Error, we could not find the data requested !");
+            return $this->redirectToRoute('ex10_index');
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error, unexpected error: ' . $e->getMessage());
+            return $this->redirectToRoute('ex10_index');
+        }
+    }
+
+    private function createDataForm()
+    {
+        return $this->createFormBuilder()
+            ->add('comment', TextType::class, [
+                'label' => 'Comment',
+                'constraints' => [
+                    new NotBlank(['message' => 'Comment is required.']),
+                    new Length(['max' => 255, 'maxMessage' => 'Maximum 255 characters allowed.']),
+                ],
+                'attr' => ['maxlength' => 255, 'placeholder' => 'Your comment']
+            ])
+            ->getForm();
+    }
+
+    /**
+     * @Route("/ex10/import", name="ex10_import_file", methods={"POST"})
+     */
+    public function importFile(ImportFileService $importFileService): Response
+    {
+        try
+        {
+            // Récupérer le chemin du fichier à la racine du projet
+            $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
+
+            // Valider que c'est un fichier et pas un répertoire
+            if (!is_file($filePath))
+            {
+                $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
+                return $this->redirectToRoute('app_ex10');
+            }
+
+            // Vérifier les permissions de lecture
+            if (!is_readable($filePath))
+            {
+                $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
+                return $this->redirectToRoute('app_ex10');
+            }
+
+            // Appeler le service d'import
+            $importFileService->importFile($filePath, 'ex10_data_sql');
+
+            // Les messages flash sont déjà gérés par le service
+            return $this->redirectToRoute('app_ex10');
+        }
+        catch (Exception $e)
+        {
+            // Sécurité : Ne pas exposer les details techniques en prod
+            $this->addFlash('danger', 'An unexpected error occurred during import.');
+            if ($this->getParameter('kernel.debug'))
+            {
+                $this->addFlash('danger', 'Debug: ' . $e->getMessage());
+            }
+            return $this->redirectToRoute('app_ex10');
+        }
+    }
+
+
 }

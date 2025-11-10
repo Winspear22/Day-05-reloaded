@@ -11,7 +11,7 @@ class CreateTableServiceSQL
 		private readonly Connection $sql_connection,
 		private readonly UtilsService $utils_service) {}
 
-	public function createTable(string $tableName): string
+	public function createTableSQL(string $tableName): string
 	{
 		$sql = "CREATE TABLE IF NOT EXISTS $tableName (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,7 +20,7 @@ class CreateTableServiceSQL
 		);";
 		try
 		{
-			if (!$this->utils_service->checkTableExistenceSQL($tableName))
+			if ($this->utils_service->checkTableExistenceSQL($tableName))
 				return "info:The table $tableName already exists and cannot be created again.";
 			$this->sql_connection->executeStatement($sql);
 			return "success:Success! The table $tableName was created!";

@@ -1,20 +1,101 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello Ex10Controller!{% endblock %}
+{% block title %}Ex10 – SQL & ORM{% endblock %}
 
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+{% block content %}
+    <h1>Ex10 – Lecture de fichier et insertion SQL & ORM</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {# Messages flash #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/adnen/Desktop/Day-05-reloaded/ex10/src/Controller/Ex10Controller.php</code></li>
-        <li>Your template at <code>/home/adnen/Desktop/Day-05-reloaded/ex10/templates/ex10/index.html.twig</code></li>
-    </ul>
-</div>
+    <div class="form-wrapper">
+        <h2>Insérer une donnée SQL</h2>
+        <form action="{{ path('ex10_insert_data_sql') }}" method="post">
+            <input type="text" name="comment" maxlength="255" placeholder="Your comment" required>
+            <button type="submit">Insérer en SQL</button>
+        </form>
+
+        <h2>Insérer une donnée ORM</h2>
+        <form action="{{ path('ex10_insert_data_orm') }}" method="post">
+            <input type="text" name="comment" maxlength="255" placeholder="Your comment" required>
+            <button type="submit">Insérer en ORM</button>
+        </form>
+    </div>
+
+    <h2>Importer depuis text.txt</h2>
+    <form action="{{ path('ex10_import_file') }}" method="post">
+        <button type="submit" onclick="return confirm('Importer les données du fichier text.txt ?')">
+            Importer dans SQL & ORM
+        </button>
+    </form>
+
+    <hr>
+
+    <h2>Données existantes (SQL) - ex10_data_sql</h2>
+    {% if datasSQL is not empty %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Données</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in datasSQL %}
+                    <tr>
+                        <td>{{ data.id }}</td>
+                        <td>{{ data.data }}</td>
+                        <td>{{ data.date }}</td>
+                        <td>
+                            <form action="{{ path('ex10_delete_data_sql', {id: data.id}) }}" method="post" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Supprimer cet enregistrement SQL ?')">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p><em>Aucune donnée SQL trouvée.</em></p>
+    {% endif %}
+
+    <h2>Données existantes (ORM) - ex10_data_orm</h2>
+    {% if datasORM is not empty %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Données</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in datasORM %}
+                    <tr>
+                        <td>{{ data.id }}</td>
+                        <td>{{ data.data }}</td>
+                        <td>{{ data.date|date('Y-m-d H:i:s') }}</td>
+                        <td>
+                            <form action="{{ path('ex10_delete_data_orm', {id: data.id}) }}" method="post" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Supprimer cet enregistrement ORM ?')">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p><em>Aucune donnée ORM trouvée.</em></p>
+    {% endif %}
 {% endblock %}

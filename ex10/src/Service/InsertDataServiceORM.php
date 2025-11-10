@@ -15,7 +15,6 @@ class InsertDataServiceORM
 		private readonly UtilsService $utilsService
 
 	) {}
-
 	public function insertDataORM(string $tableName, Data $data): string
 	{
 		try
