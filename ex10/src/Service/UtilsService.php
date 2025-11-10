@@ -30,6 +30,9 @@ class UtilsService
 		try
 		{
 			$schemaManager = $this->connection->createSchemaManager();
+			//if (empty($schemaManager))
+			//	return false;
+			//return true;
 			return $schemaManager->tablesExist([$tableName]);
 		}
 		catch (Exception $e)

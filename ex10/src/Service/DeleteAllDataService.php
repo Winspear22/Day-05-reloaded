@@ -18,54 +18,37 @@ class DeleteAllDataService
 	{
 		try
 		{
-			$resultSql = $this->deleteSql->deleteAllDataSQL($tableNameSql);
 			$resultOrm = $this->deleteOrm->deleteAllDataORM($tableNameOrm);
-			
-			if (strpos($resultSql, 'danger') === 0)
+			$resultSql = $this->deleteSql->deleteAllDataSQL($tableNameSql);
+			if (strpos($resultOrm, 'danger') === 0 || strpos($resultOrm, 'info') === 0)
 			{
 				return [
 					'success' => false,
-					'message' => $resultSql
+					'message' => $resultOrm  // ✅ Format type:message
 				];
 			}
 			
-			if (strpos($resultOrm, 'danger') === 0)
+			if (strpos($resultSql, 'danger') === 0 || strpos($resultSql, 'info') === 0)
 			{
 				return [
 					'success' => false,
-					'message' => $resultOrm
+					'message' => $resultSql  // ✅ Format type:message
 				];
 			}
+			
 
-			if (strpos($resultSql, 'info') === 0)
-			{
-				return [
-					'success' => false,
-					'message' => $resultSql
-				];
-			}
-			
-			if (strpos($resultOrm, 'info') === 0)
-			{
-				return [
-					'success' => false,
-					'message' => $resultOrm
-				];
-			}
 			
 			return [
 				'success' => true,
-				'message' => 'All data deleted successfully from both SQL and ORM!'
+				'message' => 'success:All data deleted successfully from both SQL and ORM!'  // ✅ Ajoute "success:" ici
 			];
 		}
 		catch (Exception $e)
 		{
 			return [
 				'success' => false,
-				'message' => 'Error deleting all data: ' . $e->getMessage()
+				'message' => 'danger:Error deleting all data: ' . $e->getMessage()  // ✅ Format type:message
 			];
 		}
 	}
-
-
 }

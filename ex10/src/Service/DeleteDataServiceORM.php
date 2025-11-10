@@ -31,7 +31,7 @@ class DeleteDataServiceORM
 		}
 		catch (Exception $e)
 		{
-			return "danger: Error deleting data with ID $id. " . $e->getMessage();
+			return "danger:Error deleting data with ID $id. " . $e->getMessage();
 		}
 	}
 
@@ -40,18 +40,18 @@ class DeleteDataServiceORM
 		try
 		{
 			if (!$this->utilsService->checkTableExistenceORM($tableName))
-				return "info: The table $tableName does not exist (ORM).";
+				return "danger:The table $tableName does not exist (ORM).";
 			$datas = $this->data_repository->findAll();
 			if (empty($datas))
-				return "info: No data to delete.";
+				return "info:No data to delete.";
 			foreach ($datas as $data)
 				$this->em->remove($data);
 			$this->em->flush();
-			return "success: All data deleted successfully!";
+			return "success:Success! All data deleted from $tableName.";
 		}
 		catch (Exception $e)
 		{
-			return "danger: Error deleting all data. " . $e->getMessage();
+			return "danger:Error deleting all data. " . $e->getMessage();
 		}
 	}
 }

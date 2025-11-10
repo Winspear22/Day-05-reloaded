@@ -39,7 +39,7 @@ class DeleteDataServiceSQL
 		try
 		{
 			if (!$this->utils_service->checkTableExistenceSQL($tableName))
-				return "info:The table $tableName does not exist (SQL).";
+				return "danger:The table $tableName does not exist (SQL).";
 			$this->sql_connection->executeStatement($sql_command);
 			return "success:Success! All data deleted from $tableName.";
 		}
