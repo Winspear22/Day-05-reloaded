@@ -7,8 +7,6 @@ use Exception;
 use App\Entity\Data;
 use App\Service\UtilsService;
 use Doctrine\DBAL\Connection;
-use App\Service\ReadDataServiceSQL;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
 class ImportFileService
 {
@@ -19,10 +17,9 @@ class ImportFileService
 		private readonly InsertDataServiceSQL $insertDataServiceSQL,
 		private readonly CreateTableServiceSQL $createTableServiceSQL,
 		private readonly CreateTableServiceORM $createTableServiceORM,
-		private readonly FlashBagInterface $flashBag
 	) {}
 	
-	public function importFile(string $filePath, string $tableName): void
+	/*public function importFile(string $filePath, string $tableName): void
     {
         try
 		{
@@ -56,7 +53,44 @@ class ImportFileService
 		{
             $this->flashBag->add('danger', 'Error during the file import: ' . $e->getMessage());
         }
-    }
+    }*/
 
+    public function importFile(string $filePath, string $tableName): array
+    {
+        try
+        {
+            if (!file_exists($filePath))
+                return ['success' => false, 'message' => 'Error ! Could not find file: ' . basename($filePath)];
+            
+            $content = array_map(
+                fn ($line) => htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)
+            );
+            
+            if (empty($content))
+                return ['success' => false, 'message' => 'Error ! The file is empty.'];
+            
+            $date = new DateTime();
+            $this->createTableServiceSQL->createTableSQL($tableName);
+            $this->createTableServiceORM->createTableORM($tableName);
+            
+            foreach ($content as $line)
+                $this->insertDataServiceSQL->insertDataSQL($tableName, $line, $date);
+            
+            foreach ($content as $line)
+            {
+                $dataEntity = new Data();
+                $dataEntity->setData($line);
+                $dataEntity->setDate($date);
+                $this->InsertDataServiceORM->insertDataORM($tableName, $dataEntity);
+            }
+            
+            return ['success' => true, 'message' => 'Success! The SQL and ORM import was successful!'];
+        }
+        catch (Exception $e)
+        {
+            return ['success' => false, 'message' => 'Error during the file import: ' . $e->getMessage()];
+        }
+    }
 }
 ?>

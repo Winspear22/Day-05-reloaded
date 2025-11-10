@@ -637,6 +637,7 @@ File: src/Service/DeleteUserInTable.php
 
 namespace App\Service;
 
+use Exception;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -658,7 +659,7 @@ class DeleteUserInTable
 			$this->em->flush();
 			return "success: User deleted successfully!";
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return "error: " . $e->getMessage();
 		}
@@ -676,7 +677,7 @@ class DeleteUserInTable
 			$this->em->flush();
 			return "success: All users deleted successfully!";
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return "error: " . $e->getMessage();
 		}
@@ -727,6 +728,7 @@ File: src/Service/ReadUserInTable.php
 
 namespace App\Service;
 
+use Exception;
 use App\Repository\UserRepository;
 
 class ReadUserInTable
@@ -737,7 +739,14 @@ class ReadUserInTable
 
     public function getAllUsers(): array
     {
-        return $this->userRepository->findAll();
+        try
+        {
+            return $this->userRepository->findAll();
+        }
+        catch (Exception $e)
+        {
+            return [];
+        }
     }
 }
 

@@ -55,6 +55,7 @@ Root Directory: ./ex10/
 │   │   └── TwigBundle
 │   └── ex10
 │       └── index.html.twig
+├── text.txt
 ├── var
 │   ├── cache
 │   │   ├── env
@@ -152,7 +153,7 @@ Root Directory: ./ex10/
         ├── extra-bundle
         └── twig
 
-91 directories, 55 files
+91 directories, 56 files
 
 ================================================================================
 
@@ -171,7 +172,10 @@ namespace App\Controller;
 use DateTime;
 use Exception;
 use App\Entity\Data;
+use App\Service\CreateTableServiceORM;
+use App\Service\CreateTableServiceSQL;
 use DateTimeInterface;
+use App\Service\ImportFileService;
 use App\Service\ReadDataServiceORM;
 use App\Service\ReadDataServiceSQL;
 use App\Service\DeleteDataServiceORM;
@@ -195,15 +199,37 @@ class Ex10Controller extends AbstractController
         private readonly InsertDataServiceORM $insertOrm,
         private readonly DeleteDataServiceSQL $deleteSql,
         private readonly DeleteDataServiceORM $deleteOrm,
+        private readonly CreateTableServiceSQL $createSql,
+        private readonly CreateTableServiceORM $createOrm
     ) {}
 
     /**
-     * @Route("/ex10", name="app_ex10", methods={"GET"})
+     * @Route("/ex10", name="ex10_index", methods={"GET"})
      */
     public function index(): Response
     {
+        $formSQL = $this->createDataForm();
+        $formORM = $this->createDataForm();
+        $tableNameSql = "ex10_data_sql";
+        $tableNameOrm = "ex10_data_orm";
+        try
+        {
+            $this->createSql->createTableSQL($tableNameSql).
+            $this->createOrm->createTableORM($tableNameOrm);
+            $dataSql = $this->readSql->readAllDataSQL($tableNameSql);
+            $dataOrm = $this->readOrm->readAllDataORM($tableNameOrm);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', "Error, unexpected error: " . $e->getMessage());
+            $dataSql = [];
+            $dataOrm = [];
+        }
         return $this->render('ex10/index.html.twig', [
-            'controller_name' => 'Ex10Controller',
+            'formSQL' => $formSQL->createView(),
+            'formORM' => $formORM->createView(),
+            'datasSQL' => $dataSql,
+            'datasORM' => $dataOrm
         ]);
     }
 
@@ -216,11 +242,10 @@ class Ex10Controller extends AbstractController
         {
             $form = $this->createDataForm();
             $form->handleRequest($request);
-            $date = new DateTime();
-
             if ($form->isSubmitted() && $form->isValid())
             {
                 $data = $form->get('comment')->getData();
+                $date = new DateTime();
                 $result = $this->insertSql->insertDataSQL("ex10_data_sql", $data, $date);//$dataInsertService->insertData($connection, 'ex10_data_sql', $data, $date);
                 [$type, $msg] = explode(':', $result, 2);
                 $this->addFlash($type, $msg);
@@ -248,7 +273,6 @@ class Ex10Controller extends AbstractController
         {
             $form = $this->createDataForm();
             $form->handleRequest($request);
-
             if ($form->isSubmitted() && $form->isValid())
             {
                 $comment = $form->get('comment')->getData();
@@ -295,11 +319,12 @@ class Ex10Controller extends AbstractController
     /**
      * @Route("/ex10/delete_data_orm/{id}", name="ex10_delete_data_orm", methods={"POST"})
      */
-    public function delete(int $id): Response
+    public function deleteDataORM(int $id): Response
     {
         try
         {
             $success = $this->deleteOrm->deleteDataByIdORM("ex10_data_orm", $id);
+            if ($success)
                 $this->addFlash('success', "Success! Data was successfully deleted !");
             else
                 $this->addFlash('danger', "Error, we could not find the data requested !");
@@ -326,7 +351,87 @@ class Ex10Controller extends AbstractController
             ->getForm();
     }
 
-    
+    /**
+     * @Route("/ex10/import", name="ex10_import_file", methods={"POST"})
+     */
+    /*public function importFile(ImportFileService $importFileService): Response
+    {
+        try
+        {
+            // Récupérer le chemin du fichier à la racine du projet
+            $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
+
+            // Valider que c'est un fichier et pas un répertoire
+            if (!is_file($filePath))
+            {
+                $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
+                return $this->redirectToRoute('ex10_index');
+            }
+
+            // Vérifier les permissions de lecture
+            if (!is_readable($filePath))
+            {
+                $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
+                return $this->redirectToRoute('ex10_index');
+            }
+
+            // Appeler le service d'import
+            $importFileService->importFile($filePath, 'ex10_data_sql');
+
+            // Les messages flash sont déjà gérés par le service
+            return $this->redirectToRoute('ex10_index');
+        }
+        catch (Exception $e)
+        {
+            // Sécurité : Ne pas exposer les details techniques en prod
+            $this->addFlash('danger', 'An unexpected error occurred during import.');
+            if ($this->getParameter('kernel.debug'))
+            {
+                $this->addFlash('danger', 'Debug: ' . $e->getMessage());
+            }
+            return $this->redirectToRoute('ex10_index');
+        }
+    }*/
+
+    public function importFile(ImportFileService $importFileService): Response
+{
+    try
+    {
+        $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
+
+        if (!is_file($filePath))
+        {
+            $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
+            return $this->redirectToRoute('ex10_index');
+        }
+
+        if (!is_readable($filePath))
+        {
+            $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
+            return $this->redirectToRoute('ex10_index');
+        }
+
+        // Appeler le service et récupérer le résultat
+        $result = $importFileService->importFile($filePath, 'ex10_data_sql');
+
+        // Ajouter le message au flash selon le résultat
+        $flashType = $result['success'] ? 'success' : 'danger';
+        $this->addFlash($flashType, $result['message']);
+
+        return $this->redirectToRoute('ex10_index');
+    }
+    catch (Exception $e)
+    {
+        $this->addFlash('danger', 'An unexpected error occurred during import.');
+        if ($this->getParameter('kernel.debug'))
+        {
+            $this->addFlash('danger', 'Debug: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex10_index');
+    }
+}
+
+
 }
 
 
@@ -669,8 +774,6 @@ use Exception;
 use App\Entity\Data;
 use App\Service\UtilsService;
 use Doctrine\DBAL\Connection;
-use App\Service\ReadDataServiceSQL;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
 class ImportFileService
 {
@@ -681,10 +784,9 @@ class ImportFileService
 		private readonly InsertDataServiceSQL $insertDataServiceSQL,
 		private readonly CreateTableServiceSQL $createTableServiceSQL,
 		private readonly CreateTableServiceORM $createTableServiceORM,
-		private readonly FlashBagInterface $flashBag
 	) {}
 	
-	public function importFile(string $filePath, string $tableName): void
+	/*public function importFile(string $filePath, string $tableName): void
     {
         try
 		{
@@ -718,8 +820,45 @@ class ImportFileService
 		{
             $this->flashBag->add('danger', 'Error during the file import: ' . $e->getMessage());
         }
-    }
+    }*/
 
+    public function importFile(string $filePath, string $tableName): array
+    {
+        try
+        {
+            if (!file_exists($filePath))
+                return ['success' => false, 'message' => 'Error ! Could not find file: ' . basename($filePath)];
+            
+            $content = array_map(
+                fn ($line) => htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)
+            );
+            
+            if (empty($content))
+                return ['success' => false, 'message' => 'Error ! The file is empty.'];
+            
+            $date = new DateTime();
+            $this->createTableServiceSQL->createTableSQL($tableName);
+            $this->createTableServiceORM->createTableORM($tableName);
+            
+            foreach ($content as $line)
+                $this->insertDataServiceSQL->insertDataSQL($tableName, $line, $date);
+            
+            foreach ($content as $line)
+            {
+                $dataEntity = new Data();
+                $dataEntity->setData($line);
+                $dataEntity->setDate($date);
+                $this->InsertDataServiceORM->insertDataORM($tableName, $dataEntity);
+            }
+            
+            return ['success' => true, 'message' => 'Success! The SQL and ORM import was successful!'];
+        }
+        catch (Exception $e)
+        {
+            return ['success' => false, 'message' => 'Error during the file import: ' . $e->getMessage()];
+        }
+    }
 }
 ?>
 

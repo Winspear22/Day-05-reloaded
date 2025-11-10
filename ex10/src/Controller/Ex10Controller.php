@@ -37,7 +37,7 @@ class Ex10Controller extends AbstractController
     ) {}
 
     /**
-     * @Route("/ex10", name="app_ex10", methods={"GET"})
+     * @Route("/ex10", name="ex10_index", methods={"GET"})
      */
     public function index(): Response
     {
@@ -75,11 +75,10 @@ class Ex10Controller extends AbstractController
         {
             $form = $this->createDataForm();
             $form->handleRequest($request);
-            $date = new DateTime();
-
             if ($form->isSubmitted() && $form->isValid())
             {
                 $data = $form->get('comment')->getData();
+                $date = new DateTime();
                 $result = $this->insertSql->insertDataSQL("ex10_data_sql", $data, $date);//$dataInsertService->insertData($connection, 'ex10_data_sql', $data, $date);
                 [$type, $msg] = explode(':', $result, 2);
                 $this->addFlash($type, $msg);
@@ -107,7 +106,6 @@ class Ex10Controller extends AbstractController
         {
             $form = $this->createDataForm();
             $form->handleRequest($request);
-
             if ($form->isSubmitted() && $form->isValid())
             {
                 $comment = $form->get('comment')->getData();
@@ -189,7 +187,7 @@ class Ex10Controller extends AbstractController
     /**
      * @Route("/ex10/import", name="ex10_import_file", methods={"POST"})
      */
-    public function importFile(ImportFileService $importFileService): Response
+    /*public function importFile(ImportFileService $importFileService): Response
     {
         try
         {
@@ -200,21 +198,21 @@ class Ex10Controller extends AbstractController
             if (!is_file($filePath))
             {
                 $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
-                return $this->redirectToRoute('app_ex10');
+                return $this->redirectToRoute('ex10_index');
             }
 
             // Vérifier les permissions de lecture
             if (!is_readable($filePath))
             {
                 $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
-                return $this->redirectToRoute('app_ex10');
+                return $this->redirectToRoute('ex10_index');
             }
 
             // Appeler le service d'import
             $importFileService->importFile($filePath, 'ex10_data_sql');
 
             // Les messages flash sont déjà gérés par le service
-            return $this->redirectToRoute('app_ex10');
+            return $this->redirectToRoute('ex10_index');
         }
         catch (Exception $e)
         {
@@ -224,9 +222,47 @@ class Ex10Controller extends AbstractController
             {
                 $this->addFlash('danger', 'Debug: ' . $e->getMessage());
             }
-            return $this->redirectToRoute('app_ex10');
+            return $this->redirectToRoute('ex10_index');
         }
+    }*/
+
+    public function importFile(ImportFileService $importFileService): Response
+{
+    try
+    {
+        $filePath = $this->getParameter('kernel.project_dir') . '/text.txt';
+
+        if (!is_file($filePath))
+        {
+            $this->addFlash('danger', 'Error: The file path is invalid or is a directory.');
+            return $this->redirectToRoute('ex10_index');
+        }
+
+        if (!is_readable($filePath))
+        {
+            $this->addFlash('danger', 'Error: The file is not readable. Check file permissions.');
+            return $this->redirectToRoute('ex10_index');
+        }
+
+        // Appeler le service et récupérer le résultat
+        $result = $importFileService->importFile($filePath, 'ex10_data_sql');
+
+        // Ajouter le message au flash selon le résultat
+        $flashType = $result['success'] ? 'success' : 'danger';
+        $this->addFlash($flashType, $result['message']);
+
+        return $this->redirectToRoute('ex10_index');
     }
+    catch (Exception $e)
+    {
+        $this->addFlash('danger', 'An unexpected error occurred during import.');
+        if ($this->getParameter('kernel.debug'))
+        {
+            $this->addFlash('danger', 'Debug: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex10_index');
+    }
+}
 
 
 }
