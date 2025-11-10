@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Service\UtilsService;
 use Doctrine\DBAL\Connection;
 
 class CreateTableServiceSQL
@@ -15,11 +16,11 @@ class CreateTableServiceSQL
 		$sql = "CREATE TABLE IF NOT EXISTS $tableName (
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			data VARCHAR(255) NOT NULL,
-			date DATETIME DEFAULT CURRENT_TIMESTAMP
+			date DATETIME NOT NULL
 		);";
 		try
 		{
-			if (!$this->utils_service->checkTableExistence($tableName))
+			if (!$this->utils_service->checkTableExistenceSQL($tableName))
 				return "info:The table $tableName already exists and cannot be created again.";
 			$this->sql_connection->executeStatement($sql);
 			return "success:Success! The table $tableName was created!";
