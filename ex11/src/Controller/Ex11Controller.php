@@ -18,7 +18,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class Ex11Controller extends AbstractController
 {
-
     public function __construct(
         private readonly Connection $sql_connection,
         private readonly CreatePersonsTableService $createPersonsTable,

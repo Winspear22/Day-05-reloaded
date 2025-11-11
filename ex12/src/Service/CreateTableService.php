@@ -18,9 +18,8 @@ class CreateTableService
 	{
 		try
 		{
-			if ($this->utilsTableService->checkTableExistence($tableName)) {
-				return 'info: Table already exists.';
-			}
+			if ($this->utilsTableService->checkTableExistence($tableName))
+				return 'info:Table already exists.';
 
 			$process = new Process([
 				'php',
@@ -31,7 +30,7 @@ class CreateTableService
 			$process->setWorkingDirectory(__DIR__ . '/../../');
 			$process->run();
 			if ($process->isSuccessful())
-				return 'success: Table created successfully!';
+				return 'success:Table created successfully!';
 			else
 				return 'error: ' . $process->getErrorOutput();
 		} 

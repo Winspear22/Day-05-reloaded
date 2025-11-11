@@ -34,6 +34,8 @@ Root Directory: ./ex12/
 │   │   └── Ex12Controller.php
 │   ├── DataFixtures
 │   │   └── AppFixtures.php
+│   ├── DTO
+│   │   └── SearchRequest.php
 │   ├── Entity
 │   │   ├── Address.php
 │   │   ├── BankAccount.php
@@ -46,7 +48,8 @@ Root Directory: ./ex12/
 │   └── Service
 │       ├── CreateTableService.php
 │       ├── DeleteTableService.php
-│       └── UtilsTableService.php
+│       ├── UtilsTableService.php
+│       └── ValidationQueryService.php
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
@@ -155,7 +158,7 @@ Root Directory: ./ex12/
         ├── extra-bundle
         └── twig
 
-96 directories, 53 files
+97 directories, 55 files
 
 ================================================================================
 
@@ -171,18 +174,85 @@ File: src/Controller/Ex12Controller.php
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Exception;
+use App\Service\CreateTableService;
+use App\Service\DeleteTableService;
+use App\Service\LoadDemoDataService;
+use App\Service\ValidationQueryService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class Ex12Controller extends AbstractController
 {
-    #[Route('/ex12', name: 'app_ex12')]
+        public function __construct(
+        private readonly LoadDemoDataService $loadDemoData,
+        private readonly CreateTableService $createTable,
+        private readonly DeleteTableService $deleteTable,
+        private readonly ValidationQueryService $validationQueryService
+    ) {}
+
+    /**
+     * @Route("/ex12", name="ex12_index", methods={"GET"})
+     */
     public function index(): Response
+    {  
+        return $this->render('ex12/index.html.twig');
+    }
+
+    /**
+     * @Route("/ex12/create_all_tables", name="ex12_create_all_tables", methods={"POST"})
+     */
+    public function createAllTables(): Response
     {
-        return $this->render('ex12/index.html.twig', [
-            'controller_name' => 'Ex12Controller',
-        ]);
+        try
+        {
+            $result = $this->createTable->createTable("ex12_persons");
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex12_index');
+    }
+
+    /**
+     * @Route("/ex12/delete_all_tables_content", name="ex12_delete_all_tables_content", methods={"POST"})
+     */
+    public function deleteAllTablesContent(): Response
+    {
+        try
+        {
+            $result = $this->deleteTable->deleteAllTableContent();
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex12_index');
+    }
+
+    /**
+     * @Route("/ex12/load_demo_data", name="ex12_load_demo_data", methods={"POST"})
+     */
+    public function loadDemoData(): Response
+    {
+        try
+        {
+            $result = $this->loadDemoData->loadData();
+            [$type, $msg] = explode(':', $result, 2);
+            $this->addFlash($type, $msg);
+            return $this->redirectToRoute('ex12_index');
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex12_index');
     }
 }
 
@@ -195,58 +265,79 @@ File: src/DataFixtures/AppFixtures.php
 
 namespace App\DataFixtures;
 
+use App\Entity\Person;
+use App\Entity\Address;
+use App\Entity\BankAccount;
 use Faker\Factory;
-use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 
 class AppFixtures extends Fixture
 {
-    public function __construct(
-        private readonly Connection $connection) {}
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
+        $persons = [];
 
-        // Insérer 20 personnes
-        for ($i = 1; $i <= 20; $i++)
+        // Crée 20 personnes
+        for ($i = 0; $i < 20; $i++)
         {
-            $sql = "INSERT INTO ex12_persons (username, name, email, enable, birthdate) 
-                    VALUES (?, ?, ?, ?, ?)";
-            $this->connection->executeStatement($sql, [
-                $faker->unique()->userName(),
-                $faker->name(),
-                $faker->unique()->email(),
-                $faker->boolean() ? 1 : 0,
-                $faker->dateTime()->format('Y-m-d H:i:s')
-            ]);
+            $person = new Person();
+            $person->setUsername($faker->unique()->userName());
+            $person->setName($faker->name());
+            $person->setEmail($faker->unique()->email());
+            $person->setEnable($faker->boolean());
+            $person->setBirthdate($faker->dateTime());
+
+            $manager->persist($person);
+            $persons[] = $person;  // ← Stocke la personne
         }
 
-        // Insérer 20 adresses
-        for ($i = 1; $i <= 20; $i++)
+        // Flush pour que les IDs soient générés
+        $manager->flush();
+
+        // Crée 20 adresses ET comptes bancaires avec les vraies personnes
+        foreach ($persons as $person)
         {
-            $sql = "INSERT INTO ex12_addresses (person_id, address) 
-                    VALUES (?, ?)";
-            $this->connection->executeStatement($sql, [
-                $i,
-                $faker->address()
-            ]);
+            // Adresse
+            $address = new Address();
+            $address->setAddress($faker->address());
+            $address->setPerson($person);
+            $manager->persist($address);
+
+            // Compte bancaire
+            $bankAccount = new BankAccount();
+            $bankAccount->setIban($faker->iban('FR'));
+            $bankAccount->setBankName($faker->company());
+            $bankAccount->setPerson($person);
+            $manager->persist($bankAccount);
         }
 
-        // Insérer 20 comptes bancaires
-        for ($i = 1; $i <= 20; $i++)
-        {
-            $sql = "INSERT INTO ex12_bank_accounts (person_id, iban, bank_name) 
-                    VALUES (?, ?)";
-            $this->connection->executeStatement($sql, [
-                $i,
-                $faker->iban('FR'),
-                $faker->company()
-            ]);
-        }
+        // Flush final
+        $manager->flush();
     }
 }
 
+
+---
+File: src/DTO/SearchRequest.php
+---
+
+<?php
+
+namespace App\DTO;
+
+class SearchRequest
+{
+    public function __construct(
+        public readonly string $filterName = '',
+        public readonly string $sortBy = 'name',
+        public readonly string $sortDirection = 'asc',
+        public readonly int $limit = 100,
+        public readonly array $messages = []
+    ) {}
+}
+?>
 
 ---
 File: src/Entity/Address.php
@@ -685,30 +776,36 @@ class PersonRepository extends ServiceEntityRepository
         parent::__construct($registry, Person::class);
     }
 
-    //    /**
-    //     * @return Person[] Returns an array of Person objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function getPersonsGrouped(
+            string $filterName = '',
+            string $sortBy = 'name',
+            string $sortDir = 'asc'
+        ): array
+        {
+            $allowedSorts = ['name', 'email', 'birthdate'];
+            $allowedDir = ['asc', 'desc'];
 
-    //    public function findOneBySomeField($value): ?Person
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+            if (!in_array($sortBy, $allowedSorts, true))
+                $sortBy = 'name';
+
+            if (!in_array($sortDir, $allowedDir, true))
+                $sortDir = 'asc';
+
+            $qb = $this->createQueryBuilder('p')
+                ->leftJoin('p.addresses', 'a')->addSelect('a')
+                ->leftJoin('p.bankAccount', 'b')->addSelect('b');
+
+            if (!empty(trim($filterName)))
+            {
+                $qb->andWhere('p.name LIKE :filter')
+                ->setParameter('filter', "%{$filterName}%");
+            }
+
+            $qb->orderBy("p.{$sortBy}", strtoupper($sortDir))
+            ->addOrderBy('p.id', 'ASC');
+
+            return $qb->getQuery()->getResult();
+    }
 }
 
 
@@ -736,9 +833,8 @@ class CreateTableService
 	{
 		try
 		{
-			if ($this->utilsTableService->checkTableExistence($tableName)) {
-				return 'info: Table already exists.';
-			}
+			if ($this->utilsTableService->checkTableExistence($tableName))
+				return 'info:Table already exists.';
 
 			$process = new Process([
 				'php',
@@ -749,7 +845,7 @@ class CreateTableService
 			$process->setWorkingDirectory(__DIR__ . '/../../');
 			$process->run();
 			if ($process->isSuccessful())
-				return 'success: Table created successfully!';
+				return 'success:Table created successfully!';
 			else
 				return 'error: ' . $process->getErrorOutput();
 		} 
@@ -770,41 +866,44 @@ File: src/Service/DeleteTableService.php
 namespace App\Service;
 
 use Exception;
-use Doctrine\DBAL\Connection;
+use App\Repository\PersonRepository;
 use App\Service\UtilsTableService;
-use Symfony\Component\Process\Process;
+use Doctrine\ORM\EntityManagerInterface;
 
 class DeleteTableService 
 {
 	public function __construct(
-		private readonly Connection $orm_connection,
-		private readonly UtilsTableService $utilsTableService
+        private readonly EntityManagerInterface $em,
+		private readonly PersonRepository $repo,
+        private readonly UtilsTableService $utilsTableService
 	) {}
-	public function dropAllTables(string $tableName): string
+    
+    public function deleteAllTableContent(): string
     {
         try
         {
-			if (!$this->utilsTableService->checkTableExistence($tableName))
-				return 'info: Tables do not exist.';
-            $process = new Process([
-                'php',
-                'bin/console',
-                'doctrine:migrations:migrate',
-                '0',
-                '--no-interaction'
-            ]);
-            
-            $process->setWorkingDirectory(__DIR__ . '/../../');
-            $process->run();
-            
-            if ($process->isSuccessful())
-                return 'success: All tables dropped successfully!';
-            else
-                return 'danger: ' . $process->getErrorOutput();
+            if (!$this->utilsTableService->checkTableExistence('ex12_persons'))
+                return 'danger:Table ex12_persons does not exist.';
+
+            if (!$this->utilsTableService->checkTableExistence('ex12_addresses'))
+                return 'danger:Table ex12_addresses does not exist.';
+
+            if (!$this->utilsTableService->checkTableExistence('ex12_bank_accounts'))
+                return 'danger:Table ex12_bank_accounts does not exist.';
+
+            $persons = $this->repo->findAll();
+
+            if (empty($persons))
+                return 'info:No data to delete.';
+
+            foreach ($persons as $person)
+                $this->em->remove($person);
+            $this->em->flush();
+            return 'success:All data deleted successfully!';
         }
         catch (Exception $e)
         {
-            return 'danger: ' . $e->getMessage();
+            return 'danger:' . $e->getMessage();
         }
     }
 }
@@ -840,6 +939,66 @@ class UtilsTableService
 		}
 	}
 }
+
+---
+File: src/Service/ValidationQueryService.php
+---
+
+<?php
+
+namespace App\Service;
+
+use App\DTO\SearchRequest;
+use Symfony\Component\HttpFoundation\Request;
+
+
+class ValidationQueryService
+{
+    public function validateQueryParams(Request $request): SearchRequest
+    {
+        $messages = [];
+
+        $filterName = trim($request->query->get('filter_name', ''));
+        if (mb_strlen($filterName) > 64)
+		{
+            $original = $filterName;
+            $filterName = mb_substr($filterName, 0, 64);
+            $messages[] = ['warning', sprintf('Truncated from %d to 64 chars', mb_strlen($original))];
+        }
+        if ($filterName && !preg_match('/^[\p{L}\p{N} _\'\-\.,]*$/u', $filterName))
+		{
+            $messages[] = ['danger', 'Invalid characters in filter.'];
+            $filterName = '';
+        }
+
+        $allowedSorts = ['name', 'email', 'birthdate'];
+        $sortBy = $request->query->get('sort_by', 'name');
+        if (!in_array($sortBy, $allowedSorts, true))
+		{
+            $messages[] = ['danger', 'Invalid sort field. Using default.'];
+            $sortBy = 'name';
+        }
+
+        $allowedDirs = ['asc', 'desc'];
+        $sortDir = $request->query->get('sort_dir', 'asc');
+        if (!in_array($sortDir, $allowedDirs, true))
+		{
+            $messages[] = ['danger', 'Invalid sort direction. Using ascending.'];
+            $sortDir = 'asc';
+        }
+
+        // Retourner un DTO structuré
+        return new SearchRequest(
+            filterName: $filterName,
+            sortBy: $sortBy,
+            sortDirection: $sortDir,
+            limit: 100,
+            messages: $messages
+        );
+    }
+}
+
+?>
 
 ================================================================================
 

@@ -34,6 +34,8 @@ Root Directory: ./ex12/
 │   │   └── Ex12Controller.php
 │   ├── DataFixtures
 │   │   └── AppFixtures.php
+│   ├── DTO
+│   │   └── SearchRequest.php
 │   ├── Entity
 │   │   ├── Address.php
 │   │   ├── BankAccount.php
@@ -46,7 +48,8 @@ Root Directory: ./ex12/
 │   └── Service
 │       ├── CreateTableService.php
 │       ├── DeleteTableService.php
-│       └── UtilsTableService.php
+│       ├── UtilsTableService.php
+│       └── ValidationQueryService.php
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
@@ -155,7 +158,7 @@ Root Directory: ./ex12/
         ├── extra-bundle
         └── twig
 
-96 directories, 53 files
+97 directories, 55 files
 
 ================================================================================
 

@@ -16,28 +16,34 @@ class PersonRepository extends ServiceEntityRepository
         parent::__construct($registry, Person::class);
     }
 
-    //    /**
-    //     * @return Person[] Returns an array of Person objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function getPersonsGrouped(
+            string $filterName = '',
+            string $sortBy = 'name',
+            string $sortDir = 'asc'
+        ): array
+        {
+            $allowedSorts = ['name', 'email', 'birthdate'];
+            $allowedDir = ['asc', 'desc'];
 
-    //    public function findOneBySomeField($value): ?Person
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+            if (!in_array($sortBy, $allowedSorts, true))
+                $sortBy = 'name';
+
+            if (!in_array($sortDir, $allowedDir, true))
+                $sortDir = 'asc';
+
+            $qb = $this->createQueryBuilder('p')
+                ->leftJoin('p.addresses', 'a')->addSelect('a')
+                ->leftJoin('p.bankAccount', 'b')->addSelect('b');
+
+            if (!empty(trim($filterName)))
+            {
+                $qb->andWhere('p.name LIKE :filter')
+                ->setParameter('filter', "%{$filterName}%");
+            }
+
+            $qb->orderBy("p.{$sortBy}", strtoupper($sortDir))
+            ->addOrderBy('p.id', 'ASC');
+
+            return $qb->getQuery()->getResult();
+    }
 }

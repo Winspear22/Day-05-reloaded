@@ -3,41 +3,44 @@
 namespace App\Service;
 
 use Exception;
-use Doctrine\DBAL\Connection;
+use App\Repository\PersonRepository;
 use App\Service\UtilsTableService;
-use Symfony\Component\Process\Process;
+use Doctrine\ORM\EntityManagerInterface;
 
 class DeleteTableService 
 {
 	public function __construct(
-		private readonly Connection $orm_connection,
-		private readonly UtilsTableService $utilsTableService
+        private readonly EntityManagerInterface $em,
+		private readonly PersonRepository $repo,
+        private readonly UtilsTableService $utilsTableService
 	) {}
-	public function dropAllTables(string $tableName): string
+    
+    public function deleteAllTableContent(): string
     {
         try
         {
-			if (!$this->utilsTableService->checkTableExistence($tableName))
-				return 'info: Tables do not exist.';
-            $process = new Process([
-                'php',
-                'bin/console',
-                'doctrine:migrations:migrate',
-                '0',
-                '--no-interaction'
-            ]);
-            
-            $process->setWorkingDirectory(__DIR__ . '/../../');
-            $process->run();
-            
-            if ($process->isSuccessful())
-                return 'success: All tables dropped successfully!';
-            else
-                return 'danger: ' . $process->getErrorOutput();
+            if (!$this->utilsTableService->checkTableExistence('ex12_persons'))
+                return 'danger:Table ex12_persons does not exist.';
+
+            if (!$this->utilsTableService->checkTableExistence('ex12_addresses'))
+                return 'danger:Table ex12_addresses does not exist.';
+
+            if (!$this->utilsTableService->checkTableExistence('ex12_bank_accounts'))
+                return 'danger:Table ex12_bank_accounts does not exist.';
+
+            $persons = $this->repo->findAll();
+
+            if (empty($persons))
+                return 'info:No data to delete.';
+
+            foreach ($persons as $person)
+                $this->em->remove($person);
+            $this->em->flush();
+            return 'success:All data deleted successfully!';
         }
         catch (Exception $e)
         {
-            return 'danger: ' . $e->getMessage();
+            return 'danger:' . $e->getMessage();
         }
     }
 }
