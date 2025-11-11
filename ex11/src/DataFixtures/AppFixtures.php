@@ -24,7 +24,7 @@ class AppFixtures extends Fixture
                 $faker->unique()->userName(),
                 $faker->name(),
                 $faker->unique()->email(),
-                $faker->boolean(),
+                $faker->boolean() ? 1 : 0,
                 $faker->dateTime()->format('Y-m-d H:i:s')
             ]);
         }

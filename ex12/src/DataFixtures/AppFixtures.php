@@ -2,54 +2,55 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Person;
+use App\Entity\Address;
+use App\Entity\BankAccount;
 use Faker\Factory;
-use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 
 class AppFixtures extends Fixture
 {
-    public function __construct(
-        private readonly Connection $connection) {}
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
+        $persons = [];
 
-        // Insérer 20 personnes
-        for ($i = 1; $i <= 20; $i++)
+        // Crée 20 personnes
+        for ($i = 0; $i < 20; $i++)
         {
-            $sql = "INSERT INTO ex12_persons (username, name, email, enable, birthdate) 
-                    VALUES (?, ?, ?, ?, ?)";
-            $this->connection->executeStatement($sql, [
-                $faker->unique()->userName(),
-                $faker->name(),
-                $faker->unique()->email(),
-                $faker->boolean(),
-                $faker->dateTime()->format('Y-m-d H:i:s')
-            ]);
+            $person = new Person();
+            $person->setUsername($faker->unique()->userName());
+            $person->setName($faker->name());
+            $person->setEmail($faker->unique()->email());
+            $person->setEnable($faker->boolean());
+            $person->setBirthdate($faker->dateTime());
+
+            $manager->persist($person);
+            $persons[] = $person;  // ← Stocke la personne
         }
 
-        // Insérer 20 adresses
-        for ($i = 1; $i <= 20; $i++)
+        // Flush pour que les IDs soient générés
+        $manager->flush();
+
+        // Crée 20 adresses ET comptes bancaires avec les vraies personnes
+        foreach ($persons as $person)
         {
-            $sql = "INSERT INTO ex12_addresses (person_id, address) 
-                    VALUES (?, ?)";
-            $this->connection->executeStatement($sql, [
-                $i,
-                $faker->address()
-            ]);
+            // Adresse
+            $address = new Address();
+            $address->setAddress($faker->address());
+            $address->setPerson($person);
+            $manager->persist($address);
+
+            // Compte bancaire
+            $bankAccount = new BankAccount();
+            $bankAccount->setIban($faker->iban('FR'));
+            $bankAccount->setBankName($faker->company());
+            $bankAccount->setPerson($person);
+            $manager->persist($bankAccount);
         }
 
-        // Insérer 20 comptes bancaires
-        for ($i = 1; $i <= 20; $i++)
-        {
-            $sql = "INSERT INTO ex12_bank_accounts (person_id, iban, bank_name) 
-                    VALUES (?, ?)";
-            $this->connection->executeStatement($sql, [
-                $i,
-                $faker->iban('FR'),
-                $faker->company()
-            ]);
-        }
+        // Flush final
+        $manager->flush();
     }
 }
