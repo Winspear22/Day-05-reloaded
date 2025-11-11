@@ -1,0 +1,224 @@
+================================================================================
+PROJECT STRUCTURE OVERVIEW - ex09
+================================================================================
+
+Root Directory: ./ex09/
+
+./ex09
+├── bin
+│   └── console
+├── composer.json
+├── composer.lock
+├── config
+│   ├── bundles.php
+│   ├── packages
+│   │   ├── cache.yaml
+│   │   ├── doctrine_migrations.yaml
+│   │   ├── doctrine.yaml
+│   │   ├── framework.yaml
+│   │   ├── routing.yaml
+│   │   ├── twig.yaml
+│   │   └── validator.yaml
+│   ├── preload.php
+│   ├── routes
+│   │   └── framework.yaml
+│   ├── routes.yaml
+│   └── services.yaml
+├── migrations
+│   ├── Version20251109120844.php
+│   └── Version20251109121119.php
+├── public
+│   ├── index.php
+│   └── style.css
+├── src
+│   ├── Controller
+│   │   └── Ex09Controller.php
+│   ├── Entity
+│   │   ├── Address.php
+│   │   ├── BankAccount.php
+│   │   └── Person.php
+│   ├── Kernel.php
+│   ├── Repository
+│   │   ├── AddressRepository.php
+│   │   ├── BankAccountRepository.php
+│   │   └── PersonRepository.php
+│   └── Service
+│       ├── CreateTableService.php
+│       ├── DeleteTableService.php
+│       └── UtilsTableService.php
+├── symfony.lock
+└── templates
+    ├── base.html.twig
+    ├── bundles
+    │   └── TwigBundle
+    └── ex09
+        └── index.html.twig
+
+15 directories, 33 files
+
+================================================================================
+
+📂 TEMPLATE FILES (templates/) - Location: ex09/templates/
+================================================================================
+
+
+---
+File: templates/base.html.twig
+---
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('style.css') }}">
+        {% endblock %}
+
+        {% block javascripts %}
+        {% endblock %}
+    </head>
+    <body>
+    {% block body %}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        {% block content %}{% endblock %}
+    {% endblock %}
+    </body>
+</html>
+
+
+---
+File: templates/bundles/TwigBundle/Exception/error404.html.twig
+---
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Page non trouvée (404){% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h1>Erreur 404</h1>
+        <p>Désolé, la page que vous cherchez n'existe pas !</p>
+        <p>Ceci est un message d'erreur personnalisé.</p>
+        <a class="back-btn" href="{{ path('ex09_index') }}">Revenir à l'accueil</a>
+    </div>
+{% endblock %}
+
+
+---
+File: templates/bundles/TwigBundle/Exception/error405.html.twig
+---
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Méthode non autorisée (405){% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h1>Erreur 405</h1>
+        <p>Désolé, la méthode que vous utilisez n'est pas autorisée !</p>
+        <p>Vous tentez d'utiliser une route POST avec une méthode GET !</p>
+        <p>Ceci est un message d'erreur personnalisé.</p>
+        <a class="back-btn" href="{{ path('ex09_index') }}">Revenir à l'accueil</a>
+    </div>
+{% endblock %}
+
+---
+File: templates/ex09/index.html.twig
+---
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Ex09 - ORM Relations & Migrations{% endblock %}
+
+{% block content %}
+    <h1>Exercise 09 - ORM Relations & Migrations</h1>
+    
+    <p>This exercise demonstrates Doctrine ORM relationships (OneToOne, OneToMany) and migration management.</p>
+
+    <h2>Migration States</h2>
+    
+    <div class="migration-info">
+        <h3>Available Options</h3>
+        <p>Choose the database schema you want to use:</p>
+    </div>
+
+    <h3>1. Create Tables WITHOUT marital_status</h3>
+    <p>Creates the initial schema with Person, BankAccount, and Address tables (no marital_status column).</p>
+    <form method="POST" action="{{ path('ex09_create_table_without_marital_status') }}">
+        <button type="submit" class="btn btn-info">
+            ✓ Migrate to Version 1 (WITHOUT marital_status)
+        </button>
+    </form>
+
+    <h3>2. Create Tables WITH marital_status</h3>
+    <p>Adds the marital_status column to the Person table.</p>
+    <form method="POST" action="{{ path('ex09_create_table_with_marital_status') }}">
+        <button type="submit" class="btn btn-success">
+            ✓ Migrate to Version 2 (WITH marital_status)
+        </button>
+    </form>
+
+    <h3>3. Drop All Tables</h3>
+    <p>Removes all tables and returns the database to its initial state (no migrations executed).</p>
+    <form method="POST" action="{{ path('ex09_drop_tables') }}" 
+          onsubmit="return confirm('⚠️  Are you sure? This will DELETE all tables!');">
+        <button type="submit" class="btn btn-danger">
+            ✗ Drop All Tables
+        </button>
+    </form>
+
+    <hr>
+
+    <h2>Database Schema Information</h2>
+    
+    <h3>Tables Structure</h3>
+    <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Version</th>
+                <th>ex09_persons</th>
+                <th>ex09_bank_accounts</th>
+                <th>ex09_addresses</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>V1 (WITHOUT marital_status)</strong></td>
+                <td>id, username, name, email, enable, birthdate</td>
+                <td>id, iban, bank_name, person_id (UNIQUE)</td>
+                <td>id, address, person_id (INDEX)</td>
+            </tr>
+            <tr>
+                <td><strong>V2 (WITH marital_status)</strong></td>
+                <td>id, username, name, email, enable, birthdate, <strong>marital_status</strong></td>
+                <td>id, iban, bank_name, person_id (UNIQUE)</td>
+                <td>id, address, person_id (INDEX)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Relationships</h3>
+    <ul>
+        <li><strong>Person ↔ BankAccount:</strong> OneToOne (1 person = 1 bank account MAX)</li>
+        <li><strong>Person ↔ Address:</strong> OneToMany (1 person = N addresses)</li>
+    </ul>
+
+    <hr>
+
+    <h2>How to Use</h2>
+    <ol>
+        <li>Click <strong>"Migrate to Version 1"</strong> to create tables without marital_status</li>
+        <li>Click <strong>"Migrate to Version 2"</strong> to add marital_status column</li>
+        <li>Use <strong>"Migrate to Version 1"</strong> again to rollback and remove marital_status</li>
+        <li>Click <strong>"Drop All Tables"</strong> to reset the database completely</li>
+    </ol>
+
+{% endblock %}
+
