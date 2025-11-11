@@ -1,5 +1,24 @@
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+ex12_index:
+    path: /ex12
+    controller: App\Controller\Ex12Controller::index
+    methods: [GET]
+
+ex12_create_all_tables:
+    path: /ex12/create_all_tables
+    controller: App\Controller\Ex12Controller::createAllTables
+    methods: [POST]
+
+ex12_load_demo_data:
+    path: /ex12/load_demo_data
+    controller: App\Controller\Ex12Controller::loadDemoData
+    methods: [POST]
+
+ex12_delete_all_tables_content:
+    path: /ex12/delete_all_tables_content
+    controller: App\Controller\Ex12Controller::deleteAllTablesContent
+    methods: [POST]
+
+ex12_search:
+    path: /ex12/search
+    controller: App\Controller\Ex12Controller::search
+    methods: [GET]

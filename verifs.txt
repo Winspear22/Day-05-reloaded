@@ -3,3 +3,4 @@ Vérifier que le front est harmoniser entre chq exercices
 Vérifier que les routes soient bien inscrites dans le routes.yaml
 Vérifier que tout est en anglais
 Vérifier de retirer tous les commentaires
+Vérifier que chaque routes a ses méthodes
