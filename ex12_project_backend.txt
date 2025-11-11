@@ -48,6 +48,7 @@ Root Directory: ./ex12/
 │   └── Service
 │       ├── CreateTableService.php
 │       ├── DeleteTableService.php
+│       ├── LoadDemoDataService.php
 │       ├── UtilsTableService.php
 │       └── ValidationQueryService.php
 ├── symfony.lock
@@ -59,7 +60,6 @@ Root Directory: ./ex12/
 │       └── index.html.twig
 ├── var
 │   ├── cache
-│   │   ├── dev
 │   │   └── prod
 │   └── log
 └── vendor
@@ -158,7 +158,7 @@ Root Directory: ./ex12/
         ├── extra-bundle
         └── twig
 
-97 directories, 55 files
+96 directories, 56 files
 
 ================================================================================
 
@@ -177,8 +177,10 @@ namespace App\Controller;
 use Exception;
 use App\Service\CreateTableService;
 use App\Service\DeleteTableService;
+use App\Repository\PersonRepository;
 use App\Service\LoadDemoDataService;
 use App\Service\ValidationQueryService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -186,6 +188,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 final class Ex12Controller extends AbstractController
 {
         public function __construct(
+        private readonly PersonRepository $personRepository,
         private readonly LoadDemoDataService $loadDemoData,
         private readonly CreateTableService $createTable,
         private readonly DeleteTableService $deleteTable,
@@ -254,6 +257,39 @@ final class Ex12Controller extends AbstractController
         }
         return $this->redirectToRoute('ex12_index');
     }
+
+    /**
+     * @Route("/ex12/search", name="ex12_search", methods={"GET"})
+     */
+    public function search(Request $request): Response
+{
+    try
+    {
+        $searchRequest = $this->validationQueryService->validateQueryParams($request);
+
+        foreach ($searchRequest->messages as [$type, $msg])
+            $this->addFlash($type, $msg);
+
+        $results = $this->personRepository->getPersonsGrouped(
+            $searchRequest->filterName,
+            $searchRequest->sortBy,
+            $searchRequest->sortDirection
+        );
+
+        return $this->render('ex12/index.html.twig', [
+            'results' => $results,
+            'filterName' => $searchRequest->filterName,
+            'sortBy' => $searchRequest->sortBy,
+            'sortDirection' => $searchRequest->sortDirection,
+            'totalResults' => count($results)
+        ]);
+    }
+    catch (Exception $e)
+    {
+        $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        return $this->redirectToRoute('ex12_index');
+    }
+}
 }
 
 
@@ -904,6 +940,45 @@ class DeleteTableService
         catch (Exception $e)
         {
             return 'danger:' . $e->getMessage();
+        }
+    }
+}
+
+---
+File: src/Service/LoadDemoDataService.php
+---
+
+<?php
+
+namespace App\Service;
+
+use Exception;
+use Symfony\Component\Process\Process;
+
+class LoadDemoDataService
+{
+    public function loadData(): string
+    {
+        try
+        {
+            $process = new Process([
+                'php',
+                'bin/console',
+                'doctrine:fixtures:load',
+                '--no-interaction'
+            ]);
+            
+            $process->setWorkingDirectory(__DIR__ . '/../../');
+            $process->run();
+            
+            if ($process->isSuccessful())
+                return 'success: Data loaded successfully!';
+            else
+                return 'error: ' . $process->getErrorOutput();
+        }
+        catch (Exception $e)
+        {
+            return 'error: ' . $e->getMessage();
         }
     }
 }

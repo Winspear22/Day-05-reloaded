@@ -48,6 +48,7 @@ Root Directory: ./ex12/
 │   └── Service
 │       ├── CreateTableService.php
 │       ├── DeleteTableService.php
+│       ├── LoadDemoDataService.php
 │       ├── UtilsTableService.php
 │       └── ValidationQueryService.php
 ├── symfony.lock
@@ -59,7 +60,6 @@ Root Directory: ./ex12/
 │       └── index.html.twig
 ├── var
 │   ├── cache
-│   │   ├── dev
 │   │   └── prod
 │   └── log
 └── vendor
@@ -158,7 +158,7 @@ Root Directory: ./ex12/
         ├── extra-bundle
         └── twig
 
-97 directories, 55 files
+96 directories, 56 files
 
 ================================================================================
 
