@@ -18,7 +18,7 @@ class Address
     #[ORM\Column(type: Types::TEXT)]
     private ?string $address = null;
 
-    #[ORM\ManyToOne(inversedBy: 'addresses')]
+    #[ORM\ManyToOne(inversedBy: 'addresses', cascade: ['persist', 'remove'])]
     private ?Person $person = null;
 
     public function getId(): ?int
