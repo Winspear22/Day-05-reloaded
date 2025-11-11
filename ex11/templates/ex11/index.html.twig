@@ -1,38 +1,104 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Exercise 11 - Test Tables{% endblock %}
+{% block title %}ex11 – Table Management{% endblock %}
 
-{% block body %}
+{% block content %}
+    <h1>ex11 – Table Management</h1>
 
-{% for label, messages in app.flashes %}
-    {% for message in messages %}
-        <div class="alert alert-{{ label }}">{{ message }}</div>
-    {% endfor %}
-{% endfor %}
+    {# Boutons de gestion #}
+    <div style="margin-bottom: 1em;">
+        <form action="{{ path('ex11_create_all_tables') }}" method="post" style="display: inline;">
+            <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                ✓ Create all tables
+            </button>
+        </form>
 
-<div style="max-width: 600px; margin: 50px auto; padding: 20px;">
-    <h1>Exercise 11 - Test</h1>
+        <form action="{{ path('ex11_load_demo_data') }}" method="post" style="display: inline; margin-left: 10px;">
+            <button type="submit" style="padding: 10px 20px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                ⚡ Fill tables with random data
+            </button>
+        </form>
 
-    <!-- Créer les tables -->
-    <form method="POST" action="{{ path('ex11_create_all_tables') }}" style="margin: 20px 0;">
-        <button type="submit" style="padding: 12px 30px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
-            ✓ Créer les Tables
-        </button>
-    </form>
+        <form action="{{ path('ex11_delete_all_tables') }}" method="post" style="display: inline; margin-left: 10px;">
+            <button type="submit" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="return confirm('Are you sure?')">
+                🗑️ Delete all data
+            </button>
+        </form>
+    </div>
 
-    <!-- Charger les données de démo -->
-    <form method="POST" action="{{ path('ex11_load_demo_data') }}" style="margin: 20px 0;">
-        <button type="submit" style="padding: 12px 30px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
-            ⚡ Charger Données de Démo
-        </button>
-    </form>
+    {# Formulaire de recherche et tri #}
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 1.5em; border-left: 4px solid #6c757d;">
+        <form method="get" action="{{ path('ex11_search') }}" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <div>
+                <input type="text" name="filter_name" value="{{ filterName is defined ? filterName : '' }}" placeholder="Filter by name" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
 
-    <!-- Supprimer toutes les données -->
-    <form method="POST" action="{{ path('ex11_delete_all_tables') }}" style="margin: 20px 0;">
-        <button type="submit" style="padding: 12px 30px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;" onclick="return confirm('Êtes-vous sûr ?')">
-            🗑️ Supprimer Toutes les Données
-        </button>
-    </form>
-</div>
+            <div>
+                <select name="sort_by" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="name" {% if sortBy is defined and sortBy == 'name' %}selected{% endif %}>Name</option>
+                    <option value="email" {% if sortBy is defined and sortBy == 'email' %}selected{% endif %}>Email</option>
+                    <option value="birthdate" {% if sortBy is defined and sortBy == 'birthdate' %}selected{% endif %}>Birthdate</option>
+                </select>
+            </div>
+
+            <div>
+                <select name="sort_dir" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="asc" {% if sortDirection is defined and sortDirection == 'asc' %}selected{% endif %}>Ascending</option>
+                    <option value="desc" {% if sortDirection is defined and sortDirection == 'desc' %}selected{% endif %}>Descending</option>
+                </select>
+            </div>
+
+            <button type="submit" style="padding: 8px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                🔍 Apply
+            </button>
+        </form>
+    </div>
+
+    {# Tableau des résultats #}
+    <h2>Persons + Addresses + Bank Accounts</h2>
+    
+    {% if results is defined and results|length > 0 %}
+        <div style="overflow-x: auto; margin-bottom: 2em;">
+            <table border="1" style="width: 100%;">
+                <thead style="background: #343a40; color: white;">
+                    <tr>
+                        <th style="padding: 10px;">Id</th>
+                        <th style="padding: 10px;">Username</th>
+                        <th style="padding: 10px;">Name</th>
+                        <th style="padding: 10px;">Email</th>
+                        <th style="padding: 10px;">Enable</th>
+                        <th style="padding: 10px;">Birthdate</th>
+                        <th style="padding: 10px;">Addresses</th>
+                        <th style="padding: 10px;">IBAN</th>
+                        <th style="padding: 10px;">Bank Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr style="background: {% if loop.index % 2 == 0 %}#f9f9f9{% endif %};">
+                            <td style="padding: 10px;"><strong>{{ result.id }}</strong></td>
+                            <td style="padding: 10px;">{{ result.username }}</td>
+                            <td style="padding: 10px;">{{ result.name }}</td>
+                            <td style="padding: 10px;">{{ result.email }}</td>
+                            <td style="padding: 10px;">{{ result.enable ? 'Yes' : 'No' }}</td>
+                            <td style="padding: 10px;">{{ result.birthdate|date('d/m/Y') }}</td>
+                            <td style="padding: 10px;">{{ result.addresses|raw }}</td>
+                            <td style="padding: 10px; font-family: monospace; font-size: 0.9em;">{{ result.iban ?? 'N/A' }}</td>
+                            <td style="padding: 10px;">{{ result.bank_name ?? 'N/A' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p style="color: #666;">{{ totalResults is defined ? totalResults : results|length }} result(s) found</p>
+    {% elseif results is defined %}
+        <div style="background: #fff3cd; padding: 15px; border-radius: 4px; border-left: 4px solid #ffc107; margin: 20px 0;">
+            ⚠️ No data found. Please create tables and fill them with random data first!
+        </div>
+    {% else %}
+        <div style="background: #d1ecf1; padding: 15px; border-radius: 4px; border-left: 4px solid #17a2b8; margin: 20px 0;">
+            ℹ️ Please create tables and load demo data to start!
+        </div>
+    {% endif %}
 
 {% endblock %}

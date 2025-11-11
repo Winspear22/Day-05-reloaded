@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use Exception;
 use Doctrine\DBAL\Connection;
+use App\Service\ReadAndSortService;
 use App\Service\LoadDemoDataService;
 use App\Service\DeleteAllTablesService;
+use App\Service\ValidationQueryService;
 use App\Service\CreatePersonsTableService;
 use App\Service\CreateAddressesTableService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Service\CreateBankAccountsTableService;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,7 +25,9 @@ final class Ex11Controller extends AbstractController
         private readonly CreateBankAccountsTableService $createBankAccountsTable,
         private readonly CreateAddressesTableService $createAddressesTable,
         private readonly DeleteAllTablesService $deleteTable,
-        private readonly LoadDemoDataService $loadDemoData
+        private readonly LoadDemoDataService $loadDemoData,
+        private readonly ReadAndSortService $readAndSortService,
+        private readonly ValidationQueryService $validationQueryService
     ) {}
 
     /**
@@ -98,6 +103,37 @@ final class Ex11Controller extends AbstractController
             $this->addFlash('danger', 'Error: ' . $e->getMessage());
         }
         return $this->redirectToRoute('ex11_index');
+    }
 
-    }   
+    /**
+     * @Route("/ex11/search", name="ex11_search", methods={"GET"})
+     */
+    public function search(Request $request): Response
+    {
+        try
+        {
+            $searchRequest = $this->validationQueryService->validateQueryParams($request);
+
+            foreach ($searchRequest->messages as [$type, $msg])
+                $this->addFlash($type, $msg);
+
+            $results = $this->readAndSortService->getPersonsGrouped(
+                $searchRequest->filterName,
+                $searchRequest->sortBy,
+                $searchRequest->sortDirection
+            );
+            return $this->render('ex11/index.html.twig', [
+                'results' => $results,
+                'filterName' => $searchRequest->filterName,
+                'sortBy' => $searchRequest->sortBy,
+                'sortDirection' => $searchRequest->sortDirection,
+                'totalResults' => count($results)
+            ]);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger','Error : '. $e->getMessage());
+            return $this->redirectToRoute('ex11_index');
+        }
+    }
 }
