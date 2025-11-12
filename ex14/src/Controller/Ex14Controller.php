@@ -26,6 +26,7 @@ final class Ex14Controller extends AbstractController
     public function index(): Response
     {
         $tableName = "ex14_comments";
+        $comments = [];
         try
         {
             $doesTableExist = $this->utilsTableService->checkTableExistence($tableName);
@@ -50,7 +51,7 @@ final class Ex14Controller extends AbstractController
     {
         try
         {
-            $result = $this->tableCreator->createTable('ex14_comments');
+            $result = $this->tableCreator->createCommentsTable('ex14_comments');
             [$type, $msg] = explode(':', $result, 2);
             $this->addFlash($type, $msg);
             return $this->redirectToRoute('ex14_index');

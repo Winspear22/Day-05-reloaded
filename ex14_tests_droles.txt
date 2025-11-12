@@ -1,0 +1,3 @@
+test'); UPDATE ex14_comments SET comment = 'HACKED BY SQL INJECTION !!!'; --
+
+'); SHOW TABLES; --	

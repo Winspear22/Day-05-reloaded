@@ -1,20 +1,78 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello Ex14Controller!{% endblock %}
+{% block title %}ex14 – SQL Injection Demo{% endblock %}
 
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+{% block content %}
+    <h1>ex14 – SQL Injection Demo</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {# Table status #}
+    {% if doesTableExist %}
+        <div class="alert alert-success">✅ Table "{{ tableName }}" exists.</div>
+    {% else %}
+        <div class="alert alert-danger">❌ Table "{{ tableName }}" does not exist.</div>
+    {% endif %}
+    
+    {# Create table button #}
+    <form action="{{ path('ex14_create_table') }}" method="post" style="margin-bottom: 1em;">
+        <button type="submit" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer;">
+            📊 Create Table
+        </button>
+    </form>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/adnen/Desktop/Day-05-reloaded/ex14/src/Controller/Ex14Controller.php</code></li>
-        <li>Your template at <code>/home/adnen/Desktop/Day-05-reloaded/ex14/templates/ex14/index.html.twig</code></li>
-    </ul>
-</div>
+    {% if doesTableExist %}
+        {# Vulnerable form #}
+        <h2>🚨 Insert Comment (VULNERABLE)</h2>
+        <form id="vuln-form" action="{{ path('ex14_insert_vulnerable_comment') }}" method="post" style="margin-bottom: 1em; padding: 10px; background: #ffe6e6; border: 1px solid #ff0000; border-radius: 3px;">
+            <input type="text" name="comment" id="vuln-comment" placeholder="Enter comment (vulnerable to SQL injection)" style="width: 100%; padding: 8px; box-sizing: border-box;">
+            <button type="submit" style="background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; margin-top: 10px;">
+                ⚠️ Insert (Vulnerable)
+            </button>
+        </form>
+        <button type="button" onclick="injectSQL()" style="background: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 1em;">
+            🔥 Try SQL Injection
+        </button>
+
+        {# Secure form #}
+        <h2>✅ Insert Comment (SECURE)</h2>
+        <form action="{{ path('ex14_insert_secure_comment') }}" method="post" style="margin-bottom: 1em; padding: 10px; background: #e6ffe6; border: 1px solid #00aa00; border-radius: 3px;">
+            <input type="text" name="comment" placeholder="Enter comment (protected)" style="width: 100%; padding: 8px; box-sizing: border-box;">
+            <button type="submit" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; margin-top: 10px;">
+                ✅ Insert (Secure)
+            </button>
+        </form>
+
+        {# Comments table #}
+        <h2>📋 All Comments</h2>
+        <table border="1" style="width: 100%; margin-bottom: 2em; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #007bff; color: white;">
+                    <th style="padding: 10px;">ID</th>
+                    <th style="padding: 10px;">Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in comments %}
+                    <tr>
+                        <td style="padding: 10px;">{{ c.id }}</td>
+                        <td style="padding: 10px;">{{ c.comment }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="2" style="padding: 10px; text-align: center; font-style: italic;">No comments found</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <script>
+        function injectSQL()
+        {
+            const field = document.getElementById('vuln-comment');
+            const payload = "'); DROP TABLE ex14_comments; --";
+            
+            field.value = payload;
+            alert(`Injection payload entered:\n\n${payload}\n\nSubmit the form to execute the injection!`);
+        }
+    </script>
 {% endblock %}
