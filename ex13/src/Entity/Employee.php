@@ -22,9 +22,11 @@ class Employee
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 64)]
     private ?string $firstname = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 64)]
     private ?string $lastname = null;
 
@@ -33,24 +35,30 @@ class Employee
     #[ORM\Column(length: 128, unique: true)]
     private ?string $email = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column]
     private ?\DateTime $birthdate = null;
 
     #[ORM\Column]
-    private ?bool $active = null;
+    private bool $active = true;
 
+    #[Assert\NotBlank]
     #[ORM\Column]
     private ?\DateTime $employed_since = null;
 
     #[ORM\Column]
     private ?\DateTime $employed_until = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(enumType: HoursEnum::class)]
     private ?HoursEnum $hours = null;
 
+    #[Assert\NotBlank]
+    #[Assert\Positive]
     #[ORM\Column]
     private ?int $salary = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(enumType: PositionEnum::class)]
     private ?PositionEnum $position = null;
 
@@ -240,9 +248,9 @@ class Employee
     {
         $birthdate      = $employee->getBirthdate();
         $employedSince  = $employee->getEmployedSince();
-            $employedUntil  = $employee->getEmployedUntil();
+        $employedUntil  = $employee->getEmployedUntil();
 
-    // Garde-fou : si un champ date n'est pas un DateTime valide (transfo échouée, etc.)
+        // Garde-fou : si un champ date n'est pas un DateTime valide (transfo échouée, etc.)
         foreach (['birthdate' => $birthdate, 'employed_since' => $employedSince, 'employed_until' => $employedUntil] as $field => $value) {
             if ($value !== null && !($value instanceof \DateTimeInterface)) {
                 $context->buildViolation('Invalid date.')
@@ -252,7 +260,7 @@ class Employee
             }
         }
 
-        // Si pas de dates minimales, on s’arrête là (le reste des règles attend au moins naissance + début)
+        // Si pas de dates minimales, on s'arrête là (le reste des règles attend au moins naissance + début)
         if (!$birthdate || !$employedSince)
             return;
 
@@ -270,7 +278,7 @@ class Employee
             }
         }
 
-        // 0) Naissance dans la plage 1945 ... aujourd’hui
+        // 0) Naissance dans la plage 1945 ... aujourd'hui
         if ($birthdate < $minDate || $birthdate > $today)
         {
             $context->buildViolation('Birthdate must be between January 1, 1945 and today.')
@@ -278,7 +286,7 @@ class Employee
                 ->addViolation();
         }
 
-        // 1) L’employé doit être né avant son embauche
+        // 1) L'employé doit être né avant son embauche
         if ($employedSince < $birthdate)
         {
             $context->buildViolation('Error. Hire date cannot be before birth date.')
@@ -286,7 +294,7 @@ class Employee
                 ->addViolation();
         }
 
-        // 2) L’employé doit avoir au moins 18 ans à l’embauche
+        // 2) L'employé doit avoir au moins 18 ans à l'embauche
         $minHireDate = (new DateTime($birthdate->format('Y-m-d H:i:s')))->modify('+18 years');
         if ($employedSince < $minHireDate)
         {
