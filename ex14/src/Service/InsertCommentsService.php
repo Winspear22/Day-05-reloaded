@@ -24,7 +24,7 @@ class InsertCommentsService
             return "danger:Error, there was a problem with the database or the table $tableName : " . $e->getMessage();
         }
     }
-    public function insertCommentSafe(string $tableName, string $comment): string
+    public function insertCommentSecure(string $tableName, string $comment): string
     {
         $sql = "INSERT INTO $tableName (comment)
                 VALUES (:comment)";
