@@ -21,6 +21,9 @@ class UpdateEmployeesService
 		{
 			if (!$this->utilsTableService->checkTableExistence('ex13_employees'))
                 return 'danger:Table ex13_employees does not exist.';
+			$employee = $this->repo->find($employee->getId());
+            if (!$employee)
+				return 'danger:Error, employee not found.';
 			$this->em->flush();
 			return "success: Employee updated successfully!";
 		}

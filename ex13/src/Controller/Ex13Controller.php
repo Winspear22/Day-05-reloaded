@@ -14,6 +14,7 @@ use App\Service\DeleteEmployeesService;
 use App\Service\InsertEmployeesService;
 use App\Service\UpdateEmployeesService;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -66,21 +67,83 @@ final class Ex13Controller extends AbstractController
     /**
      * @Route("/ex13/delete_employees/{id}", name="ex13_delete_employees", methods={"POST"})
      */
-    public function deleteEmployees()
+    public function deleteEmployees(int $id)
     {
+        try
+        {
+            $result = $this->employeesDeleter->deleteEmployeeById($id);
+            [$type, $message] = explode(':', $result, 2);
+            $this->addFlash($type, $message);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex13_index');
     }
 
     /**
      * @Route("/ex13/update_employees/{id}", name="ex13_update_employees", methods={"GET", "POST"})
      */
-    public function updateEmployees()
-    {}
+    public function updateEmployees(Request $request, int $id)
+    {
+        try
+        {
+            $employee = $this->repo->find($id);
+            if (!$employee)
+            {
+                $this->addFlash('danger', 'Error: Employee not found.');
+                return $this->redirectToRoute('ex13_index');
+            }
+            $form = $this->createEmployeeForm($employee);
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid())
+            {
+                $result = $this->employeesUpdater->updateEmployee($employee);
+                [$type, $message] = explode(':', $result, 2);
+                $this->addFlash($type, $message);
+                return $this->redirectToRoute('ex13_index');
+            }
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->render('ex13/update.html.twig', [
+            'form' => $form->createView(),
+            'employee' => $employee,
+        ]);
+    }
 
     /**
-     * @Route("/ex13/insert_employees/{id}", name="ex13_insert_employees", methods={"POST"})
+     * @Route("/ex13/insert_employees", name="ex13_insert_employees", methods={"POST"})
      */
-    public function createEmployees()
-    {}
+    public function insertEmployees(Request $request)
+    {
+        $employee = new Employee();
+        $form = $this->createEmployeeForm($employee);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            try
+            {
+                $result = $this->employeesInserter->insertEmployee($employee);
+                [$type, $message] = explode(':', $result, 2);
+                $this->addFlash($type, $message);
+                return $this->redirectToRoute('ex13_index');
+            }
+            catch (Exception $e)
+            {
+                $this->addFlash('danger', 'Error adding employee: ' . $e->getMessage());
+            }
+            return $this->redirectToRoute('ex13_index');
+        }
+        else
+        {
+            $this->addFlash('danger', 'Error - Invalid form submission.');
+            return $this->redirectToRoute('ex13_index');
+        } 
+    }
 
     private function createEmployeeForm(Employee $employee): FormInterface
     {

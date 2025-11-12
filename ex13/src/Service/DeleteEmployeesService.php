@@ -37,5 +37,26 @@ class DeleteEmployeesService
             return 'danger:' . $e->getMessage();
         }
     }
+
+    public function deleteEmployeeById(int $id): string
+    {
+        try
+        {
+            if (!$this->utilsTableService->checkTableExistence('ex13_employees'))
+                return 'danger:Table ex13_employees does not exist.';
+
+            $employee = $this->repo->find($id);
+
+            if (!$employee)
+                return 'danger:Employee with ID ' . $id . ' not found.';
+            $this->em->remove($employee);
+            $this->em->flush();
+            return 'success:Employee deleted successfully!';
+        }
+        catch (Exception $e)
+        {
+            return 'danger:' . $e->getMessage();
+        }
+    }
 }
 ?>
