@@ -7,7 +7,7 @@ use Exception;
 use App\Service\UtilsTableService;
 use Doctrine\ORM\EntityManagerInterface;
 
-class DeleteTableContentService 
+class DeleteEmployeeService 
 {
 	public function __construct(
         private readonly EntityManagerInterface $em,
@@ -20,7 +20,7 @@ class DeleteTableContentService
         try
         {
             if (!$this->utilsTableService->checkTableExistence('ex13_employees'))
-                return 'danger:Table ex12_persons does not exist.';
+                return 'danger:Table ex13_employees does not exist.';
 
             $employees = $this->repo->findAll();
 

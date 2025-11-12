@@ -2,10 +2,10 @@
 
 namespace App\Enum;
 
-enum HoursEnum: string
+enum HoursEnum: int
 {
-    case EIGHT = '8';
-    case SIX = '6';
-    case FOUR = '4';
+    case EIGHT = 8;
+    case SIX = 6;
+    case FOUR = 4;
 }
 ?>

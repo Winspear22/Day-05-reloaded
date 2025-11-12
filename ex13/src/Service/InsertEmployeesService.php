@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Service;
 
 use Exception;
@@ -7,22 +8,23 @@ use App\Repository\EmployeeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
-class UpdateEmployeesService
+class InsertEmployeesService
 {
-		public function __construct(
+	public function __construct(
         private readonly EntityManagerInterface $em,
 		private readonly EmployeeRepository $repo,
 		private readonly UtilsTableService $utilsTableService
 	) {}
 
-    public function updateEmployee(Employee $employee): string
+    public function insertEmployee(Employee $employee): string
     {
-        try
+		try
 		{
 			if (!$this->utilsTableService->checkTableExistence('ex13_employees'))
                 return 'danger:Table ex13_employees does not exist.';
+			$this->em->persist($employee);
 			$this->em->flush();
-			return "success: Employee updated successfully!";
+			return "success: Employee created successfully!";
 		}
 		catch (UniqueConstraintViolationException $e)
 		{
@@ -32,7 +34,6 @@ class UpdateEmployeesService
 		{
 			return "danger: " . $e->getMessage();
 		}
-	}
+    }
 }
-
 ?>
