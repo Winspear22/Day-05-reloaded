@@ -93,7 +93,7 @@ class EmployeesValidationService
             return $errors;
 
         if ($employee->getManager() === null || $employee->getManager()->getPosition() !== PositionEnum::COO)
-            $errors[] = 'Error: Managers can only report to the COO.';
+            $errors[] = 'Error: Managers can only be managed by the COO.';
 
         // Manager ne peut pas manager un autre manager
         foreach ($employee->getEmployees() as $managed)

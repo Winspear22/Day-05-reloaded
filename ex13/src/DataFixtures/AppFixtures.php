@@ -20,7 +20,7 @@ class AppFixtures extends Fixture
         $ceo->setEmail('ceo@company.com');
         $ceo->setBirthdate(new DateTime('1980-01-15'));
         $ceo->setEmployedSince(new DateTime('2010-01-01'));
-        $ceo->setEmployedUntil(new DateTime('2014-05-01'));
+        $ceo->setEmployedUntil(new DateTime('2011-01-01'));
         $ceo->setHours(HoursEnum::EIGHT);
         $ceo->setSalary(150000);
         $ceo->setPosition(PositionEnum::CEO);
@@ -34,7 +34,7 @@ class AppFixtures extends Fixture
         $coo->setEmail('coo@company.com');
         $coo->setBirthdate(new DateTime('1982-03-20'));
         $coo->setEmployedSince(new DateTime('2011-06-01'));
-        $coo->setEmployedUntil(new DateTime('2014-05-01'));
+        $coo->setEmployedUntil(new DateTime('2012-06-01'));
         $coo->setHours(HoursEnum::EIGHT);
         $coo->setSalary(120000);
         $coo->setPosition(PositionEnum::COO);
@@ -49,7 +49,7 @@ class AppFixtures extends Fixture
         $devManager->setEmail('dev.manager@company.com');
         $devManager->setBirthdate(new DateTime('1985-05-10'));
         $devManager->setEmployedSince(new DateTime('2015-01-01'));
-        $devManager->setEmployedUntil(new DateTime('2014-05-01'));
+        $devManager->setEmployedUntil(new DateTime('2016-01-01'));
         $devManager->setHours(HoursEnum::EIGHT);
         $devManager->setSalary(90000);
         $devManager->setPosition(PositionEnum::DEV_MANAGER);
@@ -64,7 +64,7 @@ class AppFixtures extends Fixture
         $qaManager->setEmail('qa.manager@company.com');
         $qaManager->setBirthdate(new DateTime('1987-07-15'));
         $qaManager->setEmployedSince(new DateTime('2016-03-01'));
-        $qaManager->setEmployedUntil(new DateTime('2014-05-01'));
+        $qaManager->setEmployedUntil(new DateTime('2017-03-01'));
         $qaManager->setHours(HoursEnum::EIGHT);
         $qaManager->setSalary(85000);
         $qaManager->setPosition(PositionEnum::QA_MANAGER);
@@ -79,7 +79,7 @@ class AppFixtures extends Fixture
         $backendDev->setEmail('alex.dev@company.com');
         $backendDev->setBirthdate(new DateTime('1990-02-20'));
         $backendDev->setEmployedSince(new DateTime('2018-01-15'));
-        $backendDev->setEmployedUntil(new DateTime('2014-05-01'));
+        $backendDev->setEmployedUntil(new DateTime('2019-01-15'));
         $backendDev->setHours(HoursEnum::EIGHT);
         $backendDev->setSalary(65000);
         $backendDev->setPosition(PositionEnum::BACKEND_DEV);
@@ -94,7 +94,7 @@ class AppFixtures extends Fixture
         $frontendDev->setEmail('lisa.dev@company.com');
         $frontendDev->setBirthdate(new DateTime('1991-08-10'));
         $frontendDev->setEmployedSince(new DateTime('2019-06-01'));
-        $frontendDev->setEmployedUntil(new DateTime('2014-05-01'));
+        $frontendDev->setEmployedUntil(new DateTime('2020-06-01'));
         $frontendDev->setHours(HoursEnum::EIGHT);
         $frontendDev->setSalary(62000);
         $frontendDev->setPosition(PositionEnum::FRONTEND_DEV);
@@ -109,7 +109,7 @@ class AppFixtures extends Fixture
         $qaTester->setEmail('bob.qa@company.com');
         $qaTester->setBirthdate(new DateTime('1993-11-05'));
         $qaTester->setEmployedSince(new DateTime('2020-09-01'));
-        $qaTester->setEmployedUntil(new DateTime('2014-05-01'));
+        $qaTester->setEmployedUntil(new DateTime('2021-09-01'));
         $qaTester->setHours(HoursEnum::EIGHT);
         $qaTester->setSalary(50000);
         $qaTester->setPosition(PositionEnum::QA_TESTER);
@@ -124,7 +124,7 @@ class AppFixtures extends Fixture
         $accountManager->setEmail('emma.account@company.com');
         $accountManager->setBirthdate(new DateTime('1988-04-12'));
         $accountManager->setEmployedSince(new DateTime('2017-02-01'));
-        $accountManager->setEmployedUntil(new DateTime('2014-05-01'));
+        $accountManager->setEmployedUntil(new DateTime('2018-02-01'));
         $accountManager->setHours(HoursEnum::EIGHT);
         $accountManager->setSalary(75000);
         $accountManager->setPosition(PositionEnum::ACCOUNT_MANAGER);
@@ -139,7 +139,7 @@ class AppFixtures extends Fixture
         $managerGeneral->setEmail('david.manager@company.com');
         $managerGeneral->setBirthdate(new DateTime('1984-09-25'));
         $managerGeneral->setEmployedSince(new DateTime('2014-05-01'));
-        $managerGeneral->setEmployedUntil(new DateTime('2014-05-01'));
+        $managerGeneral->setEmployedUntil(new DateTime('2015-05-01'));
         $managerGeneral->setHours(HoursEnum::EIGHT);
         $managerGeneral->setSalary(95000);
         $managerGeneral->setPosition(PositionEnum::MANAGER);
@@ -159,7 +159,7 @@ class AppFixtures extends Fixture
         $partTimeDev->setSalary(30000);
         $partTimeDev->setPosition(PositionEnum::BACKEND_DEV);
         $partTimeDev->setManager($devManager);
-        $partTimeDev->setActive(true);
+        $partTimeDev->setActive(false);
         $manager->persist($partTimeDev);
 
         $manager->flush();

@@ -113,7 +113,7 @@ final class Ex13Controller extends AbstractController
                 $this->addFlash('danger', 'Error: Employee not found.');
                 return $this->redirectToRoute('ex13_index');
             }
-            $form = $this->createEmployeeForm($employee);
+            $form = $this->updateEmployeeForm($employee);
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid())
             {
@@ -262,7 +262,6 @@ final class Ex13Controller extends AbstractController
                         PositionEnum::DEV_MANAGER
                     ]))
                     {
-                        // Managers => uniquement COO
                         $qb->andWhere('e.position = :posCOO')
                         ->setParameter('posCOO', PositionEnum::COO);
                     }
@@ -294,6 +293,10 @@ final class Ex13Controller extends AbstractController
 
     private function updateEmployeeForm(Employee $employee): FormInterface
     {
+        $isCreation = $employee->getId() === null;
+        $isCEO = $employee->getPosition() === PositionEnum::CEO;
+        $isCOO = $employee->getPosition() === PositionEnum::COO;
+
         return $this->createFormBuilder($employee)
             ->add('firstname', TextType::class, [
                 'label' => 'First Name',
@@ -330,6 +333,7 @@ final class Ex13Controller extends AbstractController
                 'attr' => [
                     'min' => '1945-01-01',
                     'max' => (new DateTime())->format('Y-m-d'),
+                    'readonly' => !$isCreation,
                 ],
             ])
             ->add('active', CheckboxType::class, [
@@ -345,6 +349,7 @@ final class Ex13Controller extends AbstractController
                 'attr' => [
                     'min' => '1945-01-01',
                     'max' => '2045-12-31',
+                    'readonly' => !$isCreation,
                 ],
             ])
             ->add('employed_until', DateTimeType::class, [
@@ -354,6 +359,7 @@ final class Ex13Controller extends AbstractController
                 'attr' => [
                     'min' => '1945-01-01',
                     'max' => '2045-12-31',
+                    'readonly' => !$isCreation,
                 ],
             ])
             ->add('hours', ChoiceType::class, [
@@ -373,12 +379,14 @@ final class Ex13Controller extends AbstractController
             ])
             ->add('manager', EntityType::class, [
                 'class' => Employee::class,
-                'query_builder' => function (EmployeeRepository $er) use ($employee) {
+                'query_builder' => function (EmployeeRepository $er) use ($employee)
+                {
                     $qb = $er->createQueryBuilder('e');
                     $qb->where('e.id != :current')
                         ->setParameter('current', $employee->getId() ?? 0);
 
-                    if ($employee->getPosition() === PositionEnum::COO) {
+                    if ($employee->getPosition() === PositionEnum::COO)
+                    {
                         $qb->andWhere('e.position = :posCEO')
                             ->setParameter('posCEO', PositionEnum::CEO);
                     }
@@ -398,7 +406,7 @@ final class Ex13Controller extends AbstractController
                 'choice_label' => fn(Employee $e) => $e->getFirstname() . ' ' . $e->getLastname(),
                 'placeholder' => 'Select a manager',
                 'required' => false,
-                'disabled' => in_array($employee->getPosition(), [PositionEnum::CEO, PositionEnum::COO])
+                'disabled' => $isCEO || $isCOO // MODIF: CEO et COO ne peuvent pas avoir de manager
             ])
             ->add('position', ChoiceType::class, [
                 'label' => 'Position',
@@ -407,15 +415,19 @@ final class Ex13Controller extends AbstractController
                     'Account Manager' => PositionEnum::ACCOUNT_MANAGER,
                     'QA Manager' => PositionEnum::QA_MANAGER,
                     'Dev Manager' => PositionEnum::DEV_MANAGER,
-                    'CEO' => PositionEnum::CEO,
-                    'COO' => PositionEnum::COO,
+                    // MODIF: Ajouter CEO et COO seulement en création
+                    ...($isCreation ? [
+                        'CEO' => PositionEnum::CEO,
+                        'COO' => PositionEnum::COO,
+                    ] : []),
                     'Backend Dev' => PositionEnum::BACKEND_DEV,
                     'Frontend Dev' => PositionEnum::FRONTEND_DEV,
                     'QA Tester' => PositionEnum::QA_TESTER,
                 ],
                 'placeholder' => 'Select position',
-                'disabled' => ($employee->getId() && in_array($employee->getPosition(), [PositionEnum::CEO, PositionEnum::COO]))
+                'disabled' => !$isCreation && ($isCEO || $isCOO) // MODIF: CEO/COO immuables en edit
             ])
             ->getForm();
     }
+
 }
