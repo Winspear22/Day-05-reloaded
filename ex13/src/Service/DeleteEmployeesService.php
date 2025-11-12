@@ -7,7 +7,7 @@ use Exception;
 use App\Service\UtilsTableService;
 use Doctrine\ORM\EntityManagerInterface;
 
-class DeleteEmployeeService 
+class DeleteEmployeesService 
 {
 	public function __construct(
         private readonly EntityManagerInterface $em,

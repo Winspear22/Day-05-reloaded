@@ -3,10 +3,16 @@
 namespace App\Controller;
 
 use DateTime;
+use Exception;
 use App\Enum\HoursEnum;
 use App\Entity\Employee;
 use App\Enum\PositionEnum;
+use App\Service\CreateTableService;
+use App\Service\ReadEmployeesService;
 use App\Repository\EmployeeRepository;
+use App\Service\DeleteEmployeesService;
+use App\Service\InsertEmployeesService;
+use App\Service\UpdateEmployeesService;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,16 +31,56 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class Ex13Controller extends AbstractController
 {
+        public function __construct(
+        private readonly CreateTableService $tableCreator,
+        private readonly InsertEmployeesService $employeesInserter,
+        private readonly ReadEmployeesService $employeesReader,
+        private readonly DeleteEmployeesService $employeesDeleter,
+        private readonly UpdateEmployeesService $employeesUpdater,
+        private readonly EmployeeRepository $repo
+    ) {}
 
     /**
      * @Route("/ex13", name="ex13_index", methods={"GET"})
      */
     public function index(): Response
     {
-            return $this->render('ex13/index.html.twig', [
-                'controller_name' => 'Ex13Controller',
-            ]);
+        $employee = new Employee();
+        $form = $this->createEmployeeForm($employee);
+        $employees = [];
+        try
+        {
+            $this->tableCreator->createTable('ex13_employees');
+            $employees = $this->employeesReader->getAllEmployees();
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', "Error, unexpected error: " . $e->getMessage());
+        }
+        return $this->render('ex13/index.html.twig', [
+            'form' => $form->createView(),
+            'employees' => $employees
+        ]);
     }
+
+    /**
+     * @Route("/ex13/delete/{id}", name="ex13_delete", methods={"POST"})
+     */
+    public function delete()
+    {
+    }
+
+    /**
+     * @Route("/ex13/update/{id}", name="ex13_update", methods={"GET", "POST"})
+     */
+    public function update()
+    {}
+
+    /**
+     * @Route("/ex13/create/{id}", name="ex13_create", methods={"POST"})
+     */
+    public function create()
+    {}
 
     private function createEmployeeForm(Employee $employee): FormInterface
     {
@@ -120,21 +166,21 @@ final class Ex13Controller extends AbstractController
                 'query_builder' => function (EmployeeRepository $er) use ($employee) {
                     $qb = $er->createQueryBuilder('e');
 
-                    // 🔹 On exclut la personne elle-même
                     $qb->where('e.id != :current')
                     ->setParameter('current', $employee->getId() ?? 0);
 
-                    // 🔹 Cas spéciaux pour filtrer selon le rôle
-                    if ($employee->getPosition() === PositionEnum::COO) {
-                        // COO => uniquement CEO
+                    if ($employee->getPosition() === PositionEnum::COO)
+                    {
                         $qb->andWhere('e.position = :posCEO')
                         ->setParameter('posCEO', PositionEnum::CEO);
-                    } elseif (in_array($employee->getPosition(), [
+                    }
+                    elseif (in_array($employee->getPosition(), [
                         PositionEnum::MANAGER,
                         PositionEnum::ACCOUNT_MANAGER,
                         PositionEnum::QA_MANAGER,
                         PositionEnum::DEV_MANAGER
-                    ])) {
+                    ]))
+                    {
                         // Managers => uniquement COO
                         $qb->andWhere('e.position = :posCOO')
                         ->setParameter('posCOO', PositionEnum::COO);
