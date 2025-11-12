@@ -67,11 +67,29 @@ final class Ex13Controller extends AbstractController
     /**
      * @Route("/ex13/delete_employees/{id}", name="ex13_delete_employees", methods={"POST"})
      */
-    public function deleteEmployees(int $id)
+    public function deleteEmployees(int $id): Response
     {
         try
         {
             $result = $this->employeesDeleter->deleteEmployeeById($id);
+            [$type, $message] = explode(':', $result, 2);
+            $this->addFlash($type, $message);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex13_index');
+    }
+
+    /**
+     * @Route("/ex13/delete_all_employees", name="ex13_delete_all_employees", methods={"POST"})
+     */
+    public function deleteAllEmployees(): Response
+    {
+        try
+        {
+            $result = $this->employeesDeleter->deleteAllTableContent();
             [$type, $message] = explode(':', $result, 2);
             $this->addFlash($type, $message);
         }

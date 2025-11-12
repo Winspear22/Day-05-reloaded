@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'employé{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'employé n°{{ employee.id }}</h1>
+    {{ form_start(form, { 'method': 'POST' }) }}
+        {{ form_widget(form) }}
+        <button type="submit">Enregistrer</button>
+        <a href="{{ path('ex13_index') }}">Annuler</a>
+    {{ form_end(form) }}
+{% endblock %}
