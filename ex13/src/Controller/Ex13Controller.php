@@ -64,22 +64,22 @@ final class Ex13Controller extends AbstractController
     }
 
     /**
-     * @Route("/ex13/delete/{id}", name="ex13_delete", methods={"POST"})
+     * @Route("/ex13/delete_employees/{id}", name="ex13_delete_employees", methods={"POST"})
      */
-    public function delete()
+    public function deleteEmployees()
     {
     }
 
     /**
-     * @Route("/ex13/update/{id}", name="ex13_update", methods={"GET", "POST"})
+     * @Route("/ex13/update_employees/{id}", name="ex13_update_employees", methods={"GET", "POST"})
      */
-    public function update()
+    public function updateEmployees()
     {}
 
     /**
-     * @Route("/ex13/create/{id}", name="ex13_create", methods={"POST"})
+     * @Route("/ex13/insert_employees/{id}", name="ex13_insert_employees", methods={"POST"})
      */
-    public function create()
+    public function createEmployees()
     {}
 
     private function createEmployeeForm(Employee $employee): FormInterface
