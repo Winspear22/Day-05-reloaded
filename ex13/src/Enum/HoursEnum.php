@@ -8,3 +8,4 @@ enum HoursEnum: string
     case SIX = '6';
     case FOUR = '4';
 }
+?>

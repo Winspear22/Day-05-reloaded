@@ -14,5 +14,4 @@ enum PositionEnum: string
     case FRONTEND_DEV    = 'frontend_dev';
     case QA_TESTER       = 'qa_tester';
 }
-
 ?>
