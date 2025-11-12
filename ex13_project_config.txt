@@ -27,7 +27,8 @@ Root Directory: ./ex13/
 ├── migrations
 │   └── Version20251112145002.php
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex13Controller.php
@@ -44,17 +45,21 @@ Root Directory: ./ex13/
 │   └── Service
 │       ├── CreateTableService.php
 │       ├── DeleteEmployeesService.php
+│       ├── EmployeesValidationService.php
+│       ├── EmployeesValidationUtilsService.php
 │       ├── InsertEmployeesService.php
 │       ├── ReadEmployeesService.php
 │       ├── UpdateEmployeesService.php
-│       └── UtilsTableService.php
+│       ├── UtilsTableService.php
+│       └── ValidationService.php
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
 │   ├── bundles
 │   │   └── TwigBundle
 │   └── ex13
-│       └── index.html.twig
+│       ├── index.html.twig
+│       └── update.html.twig
 ├── var
 │   ├── cache
 │   │   ├── dev
@@ -156,7 +161,7 @@ Root Directory: ./ex13/
         ├── extra-bundle
         └── twig
 
-97 directories, 53 files
+97 directories, 58 files
 
 ================================================================================
 

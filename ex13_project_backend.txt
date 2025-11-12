@@ -27,7 +27,8 @@ Root Directory: ./ex13/
 ├── migrations
 │   └── Version20251112145002.php
 ├── public
-│   └── index.php
+│   ├── index.php
+│   └── style.css
 ├── src
 │   ├── Controller
 │   │   └── Ex13Controller.php
@@ -44,17 +45,21 @@ Root Directory: ./ex13/
 │   └── Service
 │       ├── CreateTableService.php
 │       ├── DeleteEmployeesService.php
+│       ├── EmployeesValidationService.php
+│       ├── EmployeesValidationUtilsService.php
 │       ├── InsertEmployeesService.php
 │       ├── ReadEmployeesService.php
 │       ├── UpdateEmployeesService.php
-│       └── UtilsTableService.php
+│       ├── UtilsTableService.php
+│       └── ValidationService.php
 ├── symfony.lock
 ├── templates
 │   ├── base.html.twig
 │   ├── bundles
 │   │   └── TwigBundle
 │   └── ex13
-│       └── index.html.twig
+│       ├── index.html.twig
+│       └── update.html.twig
 ├── var
 │   ├── cache
 │   │   ├── dev
@@ -156,7 +161,7 @@ Root Directory: ./ex13/
         ├── extra-bundle
         └── twig
 
-97 directories, 53 files
+97 directories, 58 files
 
 ================================================================================
 
@@ -237,11 +242,29 @@ final class Ex13Controller extends AbstractController
     /**
      * @Route("/ex13/delete_employees/{id}", name="ex13_delete_employees", methods={"POST"})
      */
-    public function deleteEmployees(int $id)
+    public function deleteEmployees(int $id): Response
     {
         try
         {
             $result = $this->employeesDeleter->deleteEmployeeById($id);
+            [$type, $message] = explode(':', $result, 2);
+            $this->addFlash($type, $message);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex13_index');
+    }
+
+    /**
+     * @Route("/ex13/delete_all_employees", name="ex13_delete_all_employees", methods={"POST"})
+     */
+    public function deleteAllEmployees(): Response
+    {
+        try
+        {
+            $result = $this->employeesDeleter->deleteAllTableContent();
             [$type, $message] = explode(':', $result, 2);
             $this->addFlash($type, $message);
         }
@@ -262,8 +285,8 @@ final class Ex13Controller extends AbstractController
             $employee = $this->repo->find($id);
             if (!$employee)
             {
-                $this->addFlash('danger', 'Error: User not found.');
-                return $this->redirectToRoute('ex07_index');
+                $this->addFlash('danger', 'Error: Employee not found.');
+                return $this->redirectToRoute('ex13_index');
             }
             $form = $this->createEmployeeForm($employee);
             $form->handleRequest($request);
@@ -288,8 +311,50 @@ final class Ex13Controller extends AbstractController
     /**
      * @Route("/ex13/insert_employees", name="ex13_insert_employees", methods={"POST"})
      */
-    public function createEmployees()
-    {}
+    public function insertEmployees(Request $request)
+    {
+        $employee = new Employee();
+        $form = $this->createEmployeeForm($employee);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            try
+            {
+                $result = $this->employeesInserter->insertEmployee($employee);
+                [$type, $message] = explode(':', $result, 2);
+                $this->addFlash($type, $message);
+                return $this->redirectToRoute('ex13_index');
+            }
+            catch (Exception $e)
+            {
+                $this->addFlash('danger', 'Error adding employee: ' . $e->getMessage());
+            }
+            return $this->redirectToRoute('ex13_index');
+        }
+        else
+        {
+            $this->addFlash('danger', 'Error - Invalid form submission.');
+            return $this->redirectToRoute('ex13_index');
+        } 
+    }
+
+    /**
+     * @Route("/ex13/fixtures", name="ex13_fixtures", methods={"POST"})
+     */
+    public function generateFixtures(EmployeeFixturesService $fixturesService): Response
+    {
+        try
+        {
+            $result = $fixturesService->generateAllFixtures();
+            [$type, $message] = explode(':', $result, 2);
+            $this->addFlash($type, $message);
+        }
+        catch (Exception $e)
+        {
+            $this->addFlash('danger', 'Error: ' . $e->getMessage());
+        }
+        return $this->redirectToRoute('ex13_index');
+    }
 
     private function createEmployeeForm(Employee $employee): FormInterface
     {
@@ -557,6 +622,10 @@ File: src/DataFixtures/AppFixtures.php
 
 namespace App\DataFixtures;
 
+use DateTime;
+use App\Entity\Employee;
+use App\Enum\HoursEnum;
+use App\Enum\PositionEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -564,8 +633,154 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        // $product = new Product();
-        // $manager->persist($product);
+        // 1. CEO
+        $ceo = new Employee();
+        $ceo->setFirstname('John');
+        $ceo->setLastname('CEO');
+        $ceo->setEmail('ceo@company.com');
+        $ceo->setBirthdate(new DateTime('1980-01-15'));
+        $ceo->setEmployedSince(new DateTime('2010-01-01'));
+        $ceo->setEmployedUntil(null);
+        $ceo->setHours(HoursEnum::EIGHT);
+        $ceo->setSalary(150000);
+        $ceo->setPosition(PositionEnum::CEO);
+        $ceo->setActive(true);
+        $manager->persist($ceo);
+
+        // 2. COO
+        $coo = new Employee();
+        $coo->setFirstname('Marie');
+        $coo->setLastname('COO');
+        $coo->setEmail('coo@company.com');
+        $coo->setBirthdate(new DateTime('1982-03-20'));
+        $coo->setEmployedSince(new DateTime('2011-06-01'));
+        $coo->setEmployedUntil(null);
+        $coo->setHours(HoursEnum::EIGHT);
+        $coo->setSalary(120000);
+        $coo->setPosition(PositionEnum::COO);
+        $coo->setManager($ceo);
+        $coo->setActive(true);
+        $manager->persist($coo);
+
+        // 3. Dev Manager
+        $devManager = new Employee();
+        $devManager->setFirstname('Thomas');
+        $devManager->setLastname('Dev Manager');
+        $devManager->setEmail('dev.manager@company.com');
+        $devManager->setBirthdate(new DateTime('1985-05-10'));
+        $devManager->setEmployedSince(new DateTime('2015-01-01'));
+        $devManager->setEmployedUntil(null);
+        $devManager->setHours(HoursEnum::EIGHT);
+        $devManager->setSalary(90000);
+        $devManager->setPosition(PositionEnum::DEV_MANAGER);
+        $devManager->setManager($coo);
+        $devManager->setActive(true);
+        $manager->persist($devManager);
+
+        // 4. QA Manager
+        $qaManager = new Employee();
+        $qaManager->setFirstname('Sophie');
+        $qaManager->setLastname('QA Manager');
+        $qaManager->setEmail('qa.manager@company.com');
+        $qaManager->setBirthdate(new DateTime('1987-07-15'));
+        $qaManager->setEmployedSince(new DateTime('2016-03-01'));
+        $qaManager->setEmployedUntil(null);
+        $qaManager->setHours(HoursEnum::EIGHT);
+        $qaManager->setSalary(85000);
+        $qaManager->setPosition(PositionEnum::QA_MANAGER);
+        $qaManager->setManager($coo);
+        $qaManager->setActive(true);
+        $manager->persist($qaManager);
+
+        // 5. Backend Dev
+        $backendDev = new Employee();
+        $backendDev->setFirstname('Alex');
+        $backendDev->setLastname('Backend Dev');
+        $backendDev->setEmail('alex.dev@company.com');
+        $backendDev->setBirthdate(new DateTime('1990-02-20'));
+        $backendDev->setEmployedSince(new DateTime('2018-01-15'));
+        $backendDev->setEmployedUntil(null);
+        $backendDev->setHours(HoursEnum::EIGHT);
+        $backendDev->setSalary(65000);
+        $backendDev->setPosition(PositionEnum::BACKEND_DEV);
+        $backendDev->setManager($devManager);
+        $backendDev->setActive(true);
+        $manager->persist($backendDev);
+
+        // 6. Frontend Dev
+        $frontendDev = new Employee();
+        $frontendDev->setFirstname('Lisa');
+        $frontendDev->setLastname('Frontend Dev');
+        $frontendDev->setEmail('lisa.dev@company.com');
+        $frontendDev->setBirthdate(new DateTime('1991-08-10'));
+        $frontendDev->setEmployedSince(new DateTime('2019-06-01'));
+        $frontendDev->setEmployedUntil(null);
+        $frontendDev->setHours(HoursEnum::EIGHT);
+        $frontendDev->setSalary(62000);
+        $frontendDev->setPosition(PositionEnum::FRONTEND_DEV);
+        $frontendDev->setManager($devManager);
+        $frontendDev->setActive(true);
+        $manager->persist($frontendDev);
+
+        // 7. QA Tester
+        $qaTester = new Employee();
+        $qaTester->setFirstname('Bob');
+        $qaTester->setLastname('QA Tester');
+        $qaTester->setEmail('bob.qa@company.com');
+        $qaTester->setBirthdate(new DateTime('1993-11-05'));
+        $qaTester->setEmployedSince(new DateTime('2020-09-01'));
+        $qaTester->setEmployedUntil(null);
+        $qaTester->setHours(HoursEnum::EIGHT);
+        $qaTester->setSalary(50000);
+        $qaTester->setPosition(PositionEnum::QA_TESTER);
+        $qaTester->setManager($qaManager);
+        $qaTester->setActive(true);
+        $manager->persist($qaTester);
+
+        // 8. Account Manager
+        $accountManager = new Employee();
+        $accountManager->setFirstname('Emma');
+        $accountManager->setLastname('Account Manager');
+        $accountManager->setEmail('emma.account@company.com');
+        $accountManager->setBirthdate(new DateTime('1988-04-12'));
+        $accountManager->setEmployedSince(new DateTime('2017-02-01'));
+        $accountManager->setEmployedUntil(null);
+        $accountManager->setHours(HoursEnum::EIGHT);
+        $accountManager->setSalary(75000);
+        $accountManager->setPosition(PositionEnum::ACCOUNT_MANAGER);
+        $accountManager->setManager($coo);
+        $accountManager->setActive(true);
+        $manager->persist($accountManager);
+
+        // 9. Manager (généraliste)
+        $managerGeneral = new Employee();
+        $managerGeneral->setFirstname('David');
+        $managerGeneral->setLastname('Manager');
+        $managerGeneral->setEmail('david.manager@company.com');
+        $managerGeneral->setBirthdate(new DateTime('1984-09-25'));
+        $managerGeneral->setEmployedSince(new DateTime('2014-05-01'));
+        $managerGeneral->setEmployedUntil(null);
+        $managerGeneral->setHours(HoursEnum::EIGHT);
+        $managerGeneral->setSalary(95000);
+        $managerGeneral->setPosition(PositionEnum::MANAGER);
+        $managerGeneral->setManager($coo);
+        $managerGeneral->setActive(true);
+        $manager->persist($managerGeneral);
+
+        // 10. Dev à temps partiel
+        $partTimeDev = new Employee();
+        $partTimeDev->setFirstname('Sarah');
+        $partTimeDev->setLastname('Part-Time Dev');
+        $partTimeDev->setEmail('sarah.dev@company.com');
+        $partTimeDev->setBirthdate(new DateTime('1995-06-30'));
+        $partTimeDev->setEmployedSince(new DateTime('2021-01-01'));
+        $partTimeDev->setEmployedUntil(null);
+        $partTimeDev->setHours(HoursEnum::FOUR);
+        $partTimeDev->setSalary(30000);
+        $partTimeDev->setPosition(PositionEnum::BACKEND_DEV);
+        $partTimeDev->setManager($devManager);
+        $partTimeDev->setActive(true);
+        $manager->persist($partTimeDev);
 
         $manager->flush();
     }
@@ -1067,17 +1282,20 @@ File: src/Service/DeleteEmployeesService.php
 
 namespace App\Service;
 
-use App\Repository\EmployeeRepository;
 use Exception;
 use App\Service\UtilsTableService;
+use App\Repository\EmployeeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\EmployeesValidationUtilsService;
 
 class DeleteEmployeesService 
 {
 	public function __construct(
         private readonly EntityManagerInterface $em,
 		private readonly EmployeeRepository $repo,
-        private readonly UtilsTableService $utilsTableService
+        private readonly UtilsTableService $utilsTableService,
+        private readonly EmployeesValidationUtilsService $validationUtils
+
 	) {}
     
     public function deleteAllTableContent(): string
@@ -1114,6 +1332,14 @@ class DeleteEmployeesService
 
             if (!$employee)
                 return 'danger:Employee with ID ' . $id . ' not found.';
+            if (!$this->validationUtils->canDeleteCEO($employee))
+                return 'danger:Cannot delete the CEO while other employees exist.';
+
+            if (!$this->validationUtils->canDeleteCOO($employee))
+                return 'danger:Cannot delete the COO while they manage employees.';
+
+            if (!$this->validationUtils->canDeleteManager($employee))
+                return 'danger:Cannot delete a manager who still has employees.';
             $this->em->remove($employee);
             $this->em->flush();
             return 'success:Employee deleted successfully!';
@@ -1124,6 +1350,290 @@ class DeleteEmployeesService
         }
     }
 }
+?>
+
+---
+File: src/Service/EmployeesValidationService.php
+---
+
+<?php
+
+namespace App\Service;
+
+use App\Entity\Employee;
+use App\Enum\PositionEnum;
+use App\Repository\EmployeeRepository;
+
+class EmployeesValidationService
+{
+	public function __construct(
+        private readonly EmployeeRepository $employeeRepository,
+		private readonly EmployeesValidationUtilsService $validation_utils
+    ) {}
+
+	public function validateAll(Employee $employee): array
+	{
+		$errors = [];
+        $errors = array_merge($errors, $this->validateCEO($employee));
+        $errors = array_merge($errors, $this->validateCOO($employee));
+        $errors = array_merge($errors, $this->validateManagers($employee));
+        $errors = array_merge($errors, $this->validateStaff($employee));
+        $errors = array_merge($errors, $this->validatePromotions($employee));
+        return $errors;
+	}
+	
+	public function validateCEO(Employee $employee): array
+    {
+		$errors = [];
+		$employee_nb = $this->employeeRepository->count([]);
+		$current_employee_position = $employee->getPosition();
+		if ($employee->getId() === null && $employee_nb === 0)
+		{
+			if ($current_employee_position !== PositionEnum::CEO)
+				$errors[] = "Error: The first employee must be the CEO !";
+		}
+		if ($current_employee_position === PositionEnum::CEO && $employee->getManager() !== null)
+            $errors[] = 'Error: The CEO cannot have a manager.';
+		if ($current_employee_position === PositionEnum::CEO)
+		{
+            $existingCEO = $this->employeeRepository->findOneBy(['position' => PositionEnum::CEO]);
+            if ($existingCEO && $existingCEO->getId() !== $employee->getId())
+                $errors[] = 'Error: There can only be one CEO in the company.';
+        }
+		return $errors;
+	}
+
+	public function validateCOO(Employee $employee): array
+    {
+		$errors = [];
+		$employee_nb = $this->employeeRepository->count([]);
+		$current_employee_position = $employee->getPosition();
+		if ($employee_nb === 1 && $employee->getId() === null)
+		{
+			if ($current_employee_position != PositionEnum::COO)
+				$errors[] = "Error: The second employee must be the COO !";
+		}
+		if ($current_employee_position === PositionEnum::COO)
+		{
+            $existingCOO = $this->employeeRepository->findOneBy(['position' => PositionEnum::COO]);
+            if ($existingCOO && $existingCOO->getId() !== $employee->getId())
+                $errors[] = 'Error: There can only be one COO in the company.';
+        }
+		if ($current_employee_position === PositionEnum::COO)
+		{
+            if ($employee->getManager() === null || $employee->getManager()->getPosition() !== PositionEnum::CEO)
+                $errors[] = 'Error: The COO must have the CEO as manager.';
+        }
+		if ($employee->getId() !== null)
+		{
+            $currentCOO = $this->employeeRepository->find($employee->getId());
+            if ($currentCOO && $currentCOO->getPosition() === PositionEnum::COO)
+			{
+                if ($employee->getPosition() !== PositionEnum::COO)
+                    $errors[] = 'Error: The COO position cannot be changed.';
+            }
+        }
+		return $errors;
+	}
+
+	public function validateManagers(Employee $employee): array
+    {
+        $errors = [];
+
+        $managerPositions = [
+            PositionEnum::MANAGER,
+            PositionEnum::ACCOUNT_MANAGER,
+            PositionEnum::QA_MANAGER,
+            PositionEnum::DEV_MANAGER
+        ];
+
+        if (!in_array($employee->getPosition(), $managerPositions))
+            return $errors;
+
+        if ($employee->getManager() === null || $employee->getManager()->getPosition() !== PositionEnum::COO)
+            $errors[] = 'Error: Managers can only report to the COO.';
+
+        // Manager ne peut pas manager un autre manager
+        foreach ($employee->getEmployees() as $managed)
+		{
+            if (in_array($managed->getPosition(), $managerPositions))
+			{
+                $errors[] = 'Error: A manager cannot manage another manager.';
+                break;
+            }
+        }
+
+        // Vérifier qui peut manager qui
+        foreach ($employee->getEmployees() as $managed)
+		{
+            if (!$this->validation_utils->canManagePosition($employee->getPosition(), $managed->getPosition()))
+                $errors[] = $employee->getPosition()->value . ' cannot manage ' . $managed->getPosition()->value . '.';
+        }
+
+        return $errors;
+	}
+
+	public function validateStaff(Employee $employee): array
+    {
+        $errors = [];
+
+        // Dev (Backend/Frontend) => Dev Manager ou Manager
+        if (in_array($employee->getPosition(), [PositionEnum::BACKEND_DEV, PositionEnum::FRONTEND_DEV]))
+		{
+            $managerPosition = $employee->getManager()?->getPosition();
+            if ($managerPosition !== PositionEnum::DEV_MANAGER && $managerPosition !== PositionEnum::MANAGER)
+                $errors[] = 'Dev can only be managed by Dev Manager or Manager.';
+        }
+
+        // QA Tester => QA Manager ou Manager
+        if ($employee->getPosition() === PositionEnum::QA_TESTER)
+		{
+            $managerPosition = $employee->getManager()?->getPosition();
+            if ($managerPosition !== PositionEnum::QA_MANAGER && $managerPosition !== PositionEnum::MANAGER)
+                $errors[] = 'QA Tester can only be managed by QA Manager or Manager.';
+        }
+        // Aucun staff ne peut être managé par Account Manager
+        if ($employee->getManager() && $employee->getManager()->getPosition() === PositionEnum::ACCOUNT_MANAGER)
+            $errors[] = 'Staff cannot be managed by Account Manager.';
+        return $errors;
+	}
+
+	public function validatePromotions(Employee $employee): array
+    {
+		$errors = [];
+
+        if ($employee->getId() === null)
+            return $errors; // Pas de promotion si c'est une création
+
+        $original = $this->employeeRepository->find($employee->getId());
+        if ($original === null || $original->getPosition() === $employee->getPosition())
+            return $errors; // Pas de changement de poste
+
+        // Hiérarchie des postes
+        $hierarchy = [
+            PositionEnum::CEO => 5,
+            PositionEnum::COO => 4,
+            PositionEnum::MANAGER => 3,
+            PositionEnum::DEV_MANAGER => 3,
+            PositionEnum::QA_MANAGER => 3,
+            PositionEnum::ACCOUNT_MANAGER => 3,
+            PositionEnum::BACKEND_DEV => 2,
+            PositionEnum::FRONTEND_DEV => 2,
+            PositionEnum::QA_TESTER => 2
+        ];
+
+        $currentLevel = $hierarchy[$original->getPosition()->value] ?? 0;
+        $newLevel = $hierarchy[$employee->getPosition()->value] ?? 0;
+
+        // Pas de rétrogradation
+        if ($newLevel < $currentLevel)
+		{
+            $errors[] = 'Demotion is not allowed.';
+            return $errors;
+        }
+
+        // Dev ne peut devenir que Dev Manager
+        if (in_array($original->getPosition(), [PositionEnum::BACKEND_DEV, PositionEnum::FRONTEND_DEV])) {
+            if ($employee->getPosition() !== PositionEnum::DEV_MANAGER)
+                $errors[] = 'Developer can only be promoted to Dev Manager.';
+			else
+			{
+                // Auto-assign COO as manager
+                $coo = $this->employeeRepository->findOneBy(['position' => PositionEnum::COO]);
+                if ($coo)
+                    $employee->setManager($coo);
+            }
+        }
+        // QA Tester ne peut devenir que QA Manager
+		if ($original->getPosition() === PositionEnum::QA_TESTER)
+		{
+			if ($employee->getPosition() !== PositionEnum::QA_MANAGER)
+				$errors[] = 'QA Tester can only be promoted to QA Manager.';
+			else
+			{
+				// Auto-assign COO as manager
+				$coo = $this->employeeRepository->findOneBy(['position' => PositionEnum::COO]);
+				if ($coo)
+					$employee->setManager($coo);
+			}
+		}
+		return $errors;
+	}
+}
+?>
+
+---
+File: src/Service/EmployeesValidationUtilsService.php
+---
+
+<?php
+
+namespace App\Service;
+
+use App\Entity\Employee;
+use App\Enum\PositionEnum;
+use App\Repository\EmployeeRepository;
+
+class EmployeesValidationUtilsService
+{
+	public function __construct(
+		private readonly EmployeeRepository $employeeRepository
+	) {}
+	public function canManagePosition(PositionEnum $manager, PositionEnum $managed): bool
+    {
+        if ($manager === PositionEnum::QA_MANAGER)
+            return $managed === PositionEnum::QA_TESTER;
+        if ($manager === PositionEnum::DEV_MANAGER)
+            return $managed === PositionEnum::BACKEND_DEV || $managed === PositionEnum::FRONTEND_DEV;
+        if ($manager === PositionEnum::MANAGER)
+		{
+            return $managed === PositionEnum::QA_TESTER 
+                || $managed === PositionEnum::BACKEND_DEV 
+                || $managed === PositionEnum::FRONTEND_DEV;
+        }
+        return false;
+    }
+
+	public function canDeleteCEO(Employee $employee): bool
+    {
+        if ($employee->getPosition() !== PositionEnum::CEO)
+            return true;
+        $totalEmployees = $this->employeeRepository->count([]);
+		if ($totalEmployees <= 1)
+			return true;
+        return false;
+    }
+	
+	public function canDeleteCOO(Employee $employee): bool
+    {
+        if ($employee->getPosition() !== PositionEnum::COO)
+            return true;
+        $numberOfManaged = count($employee->getEmployees());
+		if ($numberOfManaged === 0)
+			return true;
+		else
+			return false;
+    }
+	
+	public function canDeleteManager(Employee $employee): bool
+    {
+        $managerPositions = [
+            PositionEnum::MANAGER,
+            PositionEnum::ACCOUNT_MANAGER,
+            PositionEnum::QA_MANAGER,
+            PositionEnum::DEV_MANAGER
+        ];
+
+		if (!in_array($employee->getPosition(), $managerPositions))
+			return true;
+		$numberOfManaged = count($employee->getEmployees());
+		if ($numberOfManaged === 0)
+			return true;
+		else
+			return false;
+	}
+}
+
 ?>
 
 ---
@@ -1138,6 +1648,7 @@ use Exception;
 use App\Entity\Employee;
 use App\Repository\EmployeeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\EmployeesValidationService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class InsertEmployeesService
@@ -1145,7 +1656,8 @@ class InsertEmployeesService
 	public function __construct(
         private readonly EntityManagerInterface $em,
 		private readonly EmployeeRepository $repo,
-		private readonly UtilsTableService $utilsTableService
+		private readonly UtilsTableService $utilsTableService,
+		private readonly EmployeesValidationService $validation
 	) {}
 
     public function insertEmployee(Employee $employee): string
@@ -1154,6 +1666,10 @@ class InsertEmployeesService
 		{
 			if (!$this->utilsTableService->checkTableExistence('ex13_employees'))
                 return 'danger:Table ex13_employees does not exist.';
+            $validationErrors = $this->validation->validateAll($employee);
+
+            if (!empty($validationErrors))
+                return 'danger:' . implode(' | ', $validationErrors);
 			$this->em->persist($employee);
 			$this->em->flush();
 			return "success: Employee created successfully!";
@@ -1234,6 +1750,7 @@ use Exception;
 use App\Entity\Employee;
 use App\Repository\EmployeeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\EmployeesValidationService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class UpdateEmployeesService
@@ -1241,30 +1758,35 @@ class UpdateEmployeesService
 		public function __construct(
         private readonly EntityManagerInterface $em,
 		private readonly EmployeeRepository $repo,
-		private readonly UtilsTableService $utilsTableService
+		private readonly UtilsTableService $utilsTableService,
+		private readonly EmployeesValidationService $validation
 	) {}
 
-    public function updateEmployee(Employee $employee): string
-    {
-        try
+	public function updateEmployee(Employee $employee): string
+	{
+		try
 		{
 			if (!$this->utilsTableService->checkTableExistence('ex13_employees'))
-                return 'danger:Table ex13_employees does not exist.';
-			$employee = $this->repo->find($employee->getId());
-            if (!$employee)
-				return 'danger:Error, employee not found.';
+				return 'danger:Table ex13_employees does not exist.';
+
+			$validationErrors = $this->validation->validateAll($employee);
+
+			if (!empty($validationErrors))
+				return 'danger:' . implode(' | ', $validationErrors);
+
 			$this->em->flush();
 			return "success: Employee updated successfully!";
 		}
 		catch (UniqueConstraintViolationException $e)
 		{
-			return "danger: Email already exists!: " . $e->getMessage();
+			return "danger: Email already exists!";
 		}
-		catch (Exception $e) 
+		catch (Exception $e)
 		{
 			return "danger: " . $e->getMessage();
 		}
 	}
+
 }
 
 ?>
@@ -1300,6 +1822,58 @@ class UtilsTableService
 	}
 }
 
+---
+File: src/Service/ValidationService.php
+---
+
+<?php
+
+namespace App\Service;
+
+use App\Entity\Employee;
+use DateTime;
+
+class ValidationService
+{
+    public static function validateDates(Employee $employee): array
+    {
+        $errors = [];
+        $birthdate = $employee->getBirthdate();
+        $employedSince = $employee->getEmployedSince();
+        $employedUntil = $employee->getEmployedUntil();
+        $todayDate = new DateTime();
+
+        if (!$birthdate || !$employedSince)
+            return $errors;
+
+        // Birthdate dans le futur
+        if ($birthdate > $todayDate)
+            $errors[] = 'Error. Birthdate cannot be in the future!';
+
+        // Embauche avant la naissance
+        if ($employedSince < $birthdate)
+            $errors[] = 'Error. Hire date cannot be before birth date.';
+
+        // Moins de 18 ans à l'embauche
+        $minHireDate = new DateTime($birthdate->format('Y-m-d'));
+        $minHireDate->modify('+18 years');
+        if ($employedSince < $minHireDate)
+            $errors[] = 'Error. Employee must be at least 18 years old to be hired.';
+
+        // Contrat d'au moins 24h
+        if ($employedUntil)
+		{
+            $minEndDate = new DateTime($employedSince->format('Y-m-d'));
+            $minEndDate->modify('+1 day');
+            if ($employedUntil < $minEndDate)
+                $errors[] = 'Error. Contract end date must be at least 24 hours after hire date.';
+        }
+
+        return $errors;
+    }
+}
+
+
 ================================================================================
 
 📂 PUBLIC FILES (public/) - Location: ex13/public/
@@ -1320,3 +1894,38 @@ return function (array $context) {
     return new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
 };
 
+
+---
+File: public/style.css
+---
+
+.alert
+{
+    padding: 1em 1.5em;
+    margin: 1em 0;
+    border-radius: 5px;
+    font-weight: bold;
+    box-shadow: 0 1px 7px #aaa1;
+    font-size: 1em;
+}
+
+.alert-success
+{
+    background: #d4edda;
+    color: #155724;
+    border-left: 7px solid #38a169;
+}
+
+.alert-danger
+{
+    background: #f8d7da;
+    color: #721c24;
+    border-left: 7px solid #e53e3e;
+}
+
+.alert-info
+{
+    background: #ffee00;
+    color: #000000;
+    border-left: 7px solid #d8db38;
+}
