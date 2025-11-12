@@ -1,0 +1,464 @@
+================================================================================
+PROJECT STRUCTURE OVERVIEW - ex13
+================================================================================
+
+Root Directory: ./ex13/
+
+./ex13
+├── bin
+│   └── console
+├── composer.json
+├── composer.lock
+├── config
+│   ├── bundles.php
+│   ├── packages
+│   │   ├── cache.yaml
+│   │   ├── doctrine_migrations.yaml
+│   │   ├── doctrine.yaml
+│   │   ├── framework.yaml
+│   │   ├── routing.yaml
+│   │   ├── twig.yaml
+│   │   └── validator.yaml
+│   ├── preload.php
+│   ├── routes
+│   │   └── framework.yaml
+│   ├── routes.yaml
+│   └── services.yaml
+├── migrations
+│   └── Version20251112145002.php
+├── public
+│   └── index.php
+├── src
+│   ├── Controller
+│   │   └── Ex13Controller.php
+│   ├── DataFixtures
+│   │   └── AppFixtures.php
+│   ├── Entity
+│   │   └── Employee.php
+│   ├── Enum
+│   │   ├── HoursEnum.php
+│   │   └── PositionEnum.php
+│   ├── Kernel.php
+│   ├── Repository
+│   │   └── EmployeeRepository.php
+│   └── Service
+│       ├── CreateTableService.php
+│       ├── DeleteTableContentService.php
+│       └── UtilsTableService.php
+├── symfony.lock
+├── templates
+│   ├── base.html.twig
+│   ├── bundles
+│   │   └── TwigBundle
+│   └── ex13
+│       └── index.html.twig
+├── var
+│   ├── cache
+│   │   ├── dev
+│   │   └── prod
+│   └── log
+└── vendor
+    ├── autoload.php
+    ├── autoload_runtime.php
+    ├── bin
+    │   ├── doctrine-migrations
+    │   ├── patch-type-declarations
+    │   ├── php-parse
+    │   ├── sql-formatter
+    │   ├── var-dump-server
+    │   └── yaml-lint
+    ├── composer
+    │   ├── autoload_classmap.php
+    │   ├── autoload_files.php
+    │   ├── autoload_namespaces.php
+    │   ├── autoload_psr4.php
+    │   ├── autoload_real.php
+    │   ├── autoload_static.php
+    │   ├── ClassLoader.php
+    │   ├── installed.json
+    │   ├── installed.php
+    │   ├── InstalledVersions.php
+    │   ├── LICENSE
+    │   └── platform_check.php
+    ├── doctrine
+    │   ├── annotations
+    │   ├── collections
+    │   ├── data-fixtures
+    │   ├── dbal
+    │   ├── deprecations
+    │   ├── doctrine-bundle
+    │   ├── doctrine-fixtures-bundle
+    │   ├── doctrine-migrations-bundle
+    │   ├── event-manager
+    │   ├── inflector
+    │   ├── instantiator
+    │   ├── lexer
+    │   ├── migrations
+    │   ├── orm
+    │   ├── persistence
+    │   └── sql-formatter
+    ├── fakerphp
+    │   └── faker
+    ├── nikic
+    │   └── php-parser
+    ├── psr
+    │   ├── cache
+    │   ├── container
+    │   ├── event-dispatcher
+    │   └── log
+    ├── symfony
+    │   ├── asset
+    │   ├── cache
+    │   ├── cache-contracts
+    │   ├── config
+    │   ├── console
+    │   ├── dependency-injection
+    │   ├── deprecation-contracts
+    │   ├── doctrine-bridge
+    │   ├── dotenv
+    │   ├── error-handler
+    │   ├── event-dispatcher
+    │   ├── event-dispatcher-contracts
+    │   ├── filesystem
+    │   ├── finder
+    │   ├── flex
+    │   ├── form
+    │   ├── framework-bundle
+    │   ├── http-foundation
+    │   ├── http-kernel
+    │   ├── maker-bundle
+    │   ├── options-resolver
+    │   ├── polyfill-intl-grapheme
+    │   ├── polyfill-intl-icu
+    │   ├── polyfill-intl-normalizer
+    │   ├── polyfill-mbstring
+    │   ├── polyfill-php83
+    │   ├── polyfill-php84
+    │   ├── process
+    │   ├── property-access
+    │   ├── property-info
+    │   ├── routing
+    │   ├── runtime
+    │   ├── service-contracts
+    │   ├── stopwatch
+    │   ├── string
+    │   ├── translation-contracts
+    │   ├── twig-bridge
+    │   ├── twig-bundle
+    │   ├── validator
+    │   ├── var-dumper
+    │   ├── var-exporter
+    │   └── yaml
+    └── twig
+        ├── extra-bundle
+        └── twig
+
+97 directories, 50 files
+
+================================================================================
+
+📂 CONFIGURATION FILES (config/) - Location: ex13/config/
+================================================================================
+
+
+---
+File: config/bundles.php
+---
+
+<?php
+
+return [
+    Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
+    Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],
+    Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class => ['dev' => true, 'test' => true],
+    Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
+    Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
+    Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
+    Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle::class => ['all' => true],
+];
+
+
+---
+File: config/packages/cache.yaml
+---
+
+framework:
+    cache:
+        # Unique name of your app: used to compute stable namespaces for cache keys.
+        #prefix_seed: your_vendor_name/app_name
+
+        # The "app" cache stores to the filesystem by default.
+        # The data in this cache should persist between deploys.
+        # Other options include:
+
+        # Redis
+        #app: cache.adapter.redis
+        #default_redis_provider: redis://localhost
+
+        # APCu (not recommended with heavy random-write workloads as memory fragmentation can cause perf issues)
+        #app: cache.adapter.apcu
+
+        # Namespaced pools use the above "app" backend by default
+        #pools:
+            #my.dedicated.cache: null
+
+
+---
+File: config/packages/doctrine_migrations.yaml
+---
+
+doctrine_migrations:
+    migrations_paths:
+        # namespace is arbitrary but should be different from App\Migrations
+        # as migrations classes should NOT be autoloaded
+        'DoctrineMigrations': '%kernel.project_dir%/migrations'
+    enable_profiler: false
+
+
+---
+File: config/packages/doctrine.yaml
+---
+
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '16'
+
+        profiling_collect_backtrace: '%kernel.debug%'
+        use_savepoints: true
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        report_fields_where_declared: true
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            auto_generate_proxy_classes: false
+            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system
+
+
+---
+File: config/packages/framework.yaml
+---
+
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+    annotations: true
+    http_method_override: false
+    handle_all_throwables: true
+
+    # Enables session support. Note that the session will ONLY be started if you read or write from it.
+    # Remove or comment this section to explicitly disable session support.
+    session:
+        handler_id: null
+        cookie_secure: auto
+        cookie_samesite: lax
+
+    #esi: true
+    #fragments: true
+    php_errors:
+        log: true
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file
+
+
+---
+File: config/packages/routing.yaml
+---
+
+framework:
+    router:
+        utf8: true
+
+        # Configure how to generate URLs in non-HTTP contexts, such as CLI commands.
+        # See https://symfony.com/doc/current/routing.html#generating-urls-in-commands
+        #default_uri: http://localhost
+
+when@prod:
+    framework:
+        router:
+            strict_requirements: null
+
+
+---
+File: config/packages/twig.yaml
+---
+
+twig:
+    file_name_pattern: '*.twig'
+
+when@test:
+    twig:
+        strict_variables: true
+
+
+---
+File: config/packages/validator.yaml
+---
+
+framework:
+    validation:
+        email_validation_mode: html5
+
+        # Enables validator auto-mapping support.
+        # For instance, basic validation constraints will be inferred from Doctrine's metadata.
+        #auto_mapping:
+        #    App\Entity\: []
+
+when@test:
+    framework:
+        validation:
+            not_compromised_password: false
+
+
+---
+File: config/preload.php
+---
+
+<?php
+
+if (file_exists(dirname(__DIR__).'/var/cache/prod/App_KernelProdContainer.preload.php')) {
+    require dirname(__DIR__).'/var/cache/prod/App_KernelProdContainer.preload.php';
+}
+
+
+---
+File: config/routes/framework.yaml
+---
+
+when@dev:
+    _errors:
+        resource: '@FrameworkBundle/Resources/config/routing/errors.xml'
+        prefix: /_error
+
+
+---
+File: config/routes.yaml
+---
+
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+
+---
+File: config/services.yaml
+---
+
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+
+================================================================================
+
+📂 MIGRATION FILES (migrations/) - Location: ex13/migrations/
+================================================================================
+
+
+---
+File: migrations/.gitignore
+---
+
+
+
+---
+File: migrations/Version20251112145002.php
+---
+
+<?php
+
+declare(strict_types=1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
+final class Version20251112145002 extends AbstractMigration
+{
+    public function getDescription(): string
+    {
+        return '';
+    }
+
+    public function up(Schema $schema): void
+    {
+        // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE TABLE ex13_employees (id INT AUTO_INCREMENT NOT NULL, firstname VARCHAR(64) NOT NULL, lastname VARCHAR(64) NOT NULL, email VARCHAR(128) NOT NULL, birthdate DATETIME NOT NULL, active TINYINT(1) NOT NULL, employed_since DATETIME NOT NULL, employed_until DATETIME NOT NULL, hours VARCHAR(255) NOT NULL, salary INT NOT NULL, position VARCHAR(255) NOT NULL, manager_id INT DEFAULT NULL, UNIQUE INDEX UNIQ_13A26A77E7927C74 (email), INDEX IDX_13A26A77783E3463 (manager_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('ALTER TABLE ex13_employees ADD CONSTRAINT FK_13A26A77783E3463 FOREIGN KEY (manager_id) REFERENCES ex13_employees (id) ON DELETE SET NULL');
+    }
+
+    public function down(Schema $schema): void
+    {
+        // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('ALTER TABLE ex13_employees DROP FOREIGN KEY FK_13A26A77783E3463');
+        $this->addSql('DROP TABLE ex13_employees');
+    }
+}
+

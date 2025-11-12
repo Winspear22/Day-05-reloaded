@@ -1,0 +1,797 @@
+================================================================================
+PROJECT STRUCTURE OVERVIEW - ex13
+================================================================================
+
+Root Directory: ./ex13/
+
+./ex13
+├── bin
+│   └── console
+├── composer.json
+├── composer.lock
+├── config
+│   ├── bundles.php
+│   ├── packages
+│   │   ├── cache.yaml
+│   │   ├── doctrine_migrations.yaml
+│   │   ├── doctrine.yaml
+│   │   ├── framework.yaml
+│   │   ├── routing.yaml
+│   │   ├── twig.yaml
+│   │   └── validator.yaml
+│   ├── preload.php
+│   ├── routes
+│   │   └── framework.yaml
+│   ├── routes.yaml
+│   └── services.yaml
+├── migrations
+│   └── Version20251112145002.php
+├── public
+│   └── index.php
+├── src
+│   ├── Controller
+│   │   └── Ex13Controller.php
+│   ├── DataFixtures
+│   │   └── AppFixtures.php
+│   ├── Entity
+│   │   └── Employee.php
+│   ├── Enum
+│   │   ├── HoursEnum.php
+│   │   └── PositionEnum.php
+│   ├── Kernel.php
+│   ├── Repository
+│   │   └── EmployeeRepository.php
+│   └── Service
+│       ├── CreateTableService.php
+│       ├── DeleteTableContentService.php
+│       └── UtilsTableService.php
+├── symfony.lock
+├── templates
+│   ├── base.html.twig
+│   ├── bundles
+│   │   └── TwigBundle
+│   └── ex13
+│       └── index.html.twig
+├── var
+│   ├── cache
+│   │   ├── dev
+│   │   └── prod
+│   └── log
+└── vendor
+    ├── autoload.php
+    ├── autoload_runtime.php
+    ├── bin
+    │   ├── doctrine-migrations
+    │   ├── patch-type-declarations
+    │   ├── php-parse
+    │   ├── sql-formatter
+    │   ├── var-dump-server
+    │   └── yaml-lint
+    ├── composer
+    │   ├── autoload_classmap.php
+    │   ├── autoload_files.php
+    │   ├── autoload_namespaces.php
+    │   ├── autoload_psr4.php
+    │   ├── autoload_real.php
+    │   ├── autoload_static.php
+    │   ├── ClassLoader.php
+    │   ├── installed.json
+    │   ├── installed.php
+    │   ├── InstalledVersions.php
+    │   ├── LICENSE
+    │   └── platform_check.php
+    ├── doctrine
+    │   ├── annotations
+    │   ├── collections
+    │   ├── data-fixtures
+    │   ├── dbal
+    │   ├── deprecations
+    │   ├── doctrine-bundle
+    │   ├── doctrine-fixtures-bundle
+    │   ├── doctrine-migrations-bundle
+    │   ├── event-manager
+    │   ├── inflector
+    │   ├── instantiator
+    │   ├── lexer
+    │   ├── migrations
+    │   ├── orm
+    │   ├── persistence
+    │   └── sql-formatter
+    ├── fakerphp
+    │   └── faker
+    ├── nikic
+    │   └── php-parser
+    ├── psr
+    │   ├── cache
+    │   ├── container
+    │   ├── event-dispatcher
+    │   └── log
+    ├── symfony
+    │   ├── asset
+    │   ├── cache
+    │   ├── cache-contracts
+    │   ├── config
+    │   ├── console
+    │   ├── dependency-injection
+    │   ├── deprecation-contracts
+    │   ├── doctrine-bridge
+    │   ├── dotenv
+    │   ├── error-handler
+    │   ├── event-dispatcher
+    │   ├── event-dispatcher-contracts
+    │   ├── filesystem
+    │   ├── finder
+    │   ├── flex
+    │   ├── form
+    │   ├── framework-bundle
+    │   ├── http-foundation
+    │   ├── http-kernel
+    │   ├── maker-bundle
+    │   ├── options-resolver
+    │   ├── polyfill-intl-grapheme
+    │   ├── polyfill-intl-icu
+    │   ├── polyfill-intl-normalizer
+    │   ├── polyfill-mbstring
+    │   ├── polyfill-php83
+    │   ├── polyfill-php84
+    │   ├── process
+    │   ├── property-access
+    │   ├── property-info
+    │   ├── routing
+    │   ├── runtime
+    │   ├── service-contracts
+    │   ├── stopwatch
+    │   ├── string
+    │   ├── translation-contracts
+    │   ├── twig-bridge
+    │   ├── twig-bundle
+    │   ├── validator
+    │   ├── var-dumper
+    │   ├── var-exporter
+    │   └── yaml
+    └── twig
+        ├── extra-bundle
+        └── twig
+
+97 directories, 50 files
+
+================================================================================
+
+📂 SOURCE CODE (src/) - Location: ex13/src/
+================================================================================
+
+
+---
+File: src/Controller/Ex13Controller.php
+---
+
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+final class Ex13Controller extends AbstractController
+{
+
+    /**
+     * @Route("/ex13", name="ex13_index", methods={"GET"})
+     */
+    public function index(): Response
+    {
+            return $this->render('ex13/index.html.twig', [
+                'controller_name' => 'Ex13Controller',
+            ]);
+    }
+}
+
+
+---
+File: src/DataFixtures/AppFixtures.php
+---
+
+<?php
+
+namespace App\DataFixtures;
+
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+
+class AppFixtures extends Fixture
+{
+    public function load(ObjectManager $manager): void
+    {
+        // $product = new Product();
+        // $manager->persist($product);
+
+        $manager->flush();
+    }
+}
+
+
+---
+File: src/Entity/Employee.php
+---
+
+<?php
+
+namespace App\Entity;
+
+use DateTime;
+use App\Enum\HoursEnum;
+use App\Enum\PositionEnum;
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\EmployeeRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+#[ORM\Entity(repositoryClass: EmployeeRepository::class)]
+#[ORM\Table(name: "ex13_employees")]
+#[Assert\Callback('validateDates')]
+class Employee
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[Assert\NotBlank]
+    #[ORM\Column(length: 64)]
+    private ?string $firstname = null;
+
+    #[Assert\NotBlank]
+    #[ORM\Column(length: 64)]
+    private ?string $lastname = null;
+
+    #[Assert\NotBlank]
+    #[Assert\Email]
+    #[ORM\Column(length: 128, unique: true)]
+    private ?string $email = null;
+
+    #[Assert\NotBlank]
+    #[ORM\Column]
+    private ?\DateTime $birthdate = null;
+
+    #[ORM\Column]
+    private bool $active = true;
+
+    #[Assert\NotBlank]
+    #[ORM\Column]
+    private ?\DateTime $employed_since = null;
+
+    #[ORM\Column]
+    private ?\DateTime $employed_until = null;
+
+    #[Assert\NotBlank]
+    #[ORM\Column(enumType: HoursEnum::class)]
+    private ?HoursEnum $hours = null;
+
+    #[Assert\NotBlank]
+    #[Assert\Positive]
+    #[ORM\Column]
+    private ?int $salary = null;
+
+    #[Assert\NotBlank]
+    #[ORM\Column(enumType: PositionEnum::class)]
+    private ?PositionEnum $position = null;
+
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'employees')]
+    #[ORM\JoinColumn(onDelete: "SET NULL")]
+    private ?self $manager = null;
+
+    /**
+     * @var Collection<int, self>
+     */
+    #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'manager')]
+    private Collection $employees;
+
+    public function __construct()
+    {
+        $this->employees = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(string $firstname): static
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(string $lastname): static
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getBirthdate(): ?\DateTime
+    {
+        return $this->birthdate;
+    }
+
+    public function setBirthdate(\DateTime $birthdate): static
+    {
+        $this->birthdate = $birthdate;
+
+        return $this;
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): static
+    {
+        $this->active = $active;
+
+        return $this;
+    }
+
+    public function getEmployedSince(): ?\DateTime
+    {
+        return $this->employed_since;
+    }
+
+    public function setEmployedSince(\DateTime $employed_since): static
+    {
+        $this->employed_since = $employed_since;
+
+        return $this;
+    }
+
+    public function getEmployedUntil(): ?\DateTime
+    {
+        return $this->employed_until;
+    }
+
+    public function setEmployedUntil(\DateTime $employed_until): static
+    {
+        $this->employed_until = $employed_until;
+
+        return $this;
+    }
+
+    public function getHours(): ?HoursEnum
+    {
+        return $this->hours;
+    }
+
+    public function setHours(HoursEnum $hours): static
+    {
+        $this->hours = $hours;
+
+        return $this;
+    }
+
+    public function getSalary(): ?int
+    {
+        return $this->salary;
+    }
+
+    public function setSalary(int $salary): static
+    {
+        $this->salary = $salary;
+
+        return $this;
+    }
+
+    public function getPosition(): ?PositionEnum
+    {
+        return $this->position;
+    }
+
+    public function setPosition(PositionEnum $position): static
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    public function getManager(): ?self
+    {
+        return $this->manager;
+    }
+
+    public function setManager(?self $manager): static
+    {
+        $this->manager = $manager;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getEmployees(): Collection
+    {
+        return $this->employees;
+    }
+
+    public function addEmployee(self $employee): static
+    {
+        if (!$this->employees->contains($employee)) {
+            $this->employees->add($employee);
+            $employee->setManager($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmployee(self $employee): static
+    {
+        if ($this->employees->removeElement($employee)) {
+            // set the owning side to null (unless already changed)
+            if ($employee->getManager() === $this) {
+                $employee->setManager(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public static function validateDates(self $employee, ExecutionContextInterface $context): void
+    {
+        $birthdate      = $employee->getBirthdate();
+        $employedSince  = $employee->getEmployedSince();
+        $employedUntil  = $employee->getEmployedUntil();
+
+        // Garde-fou : si un champ date n'est pas un DateTime valide (transfo échouée, etc.)
+        foreach (['birthdate' => $birthdate, 'employed_since' => $employedSince, 'employed_until' => $employedUntil] as $field => $value) {
+            if ($value !== null && !($value instanceof \DateTimeInterface)) {
+                $context->buildViolation('Invalid date.')
+                    ->atPath($field)
+                    ->addViolation();
+                // on continue pour signaler les autres problèmes éventuels
+            }
+        }
+
+        // Si pas de dates minimales, on s'arrête là (le reste des règles attend au moins naissance + début)
+        if (!$birthdate || !$employedSince)
+            return;
+
+        $today   = new DateTime('today');
+        $minDate = new DateTime('1945-01-01');
+        $maxDate = new DateTime('2045-12-31');
+
+        foreach (['birthdate' => $birthdate, 'employed_since' => $employedSince, 'employed_until' => $employedUntil] as $field => $date)
+        {
+            if ($date !== null && ($date < $minDate || $date > $maxDate))
+            {
+                $context->buildViolation("Error. $field must be between 1945 and 2045.")
+                    ->atPath($field)
+                    ->addViolation();
+            }
+        }
+
+        // 0) Naissance dans la plage 1945 ... aujourd'hui
+        if ($birthdate < $minDate || $birthdate > $today)
+        {
+            $context->buildViolation('Birthdate must be between January 1, 1945 and today.')
+                ->atPath('birthdate')
+                ->addViolation();
+        }
+
+        // 1) L'employé doit être né avant son embauche
+        if ($employedSince < $birthdate)
+        {
+            $context->buildViolation('Error. Hire date cannot be before birth date.')
+                ->atPath('employed_since')
+                ->addViolation();
+        }
+
+        // 2) L'employé doit avoir au moins 18 ans à l'embauche
+        $minHireDate = (new DateTime($birthdate->format('Y-m-d H:i:s')))->modify('+18 years');
+        if ($employedSince < $minHireDate)
+        {
+            $context->buildViolation('Error. Employee must be at least 18 years old to be hired.')
+                ->atPath('employed_since')
+                ->addViolation();
+        }
+
+        // 3) Embauche dans la plage 1945 ... 2045
+        if ($employedSince < $minDate || $employedSince > $maxDate)
+        {
+            $context->buildViolation('Employment start date must be between January 1, 1945 and December 31, 2045.')
+                ->atPath('employed_since')
+                ->addViolation();
+        }
+
+        // 4) Fin de contrat : au moins +24h et dans la plage 1945 ... 2045
+        if ($employedUntil)
+        {
+            if ($employedUntil < (new DateTime($employedSince->format('Y-m-d H:i:s')))->modify('+1 day'))
+            {
+                $context->buildViolation('Error. Contract end date must be at least 24 hours after hire date.')
+                    ->atPath('employed_until')
+                    ->addViolation();
+            }
+            if ($employedUntil < $minDate || $employedUntil > $maxDate)
+            {
+                $context->buildViolation('Employment end date must be between January 1, 1945 and December 31, 2045.')
+                    ->atPath('employed_until')
+                    ->addViolation();
+            }
+        }
+    }
+}
+
+---
+File: src/Enum/HoursEnum.php
+---
+
+<?php
+
+namespace App\Enum;
+
+enum HoursEnum: string
+{
+    case EIGHT = '8';
+    case SIX = '6';
+    case FOUR = '4';
+}
+?>
+
+---
+File: src/Enum/PositionEnum.php
+---
+
+<?php
+
+namespace App\Enum;
+
+enum PositionEnum: string
+{
+    case MANAGER         = 'manager';
+    case ACCOUNT_MANAGER = 'account_manager';
+    case QA_MANAGER      = 'qa_manager';
+    case DEV_MANAGER     = 'dev_manager';
+    case CEO             = 'ceo';
+    case COO             = 'coo';
+    case BACKEND_DEV     = 'backend_dev';
+    case FRONTEND_DEV    = 'frontend_dev';
+    case QA_TESTER       = 'qa_tester';
+}
+?>
+
+---
+File: src/Kernel.php
+---
+
+<?php
+
+namespace App;
+
+use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+
+class Kernel extends BaseKernel
+{
+    use MicroKernelTrait;
+}
+
+
+---
+File: src/Repository/EmployeeRepository.php
+---
+
+<?php
+
+namespace App\Repository;
+
+use App\Entity\Employee;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<Employee>
+ */
+class EmployeeRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Employee::class);
+    }
+
+//    /**
+//     * @return Employee[] Returns an array of Employee objects
+//     */
+//    public function findByExampleField($value): array
+//    {
+//        return $this->createQueryBuilder('e')
+//            ->andWhere('e.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->orderBy('e.id', 'ASC')
+//            ->setMaxResults(10)
+//            ->getQuery()
+//            ->getResult()
+//        ;
+//    }
+
+//    public function findOneBySomeField($value): ?Employee
+//    {
+//        return $this->createQueryBuilder('e')
+//            ->andWhere('e.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->getQuery()
+//            ->getOneOrNullResult()
+//        ;
+//    }
+}
+
+---
+File: src/Service/CreateTableService.php
+---
+
+<?php 
+
+namespace App\Service;
+
+use Exception;
+use Doctrine\DBAL\Connection;
+use App\Service\UtilsTableService;
+use Symfony\Component\Process\Process;
+
+class CreateTableService 
+{
+    public function __construct(
+        private readonly Connection $orm_connection,
+        private readonly UtilsTableService $utilsTableService
+    ) {}
+
+	public function createTable(string $tableName): string
+	{
+		try
+		{
+			if ($this->utilsTableService->checkTableExistence($tableName))
+				return 'info:Table already exists.';
+
+			$process = new Process([
+				'php',
+				'bin/console',
+				'doctrine:migrations:migrate',
+				'--no-interaction'
+			]);
+			$process->setWorkingDirectory(__DIR__ . '/../../');
+			$process->run();
+			if ($process->isSuccessful())
+				return 'success:Table created successfully!';
+			else
+				return 'error: ' . $process->getErrorOutput();
+		} 
+		catch (Exception $e)
+		{
+			return 'error: ' . $e->getMessage();
+		}
+	}
+}
+?>
+
+---
+File: src/Service/DeleteTableContentService.php
+---
+
+<?php 
+
+namespace App\Service;
+
+use App\Repository\EmployeeRepository;
+use Exception;
+use App\Service\UtilsTableService;
+use Doctrine\ORM\EntityManagerInterface;
+
+class DeleteTableContentService 
+{
+	public function __construct(
+        private readonly EntityManagerInterface $em,
+		private readonly EmployeeRepository $repo,
+        private readonly UtilsTableService $utilsTableService
+	) {}
+    
+    public function deleteAllTableContent(): string
+    {
+        try
+        {
+            if (!$this->utilsTableService->checkTableExistence('ex13_employees'))
+                return 'danger:Table ex12_persons does not exist.';
+
+            $employees = $this->repo->findAll();
+
+            if (empty($employees))
+                return 'info:No data to delete.';
+
+            foreach ($employees as $employee)
+                $this->em->remove($employee);
+            $this->em->flush();
+            return 'success:All data deleted successfully!';
+        }
+        catch (Exception $e)
+        {
+            return 'danger:' . $e->getMessage();
+        }
+    }
+}
+?>
+
+---
+File: src/Service/UtilsTableService.php
+---
+
+<?php 
+
+namespace App\Service;
+
+use Exception;
+use Doctrine\DBAL\Connection;
+
+class UtilsTableService 
+{
+	public function __construct(
+		private readonly Connection $orm_connection
+	) {}
+
+	public function checkTableExistence(string $tableName): bool
+	{
+		try
+		{
+			$schemaManager = $this->orm_connection->createSchemaManager();
+			return $schemaManager->tablesExist([$tableName]);
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+	}
+}
+
+================================================================================
+
+📂 PUBLIC FILES (public/) - Location: ex13/public/
+================================================================================
+
+
+---
+File: public/index.php
+---
+
+<?php
+
+use App\Kernel;
+
+require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
+
+return function (array $context) {
+    return new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
+};
+
