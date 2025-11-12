@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Exception;
 use App\Service\CreateTableService;
+use App\Service\ReadCommentsService;
 use App\Service\UtilsTableService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -13,7 +14,8 @@ final class Ex14Controller extends AbstractController
 {
     public function __construct(
         private readonly CreateTableService $tableCreator,
-        private readonly UtilsTableService $utilsTableService
+        private readonly UtilsTableService $utilsTableService,
+        private readonly ReadCommentsService $readCommentsService
     ) {}
     /**
      * @Route("/ex14", name="ex14_index", methods={"GET"})
@@ -25,15 +27,16 @@ final class Ex14Controller extends AbstractController
         {
             $doesTableExist = $this->utilsTableService->checkTableExistence($tableName);
             if ($doesTableExist === true)
-                $comments = $readService->getAllComments($tableName);
+                $comments = $this->readCommentsService->getAllComments($tableName);
         }
         catch (Exception $e)
         {
             $this->addFlash('danger', "Error, unexpected error: " . $e->getMessage());
         }
-        return $this->render('ex13/index.html.twig', [
-            'form' => $form->createView(),
-            'employees' => $employees
+        return $this->render('ex14/index.html.twig', [
+            'comments'    => $comments,
+            'doesTableExist' => $doesTableExist,
+            'tableName'   => 'ex14_comments'
         ]);
     }
 
