@@ -16,9 +16,8 @@ class CreateTableService
 	{
 		try
 		{
-			if ($this->checkTableExistence($tableName)) {
+			if ($this->checkTableExistence($tableName))
 				return 'info: Table already exists.';
-			}
 
 			$process = new Process([
 				'php',
