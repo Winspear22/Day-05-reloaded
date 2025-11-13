@@ -1,3 +1,6 @@
 test'); UPDATE ex14_comments SET comment = 'HACKED BY SQL INJECTION !!!'; --
 
 '); SHOW TABLES; --	
+
+
+php bin/console doctrine:fixtures:load

@@ -14,7 +14,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: EmployeeRepository::class)]
 #[ORM\Table(name: "ex13_employees")]
-#[Assert\Callback('validateDates')]
 class Employee
 {
     #[ORM\Id]
