@@ -5,7 +5,6 @@
 {% block content %}
     <h1>Ex13 : Insert, Read, Delete and Update Employees in the Database !</h1>
     
-    {# Affiche les messages flash (succès/erreur) #}
     {% for type, messages in app.flashes %}
         {% for message in messages %}
             <div style="padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; background-color: 
@@ -18,7 +17,6 @@
         {% endfor %}
     {% endfor %}
 
-    {# ========== FORMULAIRE DE CRÉATION ========== #}
     {{ form_start(form, { 'action': path('ex13_insert_employees'), 'method': 'POST' }) }}
         <fieldset style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;">
             <legend style="font-weight: bold; font-size: 1.2em;">Create New Employee</legend>
@@ -103,7 +101,6 @@
 
     <hr style="margin: 30px 0;">
 
-    {# ========== LISTE DES EMPLOYÉS ========== #}
     <h2>Employee List :</h2>
     
     <form method="post" action="{{ path('ex13_delete_all_employees') }}" onsubmit="return confirm('Are you sure you want to delete ALL employees ?');">

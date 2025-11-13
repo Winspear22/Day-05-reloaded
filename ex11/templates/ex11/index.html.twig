@@ -5,7 +5,6 @@
 {% block content %}
     <h1>ex11 – Table Management</h1>
 
-    {# Boutons de gestion #}
     <div style="margin-bottom: 1em;">
         <form action="{{ path('ex11_create_all_tables') }}" method="post" style="display: inline;">
             <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
@@ -26,7 +25,6 @@
         </form>
     </div>
 
-    {# Formulaire de recherche et tri #}
     <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 1.5em; border-left: 4px solid #6c757d;">
         <form method="get" action="{{ path('ex11_search') }}" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
             <div>
@@ -54,7 +52,6 @@
         </form>
     </div>
 
-    {# Tableau des résultats #}
     <h2>Persons + Addresses + Bank Accounts</h2>
     
     {% if results is defined and results|length > 0 %}

@@ -5,14 +5,12 @@
 {% block content %}
     <h1>ex14 – SQL Injection Demo</h1>
 
-    {# Table status #}
     {% if doesTableExist %}
         <div class="alert alert-success">✅ Table "{{ tableName }}" exists.</div>
     {% else %}
         <div class="alert alert-danger">❌ Table "{{ tableName }}" does not exist.</div>
     {% endif %}
     
-    {# Create table button #}
     <form action="{{ path('ex14_create_table') }}" method="post" style="margin-bottom: 1em;">
         <button type="submit" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer;">
             📊 Create Table
@@ -20,7 +18,6 @@
     </form>
 
     {% if doesTableExist %}
-        {# Vulnerable form #}
         <h2>🚨 Insert Comment (VULNERABLE)</h2>
         <form id="vuln-form" action="{{ path('ex14_insert_vulnerable_comment') }}" method="post" style="margin-bottom: 1em; padding: 10px; background: #ffe6e6; border: 1px solid #ff0000; border-radius: 3px;">
             <input type="text" name="comment" id="vuln-comment" placeholder="Enter comment (vulnerable to SQL injection)" style="width: 100%; padding: 8px; box-sizing: border-box;">
@@ -32,7 +29,6 @@
             🔥 Try SQL Injection
         </button>
 
-        {# Secure form #}
         <h2>✅ Insert Comment (SECURE)</h2>
         <form action="{{ path('ex14_insert_secure_comment') }}" method="post" style="margin-bottom: 1em; padding: 10px; background: #e6ffe6; border: 1px solid #00aa00; border-radius: 3px;">
             <input type="text" name="comment" placeholder="Enter comment (protected)" style="width: 100%; padding: 8px; box-sizing: border-box;">
@@ -41,7 +37,6 @@
             </button>
         </form>
 
-        {# Comments table #}
         <h2>📋 All Comments</h2>
         <table border="1" style="width: 100%; margin-bottom: 2em; border-collapse: collapse;">
             <thead>
