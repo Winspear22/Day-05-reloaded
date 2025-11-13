@@ -1,6 +1,6 @@
 Vérifier dans les exercices ORM que adresse est bien en cascade (ex09 notamment à addresses.php entity ligne persons (voir addresses de ex12 pour savoitr ce quil faut mettre ligne 22))
 Vérifier que le front est harmoniser entre chq exercices
-Vérifier que les routes soient bien inscrites dans le routes.yaml
+Vérifier que les routes soient bien inscrites dans le routes.yaml - OK
 Vérifier que tout est en anglais
-Vérifier de retirer tous les commentaires
-Vérifier que chaque routes a ses méthodes
+Vérifier de retirer tous les commentaires - OK
+Vérifier que chaque routes a ses méthodes - OK
