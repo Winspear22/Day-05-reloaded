@@ -28,13 +28,19 @@ get_database_name() {
   case "$ex" in
     ex00) echo "Day_05db" ;;
     ex01) echo "Day05db_ex01" ;;
+    ex02) echo "Day_05db" ;;
     ex03) echo "Day05db_ex03" ;;
+    ex04) echo "Day_05db" ;;
     ex05) echo "Day05db_ex05" ;;
+    ex06) echo "Day_05db" ;;
     ex07) echo "Day05db_ex07" ;;
+    ex08) echo "Day_05db" ;;
     ex09) echo "Day05db_ex09" ;;
     ex10) echo "Day05db_ex10" ;;
+    ex11) echo "Day_05db" ;;
     ex12) echo "Day05db_ex12" ;;
     ex13) echo "Day05db_ex13" ;;
+    ex14) echo "Day_05db" ;;
     *) echo "" ;;
   esac
 }
@@ -177,7 +183,7 @@ show_help() {
 }
 
 # List of all exercises
-EXERCISES="ex00 ex01 ex03 ex05 ex07 ex09 ex10 ex12 ex13"
+EXERCISES="ex00 ex01 ex02 ex03 ex04 ex05 ex06 ex07 ex08 ex09 ex10 ex11 ex12 ex13 ex14"
 
 # ============================================================================
 # MAIN
