@@ -31,15 +31,4 @@
     <form method="POST" action="{{ path('ex08_create_relation_addresses') }}">
         <button type="submit">Create Addresses ↔ Persons (1:N)</button>
     </form>
-
-    <h2>Order of Operations</h2>
-    <ol>
-        <li>Create Persons table</li>
-        <li>Create Bank Accounts table</li>
-        <li>Create Addresses table</li>
-        <li>Add Marital Status (optional)</li>
-        <li>Create Bank Accounts ↔ Persons relation (1:1 with UNIQUE)</li>
-        <li>Create Addresses ↔ Persons relation (1:N with NOT NULL)</li>
-    </ol>
-
 {% endblock %}

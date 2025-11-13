@@ -33,56 +33,10 @@
     <h3>3. Drop All Tables</h3>
     <p>Removes all tables and returns the database to its initial state (no migrations executed).</p>
     <form method="POST" action="{{ path('ex09_drop_tables') }}" 
-          onsubmit="return confirm('⚠️  Are you sure? This will DELETE all tables!');">
+        onsubmit="return confirm('⚠️  Are you sure? This will DELETE all tables!');">
         <button type="submit" class="btn btn-danger">
             ✗ Drop All Tables
         </button>
     </form>
-
     <hr>
-
-    <h2>Database Schema Information</h2>
-    
-    <h3>Tables Structure</h3>
-    <table border="1" cellpadding="10" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Version</th>
-                <th>ex09_persons</th>
-                <th>ex09_bank_accounts</th>
-                <th>ex09_addresses</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>V1 (WITHOUT marital_status)</strong></td>
-                <td>id, username, name, email, enable, birthdate</td>
-                <td>id, iban, bank_name, person_id (UNIQUE)</td>
-                <td>id, address, person_id (INDEX)</td>
-            </tr>
-            <tr>
-                <td><strong>V2 (WITH marital_status)</strong></td>
-                <td>id, username, name, email, enable, birthdate, <strong>marital_status</strong></td>
-                <td>id, iban, bank_name, person_id (UNIQUE)</td>
-                <td>id, address, person_id (INDEX)</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h3>Relationships</h3>
-    <ul>
-        <li><strong>Person ↔ BankAccount:</strong> OneToOne (1 person = 1 bank account MAX)</li>
-        <li><strong>Person ↔ Address:</strong> OneToMany (1 person = N addresses)</li>
-    </ul>
-
-    <hr>
-
-    <h2>How to Use</h2>
-    <ol>
-        <li>Click <strong>"Migrate to Version 1"</strong> to create tables without marital_status</li>
-        <li>Click <strong>"Migrate to Version 2"</strong> to add marital_status column</li>
-        <li>Use <strong>"Migrate to Version 1"</strong> again to rollback and remove marital_status</li>
-        <li>Click <strong>"Drop All Tables"</strong> to reset the database completely</li>
-    </ol>
-
 {% endblock %}

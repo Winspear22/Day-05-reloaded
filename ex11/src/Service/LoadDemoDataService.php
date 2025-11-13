@@ -16,19 +16,14 @@ class LoadDemoDataService
         {
             $faker = Factory::create('fr_FR');
 
-            // ✅ ÉTAPE 1 : Désactiver les contraintes FK temporairement
-            $this->connection->executeStatement("SET FOREIGN_KEY_CHECKS=0");
+            $this->connection->executeStatement("SET FOREIGN_KEY_CHECKS=0"); // Supprimer les contraintes temporairement
 
-            // ✅ ÉTAPE 2 : Vider les tables
             $this->connection->executeStatement("TRUNCATE TABLE ex11_bank_accounts");
             $this->connection->executeStatement("TRUNCATE TABLE ex11_addresses");
             $this->connection->executeStatement("TRUNCATE TABLE ex11_persons");
-            // TRUNCATE réinitialise aussi l'auto_increment à 1
 
-            // ✅ ÉTAPE 3 : Réactiver les contraintes FK
             $this->connection->executeStatement("SET FOREIGN_KEY_CHECKS=1");
 
-            // Insérer 20 personnes (IDs seront 1-20)
             for ($i = 1; $i <= 20; $i++)
             {
                 $sql = "INSERT INTO ex11_persons (username, name, email, enable, birthdate) 
@@ -42,7 +37,6 @@ class LoadDemoDataService
                 ]);
             }
 
-            // Insérer adresses avec IDs 1-20
             for ($i = 1; $i <= 20; $i++)
             {
                 $sql = "INSERT INTO ex11_addresses (person_id, address) 
@@ -53,7 +47,6 @@ class LoadDemoDataService
                 ]);
             }
 
-            // Insérer comptes bancaires avec IDs 1-20
             for ($i = 1; $i <= 20; $i++)
             {
                 $sql = "INSERT INTO ex11_bank_accounts (person_id, iban, bank_name) 
@@ -64,15 +57,15 @@ class LoadDemoDataService
                     $faker->company()
                 ]);
             }
-
             return "success:20 personnes, adresses et comptes bancaires chargés !";
         }
         catch (Exception $e)
         {
-            // ✅ En cas d'erreur, réactiver les FK
-            try {
+            try
+            {
                 $this->connection->executeStatement("SET FOREIGN_KEY_CHECKS=1");
-            } catch (Exception $ignored) {}
+            }
+            catch (Exception $ignored) {}
             
             return "danger:Erreur lors du chargement des données : " . $e->getMessage();
         }
