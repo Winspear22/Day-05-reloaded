@@ -1,5 +1,19 @@
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+ex14_index:
+    path: /ex14
+    controller: App\Controller\Ex14Controller::index
+    methods: [GET]
+
+ex14_create_table:
+    path: /ex14/create_table
+    controller: App\Controller\Ex14Controller::createTable
+    methods: [POST]
+
+ex14_insert_vulnerable_comment:
+    path: /ex14/insert_vulnerable_comment
+    controller: App\Controller\Ex14Controller::insertVulnerableComment
+    methods: [POST]
+
+ex14_insert_secure_comment:
+    path: /ex14/insert_secure_comment
+    controller: App\Controller\Ex14Controller::insertSecureComment
+    methods: [POST]

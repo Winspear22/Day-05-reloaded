@@ -49,7 +49,7 @@ class Ex10Controller extends AbstractController
         $tableNameOrm = "ex10_data_orm";
         try
         {
-            $this->createSql->createTableSQL($tableNameSql).
+            $this->createSql->createTableSQL($tableNameSql);
             $this->createOrm->createTableORM($tableNameOrm);
             $dataSql = $this->readSql->readAllDataSQL($tableNameSql);
             $dataOrm = $this->readOrm->readAllDataORM($tableNameOrm);
