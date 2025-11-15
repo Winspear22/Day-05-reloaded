@@ -73,8 +73,9 @@ final class Ex07Controller extends AbstractController
             //$data = $form->getData();
             try
             {
-                $this->userInserter->insertUser($user);
-                $this->addFlash('success', 'User added successfully.');
+                $result = $this->userInserter->insertUser($user);
+                [$type, $msg] = explode(':', $result, 2);
+                $this->addFlash($type, $msg);
                 return $this->redirectToRoute('ex07_index');
             }
             catch (UniqueConstraintViolationException $e)

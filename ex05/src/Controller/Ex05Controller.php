@@ -66,11 +66,11 @@ final class Ex05Controller extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid())
         {
-            //$data = $form->getData();
             try
             {
-                $this->userInserter->insertUser($user);
-                $this->addFlash('success', 'User added successfully.');
+                $result = $this->userInserter->insertUser($user);
+                [$type, $msg] = explode(':', $result, 2);
+                $this->addFlash($type, $msg);
                 return $this->redirectToRoute('ex05_index');
             }
             catch (UniqueConstraintViolationException $e)

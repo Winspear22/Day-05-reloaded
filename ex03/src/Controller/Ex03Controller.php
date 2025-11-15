@@ -63,11 +63,11 @@ final class Ex03Controller extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid())
         {
-            //$data = $form->getData();
             try
             {
-                $this->userInserter->insertUser($user);
-                $this->addFlash('success', 'User added successfully.');
+                $result = $this->userInserter->insertUser($user);
+                [$type, $msg] = explode(':', $result, 2);
+                $this->addFlash($type, $msg);
                 return $this->redirectToRoute('ex03_index');
             }
             catch (UniqueConstraintViolationException $e)
