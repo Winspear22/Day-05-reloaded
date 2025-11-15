@@ -70,17 +70,12 @@ final class Ex07Controller extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid())
         {
-            //$data = $form->getData();
             try
             {
                 $result = $this->userInserter->insertUser($user);
                 [$type, $msg] = explode(':', $result, 2);
                 $this->addFlash($type, $msg);
                 return $this->redirectToRoute('ex07_index');
-            }
-            catch (UniqueConstraintViolationException $e)
-            {
-                $this->addFlash('danger', 'Error, email or username already in use !');
             }
             catch (Exception $e)
             {

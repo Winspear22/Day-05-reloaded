@@ -22,9 +22,7 @@ class InsertUserInTable
         } 
 		catch (Exception $e)
 		{
-            if (str_contains($e->getMessage(), 'Unique constraint failed'))
-                return 'error: Email or username already exists!';
-            return 'error: ' . $e->getMessage();
+            return 'danger:Email or username already exists!';
         }
     }
 }

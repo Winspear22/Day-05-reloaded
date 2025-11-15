@@ -73,10 +73,6 @@ final class Ex05Controller extends AbstractController
                 $this->addFlash($type, $msg);
                 return $this->redirectToRoute('ex05_index');
             }
-            catch (UniqueConstraintViolationException $e)
-            {
-                $this->addFlash('danger', 'Error, email or username already in use !');
-            }
             catch (Exception $e)
             {
                 $this->addFlash('danger', 'Error adding user: ' . $e->getMessage());
